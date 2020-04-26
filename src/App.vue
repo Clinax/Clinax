@@ -1,29 +1,26 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+  <app v-if="token"></app>
+  <auth v-else></auth>
 </template>
 
+<script>
+import App from "@/components/app";
+import Auth from "@/views/Auth";
+
+export default {
+  name: "App",
+  components: { App, Auth },
+
+  computed: {
+    token() {
+      return this.$store.state.token;
+    },
+  },
+};
+</script>
+
 <style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+.flex-grow-1 {
+  flex-grow: 1;
 }
 </style>
