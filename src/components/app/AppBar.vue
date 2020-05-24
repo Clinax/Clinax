@@ -1,44 +1,43 @@
 <template>
-  <v-app-bar v-model="model" app color="primary" dark>
-    <div class="d-flex align-center">
-      <v-img
-        alt="Vuetify Logo"
-        class=" mr-2"
-        contain
-        src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-        transition="scale-transition"
-        width="40"
-      />
-
-      <v-img
-        alt="Vuetify Name"
-        class="shrink mt-1 hidden-sm-and-down"
-        contain
-        min-width="100"
-        src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-        width="100"
-      />
-    </div>
+  <v-app-bar
+    color="white"
+    :extended="$store.state.app.extentedAppBar"
+    :extension-height="$store.state.app.extensionHeight"
+    elevate-on-scroll
+    hide-on-scroll
+    app
+  >
+    <v-divider
+      style="position: absolute; left: 0; right: 0; bottom: 0;"
+    ></v-divider>
+    <v-app-bar-nav-icon @click="model = !model"> </v-app-bar-nav-icon>
+    <v-toolbar-title v-if="$vuetify.breakpoint.mdAndUp">
+      {{ $store.state.app.title }}
+    </v-toolbar-title>
 
     <v-spacer></v-spacer>
+    <search-bar> </search-bar>
+    <v-spacer></v-spacer>
 
-    <v-btn
-      href="https://github.com/vuetifyjs/vuetify/releases/latest"
-      target="_blank"
-      text
-    >
-      <span class="mr-2">Latest Release</span>
-      <v-icon>mdi-open-in-new</v-icon>
-    </v-btn>
+    <v-btn color="error" text @click="$store.dispatch('logout')">logout</v-btn>
+    <template v-slot:extension v-if="$store.state.app.extentedAppBar">
+      <portal-target name="app-bar-extension" class="w-100"> </portal-target>
+    </template>
   </v-app-bar>
 </template>
 
 <script>
 import ComponentWithModel from "../ComponentWithModel";
+import SearchBar from "../SearchBar";
 
 export default {
   extends: ComponentWithModel,
+  components: { SearchBar },
 };
 </script>
 
-<style></style>
+<style>
+.v-toolbar__extension {
+  padding: 0 !important;
+}
+</style>

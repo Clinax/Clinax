@@ -6,27 +6,82 @@
     :flat="noActive"
     :two-line="twoLine"
   >
-    <slot></slot>
+    <slot> </slot>
     <template v-for="(item, index) in items">
       <v-subheader
         v-if="item.header"
         :key="item.header"
         v-text="item.header"
       ></v-subheader>
-      <v-divider v-else-if="item.divider" :key="'divider-' + index"></v-divider>
-      <v-list-item v-else :key="'item-' + index" :to="item.to">
+      <v-divider
+        v-else-if="item.divider"
+        :key="'divider-' + index"
+        class="my-0"
+      ></v-divider>
+      <v-list-group
+        v-model="item.model"
+        v-else-if="item.subLinks"
+        :key="item.title"
+        :dense="!!item.dense"
+        :nav="false"
+      >
+        <template v-slot:activator>
+          <v-list-item-action v-if="item.icon">
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item-content>
+        </template>
+        <v-list dense class="animate">
+          <v-list-item
+            :dense="!!subItem.dense"
+            v-for="subItem in item.subLinks"
+            :key="subItem.title"
+            class="animate"
+            :class="{
+              'v-list-item--active': $route.path == subItem.to,
+              'pl-6 ': item.model,
+            }"
+            @click="$route.path == subItem.to || $router.push(subItem.to)"
+          >
+            <v-list-item-action v-if="subItem.icon">
+              <v-icon>{{ subItem.icon }}</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>{{ subItem.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-list-group>
+      <v-list-item
+        v-else
+        :key="'item-' + index"
+        :class="{ 'v-list-item--active': $route.path == item.to }"
+        @click="$route.path == item.to || $router.push(item.to)"
+        :dense="!!item.dense"
+      >
         <v-list-item-action v-if="item.icon">
-          <icon :icon="item.icon"></icon>
+          <v-badge
+            :color="item.badgeColor"
+            icon="mdi-lock"
+            dot
+            top
+            right
+            bordered
+            :value="!!item.badge"
+          >
+            <template v-slot:badge>
+              <span>{{ item.badge }}</span>
+            </template>
+            <icon :icon="item.icon"></icon>
+          </v-badge>
         </v-list-item-action>
         <v-list-item-content>
-          <v-list-item-title
-            v-html="item.text"
-            class="text-nowrap"
-            :class="{ 'grey--text text--darken-3': noActive }"
-          ></v-list-item-title>
+          <v-list-item-title v-text="item.title"></v-list-item-title>
           <v-list-item-subtitle
             v-if="item.subText"
-            v-html="item.subText"
+            v-text="item.subText"
           ></v-list-item-subtitle>
         </v-list-item-content>
         <v-list-item-action v-if="item.append || item.appendText">

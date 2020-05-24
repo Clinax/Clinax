@@ -4,24 +4,21 @@ import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
-
-import VueClipboard from "vue-clipboard2";
-import draggable from "vuedraggable";
-import VueMask from "v-mask";
-
-import "./components";
+import moment from "moment";
 import vuetify from "./plugins/vuetify";
 
-Vue.config.productionTip = false;
+import { baseUrl } from "./modules/request";
+import { isProduction } from "./utils/";
+import "./components";
 
-Vue.use(VueMask);
-Vue.use(VueClipboard);
-Vue.component("draggable", draggable);
+Vue.config.productionTip = false;
 
 router.afterEach((to) => {
   window.document.title = to.meta.title || to.name || to.path;
 
   store.dispatch("setTitle", window.document.title);
+
+  window.document.title += " | ClinaX";
 });
 
 router.beforeEach((to, _, next) => {
@@ -32,7 +29,19 @@ router.beforeEach((to, _, next) => {
 });
 
 Vue.mixin({
+  data() {
+    return {
+      baseUrl,
+    };
+  },
   methods: {
+    log(ev) {
+      if (!isProduction()) {
+        // eslint-disable-next-line no-console
+        console.log(ev);
+      }
+    },
+    moment,
     errorHandler(err) {
       store.dispatch("errorHandler", err);
     },
