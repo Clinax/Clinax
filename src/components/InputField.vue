@@ -3,7 +3,7 @@
     class="py-0"
     v-bind="col"
     :class="{ 'pt-5': !label }"
-    :title="label || textfield.label"
+    :title="label || (textfield && textfield.label)"
   >
     <v-subheader
       v-if="editableHeader || label"
@@ -28,6 +28,7 @@
     </v-subheader>
 
     <component
+      ref="field"
       v-on="on"
       v-bind:is="field || 'v-text-field'"
       v-model="model"
@@ -35,8 +36,8 @@
       :rules="rules || [true]"
       @blur="check"
       @change="(ev) => $emit('change', ev)"
-      hide-details
-      solo
+      :solo="textfield.solo !== false"
+      :hide-details="textfield.hideDetails !== false"
     >
       <template
         v-if="
@@ -65,12 +66,12 @@ import { getReqiredField } from "../modules/regex";
 
 export default {
   props: {
-    col: Object,
+    col: { type: Object, default: () => {} },
     value: [String, Number],
     label: String,
-    textfield: Object,
+    textfield: { type: Object, default: () => {} },
     required: Boolean,
-    inputRules: Array,
+    inputRules: { type: Array, default: () => [] },
     field: String,
     mask: String,
     on: Object,
@@ -112,11 +113,16 @@ export default {
   },
   methods: {
     check() {
-      this.errors =
-        this.rules &&
-        this.rules
-          .map((ev) => typeof ev === "function" && ev(this.model))
-          .filter((ev) => ev != true);
+      if (
+        (this.model || this.$refs.field.hasError) &&
+        !this.$refs.field.isResetting
+      )
+        this.errors =
+          this.rules &&
+          this.rules
+            .map((ev) => typeof ev === "function" && ev(this.model))
+            .filter((ev) => ev != true);
+      else this.errors = null;
 
       if (this.errors && !this.errors.length) this.errors[0] = true;
     },

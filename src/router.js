@@ -39,6 +39,11 @@ export default new Router({
           component: () => import("./views/tools/Inventory"),
         },
         {
+          name: "Appointments",
+          path: "appointments",
+          component: () => import("./views/tools/Appointments"),
+        },
+        {
           name: "Console",
           path: "/",
           component: Home,

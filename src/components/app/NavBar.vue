@@ -20,57 +20,45 @@
       <div class="border-top">
         <v-expand-transition absolute>
           <div v-if="calendarNav">
-            <div
-              class="text-center grey lighten-3 small"
-              style="cursor: pointer;"
-              v-ripple
-              @click="calender = moment().format('YYYY-MM-DD')"
-            >
-              <small>
-                <b>
-                  {{ moment().format("Do MMMM YYYY") }}&nbsp;
-                  <digital-clock
-                    :twelveHour="true"
-                    :blink="true"
-                  ></digital-clock>
-                </b>
-              </small>
-            </div>
-
-            <v-sheet>
-              <v-calendar
-                :event-more="false"
-                v-model="calender"
-                ref="calendar"
-                :weekday-format="
-                  (ev) => ['Su', 'mo', 'tu', 'we', 'th', 'fi', 'sa'][ev.weekday]
-                "
-                :show-month-on-first="false"
-                short-months
+            <div class="grey lighten-3 d-flex align-center justify-center">
+              <v-spacer></v-spacer>
+              <div
+                v-ripple
+                @click="calendar = moment().format('YYYY-MM-DD')"
+                class="px-2"
+                style="cursor: pointer;"
               >
-                <template v-slot:day="{ date }">
-                  <v-layout
-                    class="fill-height w-100"
-                    style="position: absolute; top: 0; left: 0;"
-                    column
-                    wrap
-                  >
-                    <v-sheet
-                      @click="openDialog(event)"
-                      v-for="(event, i) in events[date]"
-                      :key="i"
-                      :title="event.name"
-                      :color="event.color"
-                      width="12"
-                      class="border rounded-0 mt-1"
-                      height="4"
-                    >
-                      &nbsp;
-                    </v-sheet>
-                  </v-layout>
-                </template>
-              </v-calendar>
-            </v-sheet>
+                <small>
+                  <b>
+                    <span> {{ moment().format("Do MMMM YYYY") }}&nbsp; </span>
+                    <digital-clock
+                      :twelveHour="true"
+                      :blink="true"
+                    ></digital-clock>
+                  </b>
+                </small>
+              </div>
+              <v-spacer></v-spacer>
+              <v-btn
+                color="primary"
+                :loading="loading"
+                :disabled="loading"
+                @click.stop="$refs.calendar.getEvents()"
+                absolute
+                right
+                small
+                icon
+              >
+                <v-icon small>mdi-refresh</v-icon>
+              </v-btn>
+            </div>
+            <event-calendar
+              ref="calendar"
+              v-model="calendar"
+              :loading.sync="loading"
+              tag="navbar"
+              small
+            ></event-calendar>
           </div>
         </v-expand-transition>
         <v-list-item
@@ -91,7 +79,7 @@
                 <v-spacer></v-spacer>
 
                 <span>
-                  {{ moment(calender).format("MMM YYYY") }}
+                  {{ moment(calendar).format("MMM YYYY") }}
                 </span>
 
                 <v-spacer></v-spacer>
@@ -120,51 +108,24 @@
         </v-list-item>
       </div>
     </v-layout>
-    <v-dialog v-model="eventDialog.model" max-width="290">
-      <v-card v-if="eventDialog.event">
-        <v-card-title :style="{ background: eventDialog.event.color + '5f' }">
-          {{ eventDialog.event.name }}
-        </v-card-title>
-        <v-card-text class="pt-5 pb-3">
-          Appointmented for:
-          <b class="text-no-wrap">
-            {{ moment(eventDialog.event.start).format("Do MMM YYYY") }}
-          </b>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="primary"
-            depressed
-            @click="eventDialog.model = false"
-            :to="`/app/case/${eventDialog.event._id}`"
-          >
-            View case File
-          </v-btn>
-          <v-spacer></v-spacer>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-navigation-drawer>
 </template>
 
 <script>
 import moment from "moment";
-import { makeRequest } from "@/modules/request";
 
 import DigitalClock from "vue-digital-clock";
 import ComponentWithModel from "@/components/ComponentWithModel";
+import EventCalendar from "@/components/EventCalendar";
 
 export default {
   extends: ComponentWithModel,
-  components: { DigitalClock },
+  components: { DigitalClock, EventCalendar },
 
   data: () => ({
-    calendarNav: true,
-    events: new Map(),
-
-    calender: moment(new Date()).format("YYYY-MM-DD"),
-    eventDialog: { model: false, event: null },
+    calendarNav: false,
+    loading: false,
+    calendar: moment(new Date()).format("YYYY-MM-DD"),
 
     links: [
       {
@@ -183,6 +144,11 @@ export default {
         model: true,
         subLinks: [
           {
+            title: "Appointments",
+            icon: "mdi-tab-plus",
+            to: "/app/appointments/",
+          },
+          {
             title: "Contacts",
             icon: "mdi-account-box",
             to: "/app/contacts/",
@@ -196,31 +162,6 @@ export default {
       },
     ],
   }),
-  methods: {
-    openDialog(event) {
-      this.eventDialog.model = false;
-      this.$nextTick(() => {
-        this.eventDialog = { model: true, event };
-      });
-    },
-  },
-  mounted() {
-    this.$store.dispatch("addListener", {
-      event: "eventChange",
-      name: "navBar",
-      callback: () => {
-        this.events = this.$store.getters.events;
-        this.$nextTick(() => this.$refs.calendar.checkChange());
-      },
-    });
-    makeRequest("get", "followUp/events")
-      .then(({ data }) => {
-        this.$store.commit("setEvents", data);
-      })
-      .catch((err) => {
-        this.errorHandler(err);
-      });
-  },
 };
 </script>
 

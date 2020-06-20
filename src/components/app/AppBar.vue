@@ -10,16 +10,32 @@
     <v-divider
       style="position: absolute; left: 0; right: 0; bottom: 0;"
     ></v-divider>
-    <v-app-bar-nav-icon @click="model = !model"> </v-app-bar-nav-icon>
+    <v-app-bar-nav-icon v-if="!active" @click="model = !model">
+    </v-app-bar-nav-icon>
     <v-toolbar-title v-if="$vuetify.breakpoint.mdAndUp">
       {{ $store.state.app.title }}
     </v-toolbar-title>
 
-    <v-spacer></v-spacer>
-    <search-bar> </search-bar>
-    <v-spacer></v-spacer>
-
-    <v-btn color="error" text @click="$store.dispatch('logout')">logout</v-btn>
+    <v-spacer v-if="!active"></v-spacer>
+    <search-bar class="mx-3 flex-grow-1"> </search-bar>
+    <v-spacer v-if="!active"></v-spacer>
+    <v-btn
+      v-if="!active"
+      color="error"
+      @click="$store.dispatch('logout')"
+      v-bind="
+        $vuetify.breakpoint.smAndDown
+          ? {
+              fab: true,
+              xSmall: true,
+              depressed: true,
+            }
+          : { text: true }
+      "
+    >
+      <v-icon>mdi-logout</v-icon>
+      <span class="ml-2" v-if="$vuetify.breakpoint.mdAndUp">logout</span>
+    </v-btn>
     <template v-slot:extension v-if="$store.state.app.extentedAppBar">
       <portal-target name="app-bar-extension" class="w-100"> </portal-target>
     </template>
@@ -33,6 +49,11 @@ import SearchBar from "../SearchBar";
 export default {
   extends: ComponentWithModel,
   components: { SearchBar },
+  data() {
+    return {
+      active: false,
+    };
+  },
 };
 </script>
 

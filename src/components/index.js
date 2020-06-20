@@ -9,6 +9,7 @@ import Icon from "./Icon";
 import InputField from "./InputField";
 import List from "./List";
 import Snackbar from "./Snackbar";
+import WOI from "./WOI";
 import PatientDialog from "./PatientDialog";
 import { WebCam } from "vue-web-cam";
 import PortalVue from "portal-vue";
@@ -22,6 +23,7 @@ Vue.component("draggable", draggable);
 Vue.component("web-cam", WebCam);
 
 Vue.component("icon", Icon);
+Vue.component("woi", WOI);
 Vue.component("list", List);
 Vue.component("snackbar", Snackbar);
 Vue.component("input-field", InputField);

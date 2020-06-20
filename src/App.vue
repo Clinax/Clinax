@@ -9,7 +9,8 @@ export default {};
 <style lang="scss">
 @font-face {
   font-family: "Sansation Regular V3";
-  src: url("/fonts/14df84ca92de1925877ef2ea23edf8b0.eot"); /* IE9*/
+  src: url("/fonts/14df84ca92de1925877ef2ea23edf8b0.eot");
+  /* IE9*/
   src: url("/fonts/14df84ca92de1925877ef2ea23edf8b0.eot?#iefix")
       format("embedded-opentype"),
     /* IE6-IE8 */ url("/fonts/14df84ca92de1925877ef2ea23edf8b0.woff2")
@@ -20,12 +21,14 @@ export default {};
       format("truetype"),
     /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
       url("/fonts/14df84ca92de1925877ef2ea23edf8b0.svg#Sansation Regular V3")
-      format("svg"); /* iOS 4.1- */
+      format("svg");
+  /* iOS 4.1- */
 }
 
 @font-face {
   font-family: "Androgyne Medium";
-  src: url("/fonts/3813038d9377e8e801bc444e8c469694.eot"); /* IE9*/
+  src: url("/fonts/3813038d9377e8e801bc444e8c469694.eot");
+  /* IE9*/
   src: url("/fonts/3813038d9377e8e801bc444e8c469694.eot?#iefix")
       format("embedded-opentype"),
     /* IE6-IE8 */ url("/fonts/3813038d9377e8e801bc444e8c469694.woff2")
@@ -36,8 +39,10 @@ export default {};
       format("truetype"),
     /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
       url("/fonts/3813038d9377e8e801bc444e8c469694.svg#Androgyne Medium")
-      format("svg"); /* iOS 4.1- */
+      format("svg");
+  /* iOS 4.1- */
 }
+
 * {
   font-family: "Sansation Regular V3" !important;
 }

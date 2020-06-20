@@ -32,12 +32,12 @@
     </v-card>
     <v-card v-else-if="model">
       <v-subheader v-if="patientModel._id" class="grey lighten-4">
-        {{ patientModel.fullname }}'s Profile
+        <span>{{ patientModel.fullname }}'s Profile</span>
         <v-btn
+          class="mx-3"
           color="primary"
           :to="'/app/case/' + patientModel._id"
           @click="closeDialog"
-          class="mx-3"
           depressed
           small
         >
@@ -54,16 +54,16 @@
           <v-stepper-header>
             <v-stepper-step
               :complete="step > 1 || !!patientModel._id"
-              step="1"
               :editable="!!patientModel._id"
+              step="1"
             >
               Basic
             </v-stepper-step>
             <v-divider></v-divider>
             <v-stepper-step
               :complete="step > 2 || !!patientModel._id"
-              step="2"
               :editable="!!patientModel._id"
+              step="2"
             >
               Photo
             </v-stepper-step>
@@ -71,8 +71,8 @@
 
             <v-stepper-step
               :complete="!!patientModel.address"
-              step="3"
               :editable="!!patientModel._id"
+              step="3"
             >
               Address
             </v-stepper-step>
@@ -119,9 +119,7 @@
                       <v-layout>
                         <input-field
                           v-if="age"
-                          field="v-slider"
                           v-model="patientModel.age"
-                          class="mt-3"
                           @input="
                             (ev) =>
                               (patientModel.birthDate =
@@ -131,8 +129,10 @@
                                 ).format('YYYY-MM-DD'))
                           "
                           :textfield="{
-                            label: 'Age: ' + (patientModel.age || '0'),
-                            thumbLabel: true,
+                            prependInnerIcon: ' mdi-cake-variant',
+                            label: 'Age',
+                            type: 'number',
+                            autocomplete: 'off',
                             max: 100,
                             min: 1,
                           }"
@@ -151,7 +151,6 @@
                             <input-field
                               :on="on"
                               v-model="patientModel.birthDate"
-                              @click="birthDate = true"
                               :textfield="{
                                 label: 'Date of Birth',
                                 autocomplete: 'off',
@@ -222,7 +221,6 @@
                       prependInnerIcon: 'mdi-phone-classic',
                       count: 10,
                     }"
-                    required
                   ></input-field>
                   <input-field
                     v-if="email"
@@ -376,7 +374,6 @@
                       autoGrow: true,
                       prependInnerIcon: 'mdi-map',
                     }"
-                    required
                   ></input-field>
                   <v-row class="mx-0">
                     <input-field

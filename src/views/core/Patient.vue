@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-card>
-      <v-toolbar flat>
+      <v-toolbar flat :prominent="$vuetify.breakpoint.smAndDown">
         <v-app-bar-nav-icon @click="$router.go(-1)">
           <v-icon>mdi-arrow-left</v-icon>
         </v-app-bar-nav-icon>
@@ -9,27 +9,18 @@
           Patients
         </v-toolbar-title>
         <v-spacer></v-spacer>
-
         <patient-dialog
           v-model="patientDialog"
           :no-activator="$vuetify.breakpoint.smAndDown"
           @patient-add="(ev) => patients.push(ev)"
         >
         </patient-dialog>
-        <v-divider class="ml-3" vertical inset></v-divider>
-
-        <v-btn @click="ui.dense = !ui.dense" icon>
-          <icon
-            :icon="
-              ui.dense ? 'mdi-format-list-text' : 'mdi-format-list-bulleted'
-            "
-            title="(Un) dense"
-          >
-          </icon>
-        </v-btn>
-        <v-btn @click="ui.groupBy = !ui.groupBy" icon>
-          <icon icon="mdi-group" title="Group By Gender"> </icon>
-        </v-btn>
+        <v-divider
+          v-if="$vuetify.breakpoint.mdAndUp"
+          class="ml-3"
+          vertical
+          inset
+        ></v-divider>
 
         <toolbar-tools
           @search="(ev) => (ui.search = ev)"
@@ -42,7 +33,20 @@
           filter-by="Gender"
           :filter.sync="filter"
           :items="() => items"
-        ></toolbar-tools>
+        >
+          <v-btn @click="ui.dense = !ui.dense" icon>
+            <icon
+              :icon="
+                ui.dense ? 'mdi-format-list-text' : 'mdi-format-list-bulleted'
+              "
+              title="(Un) dense"
+            >
+            </icon>
+          </v-btn>
+          <v-btn @click="ui.groupBy = !ui.groupBy" icon>
+            <icon icon="mdi-group" title="Group By Gender"> </icon>
+          </v-btn>
+        </toolbar-tools>
       </v-toolbar>
       <v-btn
         v-if="$vuetify.breakpoint.smAndDown"

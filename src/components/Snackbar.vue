@@ -7,25 +7,28 @@
     :top="top"
   >
     <slot>
-      <v-expand-x-transition>
-        <v-progress-circular
-          v-if="loading"
-          indeterminate
-          size="28"
-        ></v-progress-circular>
-      </v-expand-x-transition>
-      <span v-html="(loading ? '&emsp;' : '') + message"></span>
-      <v-spacer></v-spacer>
-      <v-expand-x-transition>
-        <v-btn
-          v-if="!loading"
-          text
-          :color="mBtnColor"
-          @click.native="(callback && callback()) || (model = false)"
-        >
-          <span v-text="btnText || 'Close'"></span>
-        </v-btn>
-      </v-expand-x-transition>
+      <v-layout align-center>
+        <v-expand-x-transition>
+          <v-progress-circular
+            v-if="loading"
+            indeterminate
+            size="28"
+          ></v-progress-circular>
+        </v-expand-x-transition>
+        <span v-html="(loading ? '&emsp;' : '') + message"></span>
+        <v-spacer></v-spacer>
+        <v-expand-x-transition>
+          <v-btn
+            class="m-0"
+            v-if="!loading"
+            text
+            :color="mBtnColor"
+            @click.native="(callback && callback()) || (model = false)"
+          >
+            <span v-text="btnText || 'Close'"></span>
+          </v-btn>
+        </v-expand-x-transition>
+      </v-layout>
     </slot>
   </v-snackbar>
 </template>

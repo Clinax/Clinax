@@ -4,9 +4,9 @@
       <app-bar v-if="appbarVisibility" v-model="navbar"></app-bar>
       <nav-bar v-if="navbarVisibility" v-model="navbar"></nav-bar>
 
-      <v-content class="grey lighten-4">
+      <v-main class="grey lighten-4">
         <router-view></router-view>
-      </v-content>
+      </v-main>
       <snackbar v-model="snackbar.value" v-bind="snackbar"></snackbar>
     </template>
     <loading-dialog v-else :value="true" text="Signing in..."></loading-dialog>

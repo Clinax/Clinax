@@ -216,7 +216,7 @@
         <!-- Treatment -->
         <v-tab-item>
           <v-menu
-            v-model="ui.birthDateMenu"
+            v-model="ui.dateMenu"
             :close-on-content-click="false"
             max-width="290px"
             min-width="290px"
@@ -225,6 +225,7 @@
           >
             <template v-slot:activator="{ on }">
               <input-field
+                v-model="followupDate"
                 :on="disabled ? null : on"
                 :value="
                   (followUpModel.nextFollowUpDate &&
@@ -233,6 +234,7 @@
                     )) ||
                   'Not provided'
                 "
+                @input="disabled || onChange()"
                 label="Next Follow up date"
                 :textfield="{
                   autocomplete: 'off',
@@ -240,25 +242,40 @@
                   class: { border: disabled },
                   flat: disabled,
                   readonly: true,
+                  clearable: true,
                   disabled,
                 }"
-                :required="!disabled"
               ></input-field>
             </template>
-            <v-date-picker
-              @input="
-                (ev) => {
-                  followUpModel.nextFollowUpDate = ev;
-                  ui.birthDateMenu = false;
-                  disabled || onChange();
-                }
-              "
-              :value="followUpModel.nextFollowUpDate"
-              :min="moment().subtract(1, 'days').format('YYYY-MM-DD')"
-              no-title
-            ></v-date-picker>
+            <v-card>
+              <v-date-picker
+                class="elevation-0"
+                ref="datePicker"
+                color="primary"
+                :value="followUpModel.nextFollowUpDate"
+                :min="moment().format('YYYY-MM-DD')"
+                no-title
+              ></v-date-picker>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn depressed text small @click="ui.dateMenu = false">
+                  cancel
+                </v-btn>
+                <v-btn
+                  color="primary"
+                  depressed
+                  small
+                  @click="
+                    followUpModel.nextFollowUpDate = $refs.datePicker.inputDate;
+                    ui.dateMenu = false;
+                  "
+                >
+                  ok
+                </v-btn>
+              </v-card-actions>
+            </v-card>
           </v-menu>
-          <v-divider></v-divider>
+          <v-divider class="mt-5"></v-divider>
 
           <input-field
             @input="disabled || onChange()"
@@ -439,6 +456,7 @@ import { clone, isEqual } from "../modules/object";
 import { sortBy } from "../modules/list";
 import { makeRequest } from "../modules/request";
 import drugs from "@/json/drugs.json";
+import moment from "moment";
 
 export default {
   props: {
@@ -502,12 +520,24 @@ export default {
       tab: 0,
       saveDelayTimerId: null,
       saveBadgeTimerId: null,
-      birthDateMenu: false,
+      dateMenu: false,
       saving: false,
       saved: false,
     },
   }),
-
+  computed: {
+    followupDate: {
+      get() {
+        return (
+          this.followUpModel.nextFollowUpDate &&
+          moment(this.followUpModel.nextFollowUpDate).format("YYYY-MM-DD")
+        );
+      },
+      set(v) {
+        this.followUpModel.nextFollowUpDate = v;
+      },
+    },
+  },
   watch: {
     "ui.saving"(a) {
       this.$emit("saving", a);
@@ -599,6 +629,7 @@ export default {
             });
 
           this.$emit("update:followUp", data);
+
           this.$nextTick(() => {
             this.ui.saving = false;
             this.ui.saved = true;

@@ -5,6 +5,7 @@ import moment from "moment";
 // import { getDownloadPath } from "./modules/firebaseStorage";
 import { makeRequest, errorHandler } from "./modules/request";
 import { setInColorMap, getFromColorMap } from "./utils";
+import { decompressFromUTF16 } from "lz-string";
 
 Vue.use(Vuex);
 
@@ -53,6 +54,8 @@ const store = new Vuex.Store({
       state.app.userUpdateLoading = false;
     },
     setEvents(state, data) {
+      data = JSON.parse(decompressFromUTF16(data));
+
       let a = {};
       for (const date in data) {
         if (data.hasOwnProperty(date)) {
@@ -60,7 +63,7 @@ const store = new Vuex.Store({
 
           element.forEach((ev) => {
             setInColorMap(ev._id, ev.color);
-            a[ev.followUpId] = ev;
+            a[ev.followUpId || ev.appointmentId] = ev;
           });
         }
       }
