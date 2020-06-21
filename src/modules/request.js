@@ -5,7 +5,7 @@ import { isProduction } from "../utils";
 import { clone } from "./object";
 
 export const baseUrl = isProduction()
-  ? "https://server.clinax.in/"
+  ? "https://clinax-server.herokuapp.com/"
   : "http://localhost:3000/";
 
 const progressCallbacks = {};
