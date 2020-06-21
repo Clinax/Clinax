@@ -93,6 +93,7 @@
         solo-inverted
         hide-details
         clearable
+        dense
         flat
         solo
       ></v-text-field>
@@ -126,7 +127,7 @@
         </v-card>
       </v-menu>
     </div>
-    <div v-if="$vuetify.breakpoint.mdAndDown">
+    <div v-if="$vuetify.breakpoint.smAndDown">
       <v-text-field
         v-model="search"
         class="flex-grow-1 my-2"

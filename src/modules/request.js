@@ -5,7 +5,7 @@ import { isProduction } from "../utils";
 import { clone } from "./object";
 
 export const baseUrl = isProduction()
-  ? "https://server.clinax.pranavraut.me/"
+  ? "https://server.clinax.in/"
   : "http://localhost:3000/";
 
 const progressCallbacks = {};
@@ -20,7 +20,7 @@ export function removeProgressCallback(name) {
 
 const axios = new Axios.create({
   baseURL: baseUrl,
-  onUploadProgress: function(progressEvent) {
+  onUploadProgress: function (progressEvent) {
     let progress = parseInt(
       Math.round((progressEvent.loaded / progressEvent.total) * 100)
     );

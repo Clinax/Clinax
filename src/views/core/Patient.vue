@@ -5,9 +5,7 @@
         <v-app-bar-nav-icon @click="$router.go(-1)">
           <v-icon>mdi-arrow-left</v-icon>
         </v-app-bar-nav-icon>
-        <v-toolbar-title v-if="$vuetify.breakpoint.mdAndUp">
-          Patients
-        </v-toolbar-title>
+
         <v-spacer></v-spacer>
         <patient-dialog
           v-model="patientDialog"
@@ -73,7 +71,6 @@
       >
         <template v-slot:item="{ item, headers }">
           <tr
-            class="item"
             :class="[item.gender, { mobile: $vuetify.breakpoint.xs }]"
             @click="
               profile = {
@@ -82,92 +79,158 @@
               }
             "
           >
-            <td class="text-truncate">
-              <div class="head">{{ headers[0].text }}</div>
-              {{ moment(item.createdAt).format("Do MMMM 'YY") }}
-            </td>
-            <td class="text-truncate">
-              <div class="head">{{ headers[1].text }}</div>
-
-              <span>{{ item.fullname }}</span>
-            </td>
-            <td class="contact-info">
-              <div class="head">{{ headers[2].text }}</div>
-              <span v-if="item.email || item.phone">
-                <a v-if="item.phone" :href="'tel:' + item.phone">
-                  {{ item.phone }}
-                </a>
-                <a v-else-if="item.email" :href="'mailto:' + item.email">
-                  {{ item.email }}
-                </a>
-              </span>
-              <pre v-else>-</pre>
-              <template v-if="item.email && item.phone">
-                <br />
-                <small>
-                  <a :href="'mailto:' + item.email">{{ item.email }}</a>
-                </small>
-              </template>
-            </td>
-            <td>
-              <div class="head">{{ headers[3].text }}</div>
-              <v-tooltip top v-if="item.birthDate">
-                <template v-slot:activator="{ on }">
-                  <v-layout align-center v-on="on" class="subheading">
-                    <v-icon
-                      v-if="
-                        moment(item.birthDate).format('L') ==
-                        moment().format('L')
-                      "
-                      title="Happy Birthday!"
-                      color="pink"
-                      class="mr-2"
-                      small
-                    >
-                      mdi-cake
-                    </v-icon>
-                    <span class="text-no-wrap">
-                      {{ item.age }} / {{ item.gender[0] }}
-                    </span>
-                  </v-layout>
-                </template>
-                <v-simple-table dense dark class="transparent">
-                  <tr>
-                    <th>Birth Date</th>
-                    <td>
-                      {{ moment(item.birthDate).format("Do MMMM 'YY") }}
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>Gender</th>
-                    <td>
-                      {{ item.gender }}
-                    </td>
-                  </tr>
-                </v-simple-table>
-              </v-tooltip>
-              <pre v-else>Not provided</pre>
-            </td>
-            <td>
-              <div class="head">{{ headers[4].text }}</div>
-              <v-tooltip v-if="item.address" top>
-                <template v-slot:activator="{ on }">
-                  <b v-on="on">{{ item.address.area }}</b>
-                </template>
-                <span>{{ item.address.street }}</span>
-              </v-tooltip>
-              <pre v-else>-</pre>
-            </td>
-            <td class="text-right text-truncate">
-              <div class="head">{{ headers[5].text }}</div>
-              <div>
-                {{ moment(item.updatedAt).format("Do MMMM 'YY") }}
+            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
+              <div
+                class="v-data-table__mobile-row__header"
+                v-if="$vuetify.breakpoint.xs"
+              >
+                {{ headers[0].text }}
               </div>
-              <small>
-                {{ moment(item.updatedAt).format("LT") }}
-              </small>
+              <div
+                :class="{
+                  'v-data-table__mobile-row__cell': $vuetify.breakpoint.xs,
+                }"
+                class="text-truncate"
+              >
+                {{ moment(item.createdAt).format("Do MMMM 'YY") }}
+              </div>
             </td>
-            <td>
+            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
+              <div
+                v-if="$vuetify.breakpoint.xs"
+                class="v-data-table__mobile-row__header"
+              >
+                {{ headers[1].text }}
+              </div>
+              <div
+                :class="{
+                  'v-data-table__mobile-row__cell': $vuetify.breakpoint.xs,
+                }"
+              >
+                <span>{{ item.fullname }}</span>
+              </div>
+            </td>
+            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
+              <div
+                v-if="$vuetify.breakpoint.xs"
+                class="v-data-table__mobile-row__header"
+              >
+                {{ headers[2].text }}
+              </div>
+              <div
+                :class="{
+                  'v-data-table__mobile-row__cell': $vuetify.breakpoint.xs,
+                }"
+              >
+                <span v-if="item.email || item.phone">
+                  <a v-if="item.phone" :href="'tel:' + item.phone">
+                    {{ item.phone }}
+                  </a>
+                  <a v-else-if="item.email" :href="'mailto:' + item.email">
+                    {{ item.email }}
+                  </a>
+                </span>
+                <pre v-else>-</pre>
+                <template v-if="item.email && item.phone">
+                  <br />
+                  <small>
+                    <a :href="'mailto:' + item.email">{{ item.email }}</a>
+                  </small>
+                </template>
+              </div>
+            </td>
+            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
+              <div
+                v-if="$vuetify.breakpoint.xs"
+                class="v-data-table__mobile-row__header"
+              >
+                {{ headers[3].text }}
+              </div>
+              <div
+                :class="{
+                  'v-data-table__mobile-row__cell': $vuetify.breakpoint.xs,
+                }"
+              >
+                <v-tooltip top v-if="item.birthDate">
+                  <template v-slot:activator="{ on }">
+                    <v-layout align-center v-on="on" class="subheading">
+                      <v-icon
+                        v-if="
+                          moment(item.birthDate).format('L') ==
+                          moment().format('L')
+                        "
+                        title="Happy Birthday!"
+                        color="pink"
+                        class="mr-2"
+                        small
+                      >
+                        mdi-cake
+                      </v-icon>
+                      <span class="text-no-wrap">
+                        {{ item.age }} / {{ item.gender[0] }}
+                      </span>
+                    </v-layout>
+                  </template>
+                  <v-simple-table dense dark class="transparent">
+                    <tr>
+                      <th>Birth Date</th>
+                      <td>
+                        {{ moment(item.birthDate).format("Do MMMM 'YY") }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Gender</th>
+                      <td>
+                        {{ item.gender }}
+                      </td>
+                    </tr>
+                  </v-simple-table>
+                </v-tooltip>
+                <pre v-else>Not provided</pre>
+              </div>
+            </td>
+            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
+              <div
+                v-if="$vuetify.breakpoint.xs"
+                class="v-data-table__mobile-row__header"
+              >
+                {{ headers[4].text }}
+              </div>
+              <div
+                :class="{
+                  'v-data-table__mobile-row__cell': $vuetify.breakpoint.xs,
+                }"
+              >
+                <v-tooltip v-if="item.address" top>
+                  <template v-slot:activator="{ on }">
+                    <b v-on="on">{{ item.address.area }}</b>
+                  </template>
+                  <span>{{ item.address.street }}</span>
+                </v-tooltip>
+                <pre v-else>-</pre>
+              </div>
+            </td>
+            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
+              <div
+                v-if="$vuetify.breakpoint.xs"
+                class="v-data-table__mobile-row__header"
+              >
+                {{ headers[5].text }}
+              </div>
+              <div
+                :class="{
+                  'v-data-table__mobile-row__cell': $vuetify.breakpoint.xs,
+                }"
+              >
+                <div class="text-truncate">
+                  {{ moment(item.updatedAt).format("Do MMMM 'YY") }}
+                </div>
+                <small>
+                  {{ moment(item.updatedAt).format("LT") }}
+                </small>
+              </div>
+            </td>
+            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
               <v-btn
                 color="primary"
                 title="Open patient case"

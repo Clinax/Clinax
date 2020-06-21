@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-content class="primary lighten-3">
+    <v-main class="primary lighten-3">
       <v-container fluid fill-height class="py-3">
         <v-layout align-center justify-center>
           <v-flex xs12 sm8 md5 lg4>
@@ -107,7 +107,7 @@
           </v-flex>
         </v-layout>
       </v-container>
-    </v-content>
+    </v-main>
 
     <snackbar v-model="snackbar.value" v-bind="snackbar"></snackbar>
   </v-app>

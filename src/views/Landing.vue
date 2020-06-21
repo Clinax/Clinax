@@ -25,7 +25,7 @@
         </v-btn>
       </template>
     </v-app-bar>
-    <v-content id="content" class="grey lighten-5">
+    <v-main id="content" class="grey lighten-5">
       <div class="banner">
         <div class="banner--content">
           <v-toolbar class="flex-grow-0 transparent" height="98" flat>
@@ -76,10 +76,13 @@
               <template v-else>
                 <v-hover v-slot:default="{ hover }" class="mb-12">
                   <v-btn
-                    :class="{ 'elevation-12': hover }"
-                    color="primary"
+                    :class="{
+                      'elevation-12 white--text': hover,
+                      'primary--text': !hover,
+                    }"
+                    class="animate"
+                    :color="hover ? 'primary' : 'white'"
                     to="/app?new-account=true"
-                    :outlined="!hover"
                     rounded
                     x-large
                   >
@@ -111,7 +114,7 @@
           <v-icon>mdi-chevron-up</v-icon>
         </v-btn>
       </v-slide-y-reverse-transition>
-    </v-content>
+    </v-main>
   </v-app>
 </template>
 
@@ -132,12 +135,12 @@ export default {
 
 <style lang="scss">
 .animate {
-  transition: all 300ms cubic-bezier(0.075, 0.82, 0.165, 1);
+  transition: all 350ms cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 .banner {
   .v-btn {
     background: white;
-    transition: all 300ms cubic-bezier(0.075, 0.82, 0.165, 1);
+    transition: all 550ms cubic-bezier(0.075, 0.82, 0.165, 1);
   }
 }
 </style>
