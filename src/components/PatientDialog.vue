@@ -1,5 +1,10 @@
 <template>
-  <v-dialog v-model="model" :persistent="!closeable" max-width="540" scrollable>
+  <v-dialog
+    v-model="model"
+    :fullscreen="$vuetify.breakpoint.smAndDown"
+    :persistent="!closeable"
+    max-width="640"
+  >
     <template v-if="!noActivator" v-slot:activator="{ on }">
       <slot name="activator" v-bind:on="on">
         <v-btn v-on="on" color="primary" depressed :block="block">
@@ -26,13 +31,14 @@
       </v-card-actions>
       <v-card-actions>
         <v-btn text block to="/app/patients/" @click="model = false" small>
-          go to patinets
+          go to patients
         </v-btn>
       </v-card-actions>
     </v-card>
     <v-card v-else-if="model">
       <v-subheader v-if="patientModel._id" class="grey lighten-4">
         <span>{{ patientModel.fullname }}'s Profile</span>
+        <v-spacer></v-spacer>
         <v-btn
           class="mx-3"
           color="primary"
@@ -41,54 +47,76 @@
           depressed
           small
         >
-          View Case
+          <span>View Case</span>
         </v-btn>
-        <v-spacer></v-spacer>
         <v-btn text @click="closeDialog" small>
-          <v-icon small>mdi-close</v-icon> close
+          <v-icon class="ml-2" small>mdi-close</v-icon>
+          <span v-if="$vuetify.breakpoint.mdAndUp">Close</span>
         </v-btn>
       </v-subheader>
       <v-divider></v-divider>
-      <v-card-text class="pa-0">
-        <v-stepper v-model="step" class="elevation-0">
-          <v-stepper-header>
-            <v-stepper-step
-              :complete="step > 1 || !!patientModel._id"
-              :editable="!!patientModel._id"
-              step="1"
-            >
-              Basic
-            </v-stepper-step>
-            <v-divider></v-divider>
-            <v-stepper-step
-              :complete="step > 2 || !!patientModel._id"
-              :editable="!!patientModel._id"
-              step="2"
-            >
-              Photo
-            </v-stepper-step>
-            <v-divider></v-divider>
+      <v-stepper v-model="step">
+        <v-stepper-header>
+          <v-stepper-step
+            :complete="step > 1 || !!patientModel._id"
+            :editable="!!patientModel._id"
+            step="1"
+          >
+            Basic
+          </v-stepper-step>
+          <v-divider></v-divider>
+          <v-stepper-step
+            :complete="step > 2 || !!patientModel._id"
+            :editable="!!patientModel._id"
+            step="2"
+          >
+            Photo
+          </v-stepper-step>
+          <v-divider></v-divider>
 
-            <v-stepper-step
-              :complete="!!patientModel.address"
-              :editable="!!patientModel._id"
-              step="3"
-            >
-              Address
-            </v-stepper-step>
-          </v-stepper-header>
+          <v-stepper-step
+            :complete="!!patientModel.address"
+            :editable="!!patientModel._id"
+            step="3"
+          >
+            Address
+          </v-stepper-step>
+        </v-stepper-header>
 
-          <v-stepper-items>
-            <v-stepper-content step="1" class="pa-0">
-              <v-form
-                ref="patientForm"
-                lazy-validation
-                @submit.prevent="addPatient"
-              >
-                <v-card-text class="grey lighten-4">
+        <v-stepper-items>
+          <v-stepper-content step="1" class="pa-0">
+            <v-form
+              ref="patientForm"
+              lazy-validation
+              @submit.prevent="addPatient"
+            >
+              <v-card-text class="grey lighten-4">
+                <v-layout>
+                  <input-field
+                    v-model="patientModel.prefix"
+                    field="v-select"
+                    label="Prefix"
+                    @input="
+                      (patientModel.prefix === '- Less' &&
+                        ((prefixes = ['Mr', 'Mrs', 'Ms', '+ More']),
+                        (patientModel.prefix = null))) ||
+                        (patientModel.prefix === '+ More' &&
+                          ((prefixes = namePrefixes),
+                          (patientModel.prefix = null)))
+                    "
+                    :textfield="{
+                      items: prefixes,
+                      autocomplete: 'off',
+                    }"
+                    :col="{ cols: 3 }"
+                    required
+                  >
+                  </input-field>
+
                   <input-field
                     v-model="patientModel.fullname"
                     label="Full name"
+                    :col="{ cols: 9 }"
                     :textfield="{
                       placeholder: 'John Doe',
                       prependInnerIcon: 'mdi-account',
@@ -96,322 +124,340 @@
                     }"
                     required
                   ></input-field>
-                  <v-row class="mx-0">
-                    <input-field
-                      field="v-select"
-                      v-model="patientModel.gender"
-                      :col="{ md: 6, cols: 12 }"
-                      :textfield="{
-                        label: 'Gender',
-                        items: [
-                          { text: 'Male', value: 'male' },
-                          { text: 'Female', value: 'female' },
-                          { text: 'Other', value: 'non-binary' },
-                        ],
-                        prependInnerIcon:
-                          (patientModel.gender &&
-                            `mdi-gender-${patientModel.gender}`) ||
-                          'mdi-help',
-                      }"
-                      required
-                    ></input-field>
-                    <v-col cols="12" md="6" class="pa-0">
-                      <v-layout>
-                        <input-field
-                          v-if="age"
-                          v-model="patientModel.age"
-                          @input="
-                            (ev) =>
-                              (patientModel.birthDate =
-                                ev &&
-                                moment(
-                                  String(new Date().getFullYear() - ev)
-                                ).format('YYYY-MM-DD'))
-                          "
-                          :textfield="{
-                            prependInnerIcon: ' mdi-cake-variant',
-                            label: 'Age',
-                            type: 'number',
-                            autocomplete: 'off',
-                            max: 100,
-                            min: 1,
-                          }"
-                          required
-                        ></input-field>
-                        <v-menu
-                          v-else
-                          v-model="birthDateMenu"
-                          :close-on-content-click="false"
-                          max-width="290px"
-                          min-width="290px"
-                          offset-y
-                          top
-                        >
-                          <template v-slot:activator="{ on }">
-                            <input-field
-                              :on="on"
-                              v-model="patientModel.birthDate"
-                              :textfield="{
-                                label: 'Date of Birth',
-                                autocomplete: 'off',
-                                prependInnerIcon: ' mdi-cake-variant',
-                                readonly: true,
-                              }"
-                              required
-                            ></input-field>
-                          </template>
-                          <v-date-picker
-                            @input="
-                              (ev) => {
-                                patientModel.birthDate = ev;
-                                birthDateMenu = false;
-                              }
-                            "
-                            :value="patientModel.birthDate"
-                            :max="moment().format('YYYY-MM-DD')"
-                            no-title
-                          ></v-date-picker>
-                        </v-menu>
-                        <v-tooltip top>
-                          <template v-slot:activator="{ on }">
-                            <v-btn
-                              v-on="on"
-                              icon
-                              class="mt-6 mr-2"
-                              @click="age = !age"
-                            >
-                              <v-icon>mdi-counter</v-icon>
-                            </v-btn>
-                          </template>
-                          <span>
-                            Change between age input and birth date input
-                          </span>
-                        </v-tooltip>
-                      </v-layout>
-                    </v-col>
-                  </v-row>
+                </v-layout>
+                <input-field
+                  field="v-select"
+                  v-model="patientModel.gender"
+                  :textfield="{
+                    label: 'Gender',
+                    items: [
+                      { text: 'Male', value: 'male' },
+                      { text: 'Female', value: 'female' },
+                      { text: 'Other', value: 'non-binary' },
+                    ],
+                    prependInnerIcon:
+                      (patientModel.gender &&
+                        `mdi-gender-${patientModel.gender}`) ||
+                      'mdi-help',
+                  }"
+                  required
+                ></input-field>
+                <v-layout>
                   <input-field
-                    field="v-select"
-                    v-model="patientModel.bloodGroup"
-                    label="Blood group"
+                    v-if="age"
+                    v-model="patientModel.age"
+                    @input="
+                      (ev) =>
+                        (patientModel.birthDate =
+                          ev &&
+                          moment(String(new Date().getFullYear() - ev)).format(
+                            'YYYY-MM-DD'
+                          ))
+                    "
                     :textfield="{
-                      prependInnerIcon: 'mdi-water',
-                      items: [
-                        'a+',
-                        'b+',
-                        'o+',
-                        'ab+',
-                        'a-',
-                        'b-',
-                        'o-',
-                        'ab-',
-                        'unknown',
-                      ],
+                      prependInnerIcon: ' mdi-cake-variant',
+                      label: 'Age',
+                      type: 'number',
+                      autocomplete: 'off',
+                      max: 100,
+                      min: 1,
                     }"
                     required
                   ></input-field>
-                  <v-divider class="mt-5"></v-divider>
-                  <input-field
-                    v-model="patientModel.phone"
-                    label="Phone"
-                    mask="+91 ### ### ####"
-                    :textfield="{
-                      autocomplete: 'off',
-                      placeholder: '12345 12345',
-                      prependInnerIcon: 'mdi-phone-classic',
-                      count: 10,
-                    }"
-                  ></input-field>
-                  <input-field
-                    v-if="email"
-                    v-model="patientModel.email"
-                    label="Email (optional)"
-                    :textfield="{
-                      placeholder: 'johndoe@abc.com',
-                      autocomplete: 'off',
-                      prependInnerIcon: 'mdi-email',
-                    }"
-                  ></input-field>
-                  <div v-else class="my-3 mx-5 text-right">
-                    <a @click="email = true">+ Email</a>
-                  </div>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn text @click="closeDialog" :disabled="loading">
-                    cancel
-                  </v-btn>
-                  <v-btn
-                    color="primary"
-                    type="submit"
-                    :loading="loading"
-                    :disabled="loading"
-                    depressed
+                  <v-menu
+                    v-else
+                    v-model="birthDateMenu"
+                    :close-on-content-click="false"
+                    max-width="290px"
+                    min-width="290px"
+                    offset-y
+                    top
                   >
-                    Next
-                  </v-btn>
-                </v-card-actions>
-              </v-form>
-            </v-stepper-content>
-            <v-stepper-content step="2">
-              <template v-if="avatar.preview">
-                <v-card-text>
-                  <p v-if="avatar.fd">
-                    Click <b>UPLOAD</b> to use this picture for
-                    {{ patientModel.fullname }}
-                  </p>
-                  <v-layout column justify-center align-center>
-                    <div class="text-right">
+                    <template v-slot:activator="{ on }">
+                      <input-field
+                        :on="on"
+                        v-model="patientModel.birthDate"
+                        :textfield="{
+                          label: 'Date of Birth',
+                          autocomplete: 'off',
+                          prependInnerIcon: ' mdi-cake-variant',
+                          readonly: true,
+                        }"
+                        required
+                      ></input-field>
+                    </template>
+                    <v-date-picker
+                      @input="
+                        (ev) => {
+                          patientModel.birthDate = ev;
+                          birthDateMenu = false;
+                        }
+                      "
+                      :value="patientModel.birthDate"
+                      :max="moment().format('YYYY-MM-DD')"
+                      no-title
+                    ></v-date-picker>
+                  </v-menu>
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
                       <v-btn
-                        color="error"
-                        class="mb-2"
-                        @click="
-                          (avatar.fd && (avatar.fd = null)) ||
-                            (avatar.preview = '')
-                        "
-                        small
-                        text
+                        v-on="on"
+                        icon
+                        class="mt-7 mr-2"
+                        @click="age = !age"
                       >
-                        <v-icon class="pr-1" small>mdi-close</v-icon> remove
+                        <v-icon>mdi-counter</v-icon>
                       </v-btn>
-                      <v-img
-                        :src="avatar.preview"
-                        height="248"
-                        width="168"
-                        class="preview"
-                      >
-                      </v-img>
-                    </div>
-                  </v-layout>
-                </v-card-text>
-                <v-card-actions>
-                  <v-btn
-                    color="primary"
-                    @click="uploadPicture"
-                    :loading="loading"
-                    :disabled="loading || !avatar.fd"
-                    block
-                  >
-                    Upload
-                  </v-btn>
-                </v-card-actions>
-              </template>
-              <template v-else>
-                <v-card-text>
-                  <p>Select or drag a picture of the patient</p>
-                  <input
-                    ref="avatar"
-                    type="file"
-                    accept="images/*"
-                    @input="(ev) => (avatar.fd = ev.target.files[0])"
-                    hidden
-                  />
-                  <v-card-actions row wrap>
-                    <v-spacer></v-spacer>
-                    <v-dialog>
-                      <template v-slot:activator="{ on }">
-                        <v-btn color="success" v-on="on">Open Camera</v-btn>
-                      </template>
-                      <v-card>
-                        <web-cam @started="log" @error="log"> </web-cam>
-                      </v-card>
-                    </v-dialog>
-                  </v-card-actions>
-                  <div
-                    class="drag-region"
-                    :class="{ dragging: dragEvent.dragging }"
-                    @click="$refs.avatar.click()"
-                    @drop.prevent="onFileDrag"
-                    @dragover.prevent="onFileDrag"
-                    @dragenter.prevent="onFileDrag"
-                    @dragleave.prevent="onFileDrag"
-                    v-ripple
-                  >
-                    <v-layout fill-height align-center justify-center column>
-                      <v-icon
-                        class="mb-2"
-                        :x-large="dragEvent.dragging"
-                        :large="!dragEvent.dragging"
-                      >
-                        {{
-                          dragEvent.dragging ? "mdi-package-down" : "mdi-image"
-                        }}
-                      </v-icon>
-                      <v-slide-y-transition mode="out-in">
-                        <span class="text--secondary" :key="dragEvent.dragging">
-                          {{
-                            dragEvent.dragging
-                              ? "Drop your file here"
-                              : "Drag and drop photo file here"
-                          }}
-                        </span>
-                      </v-slide-y-transition>
-                    </v-layout>
+                    </template>
+                    <span>
+                      Change between age input and birth date input
+                    </span>
+                  </v-tooltip>
+                </v-layout>
+                <input-field
+                  field="v-select"
+                  v-model="patientModel.bloodGroup"
+                  label="Blood group"
+                  :textfield="{
+                    prependInnerIcon: 'mdi-water',
+                    items: [
+                      'a+',
+                      'b+',
+                      'o+',
+                      'ab+',
+                      'a-',
+                      'b-',
+                      'o-',
+                      'ab-',
+                      'unknown',
+                    ],
+                  }"
+                  required
+                ></input-field>
+                <input-field
+                  field="v-select"
+                  v-model="patientModel.maritalStatus"
+                  label="Marital Status"
+                  :textfield="{
+                    prependInnerIcon: 'mdi-ring',
+                    items: [
+                      'Single',
+                      'Married',
+                      'Divorced',
+                      'Widowed',
+                      'Separated',
+                    ],
+                  }"
+                  required
+                ></input-field>
+                <v-divider class="mt-5"></v-divider>
+                <input-field
+                  v-if="showPhoneField"
+                  v-model="patientModel.phone"
+                  label="Phone"
+                  mask="+91 ### ### ####"
+                  :textfield="{
+                    autocomplete: 'off',
+                    placeholder: '12345 12345',
+                    prependInnerIcon: 'mdi-phone-classic',
+                    count: 10,
+                  }"
+                ></input-field>
+                <div v-else class="my-3 mx-5 text-right">
+                  <a @click="showPhoneField = true">+ Contact</a>
+                </div>
+                <input-field
+                  v-if="showEmailField"
+                  v-model="patientModel.email"
+                  label="Email (optional)"
+                  :textfield="{
+                    placeholder: 'johndoe@abc.com',
+                    autocomplete: 'off',
+                    prependInnerIcon: 'mdi-email',
+                  }"
+                ></input-field>
+                <div v-else class="my-3 mx-5 text-right">
+                  <a @click="showEmailField = true">+ Email</a>
+                </div>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn text @click="closeDialog" :disabled="loading">
+                  cancel
+                </v-btn>
+                <v-btn
+                  color="primary"
+                  type="submit"
+                  :loading="loading"
+                  :disabled="loading"
+                  depressed
+                >
+                  Next
+                </v-btn>
+              </v-card-actions>
+            </v-form>
+          </v-stepper-content>
+          <v-stepper-content step="2">
+            <template v-if="avatar.preview">
+              <v-card-text>
+                <p v-if="avatar.fd">
+                  Click <b>UPLOAD</b> to use this picture for
+                  {{ patientModel.fullname }}
+                </p>
+                <v-layout column justify-center align-center>
+                  <div class="text-right">
+                    <v-btn
+                      color="error"
+                      class="mb-2"
+                      @click="
+                        (avatar.fd && (avatar.fd = null)) ||
+                          (avatar.preview = '')
+                      "
+                      small
+                      text
+                    >
+                      <v-icon class="pr-1" small>mdi-close</v-icon> remove
+                    </v-btn>
+                    <v-img
+                      class="preview"
+                      :src="avatar.preview"
+                      height="248"
+                      width="168"
+                    >
+                    </v-img>
                   </div>
-                </v-card-text>
-                <v-card-actions>
+                </v-layout>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  color="primary"
+                  @click="uploadPicture"
+                  :loading="loading"
+                  :disabled="loading || !avatar.fd"
+                  block
+                >
+                  Upload
+                </v-btn>
+              </v-card-actions>
+            </template>
+            <template v-else>
+              <v-card-text>
+                <p>Select or drag a picture of the patient</p>
+                <input
+                  ref="avatar"
+                  type="file"
+                  accept="images/*"
+                  @input="(ev) => (avatar.fd = ev.target.files[0])"
+                  hidden
+                />
+                <v-card-actions row wrap v-if="false">
                   <v-spacer></v-spacer>
-                  <v-btn color="grey" text @click="step = 3">
-                    skip
-                    <v-icon>mdi-skip-next</v-icon>
-                  </v-btn>
+                  <v-dialog>
+                    <template v-slot:activator="{ on }">
+                      <v-btn color="success" v-on="on">Open Camera</v-btn>
+                    </template>
+                    <v-card>
+                      <VueCamera></VueCamera>
+                    </v-card>
+                  </v-dialog>
                 </v-card-actions>
-              </template>
-            </v-stepper-content>
-            <v-stepper-content step="3" class="pa-0">
-              <v-form
-                ref="extraForm"
-                lazy-validation
-                @submit.prevent="updateExtra"
-              >
-                <v-card-text class="grey lighten-4">
+                <div
+                  class="drag-region"
+                  :class="{ dragging: dragEvent.dragging }"
+                  @click="$refs.avatar.click()"
+                  @drop.prevent="onFileDrag"
+                  @dragover.prevent="onFileDrag"
+                  @dragenter.prevent="onFileDrag"
+                  @dragleave.prevent="onFileDrag"
+                  v-ripple
+                >
+                  <v-layout fill-height align-center justify-center column>
+                    <v-icon
+                      class="mb-2"
+                      :x-large="dragEvent.dragging"
+                      :large="!dragEvent.dragging"
+                    >
+                      {{
+                        dragEvent.dragging ? "mdi-package-down" : "mdi-image"
+                      }}
+                    </v-icon>
+                    <v-slide-y-transition mode="out-in">
+                      <span class="text--secondary" :key="dragEvent.dragging">
+                        {{
+                          dragEvent.dragging
+                            ? "Drop your file here"
+                            : "Drag and drop photo file here"
+                        }}
+                      </span>
+                    </v-slide-y-transition>
+                  </v-layout>
+                </div>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="grey" text @click="step = 3">
+                  skip
+                  <v-icon>mdi-skip-next</v-icon>
+                </v-btn>
+              </v-card-actions>
+            </template>
+          </v-stepper-content>
+          <v-stepper-content step="3" class="pa-0">
+            <v-form
+              ref="extraForm"
+              lazy-validation
+              @submit.prevent="updateExtra"
+            >
+              <v-card-text class="grey lighten-4">
+                <input-field
+                  field="v-textarea"
+                  v-model="address.street"
+                  label="Street address"
+                  :textfield="{
+                    rows: 3,
+                    autoGrow: true,
+                    prependInnerIcon: 'mdi-map',
+                  }"
+                ></input-field>
+                <v-row class="mx-0">
                   <input-field
-                    field="v-textarea"
-                    v-model="address.street"
-                    label="Street address"
+                    field="v-combobox"
+                    v-model="address.area"
+                    label="Area"
+                    :col="{ md: 6, xs: 12 }"
                     :textfield="{
-                      rows: 3,
-                      autoGrow: true,
-                      prependInnerIcon: 'mdi-map',
+                      items: areas,
+                      prependInnerIcon: 'mdi-image-filter-hdr',
                     }"
+                    required
                   ></input-field>
-                  <v-row class="mx-0">
-                    <input-field
-                      field="v-combobox"
-                      v-model="address.area"
-                      label="Area"
-                      :col="{ md: 6, xs: 12 }"
-                      :textfield="{
-                        items: areas,
-                        prependInnerIcon: 'mdi-image-filter-hdr',
-                      }"
-                      required
-                    ></input-field>
-                    <input-field
-                      v-model="address.pincode"
-                      label="Pincode"
-                      :col="{ md: 6, xs: 12 }"
-                      :input-rules="[
-                        (v) => String(v).length == 6 || 'Invalid Pincode',
-                      ]"
-                      :textfield="{
-                        type: 'number',
-                        prependInnerIcon: 'mdi-map-marker-radius-outline',
-                      }"
-                      required
-                    ></input-field>
-                  </v-row>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="primary" type="submit">finish</v-btn>
-                </v-card-actions>
-              </v-form>
-            </v-stepper-content>
-          </v-stepper-items>
-        </v-stepper>
-      </v-card-text>
+                  <input-field
+                    field="v-combobox"
+                    v-model="address.pincode"
+                    label="Pincode"
+                    :col="{ md: 6, xs: 12 }"
+                    :input-rules="[
+                      (v) => String(v).length == 6 || 'Invalid Pincode',
+                    ]"
+                    :textfield="{
+                      items: pins,
+                      type: 'number',
+                      prependInnerIcon: 'mdi-map-marker-radius-outline',
+                    }"
+                    required
+                  ></input-field>
+                </v-row>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" type="submit">finish</v-btn>
+              </v-card-actions>
+            </v-form>
+          </v-stepper-content>
+        </v-stepper-items>
+      </v-stepper>
     </v-card>
+
     <v-dialog v-model="closeConformation" max-width="280">
       <v-card>
         <v-card-title>Are you sure?</v-card-title>
@@ -435,6 +481,7 @@
 <script>
 import ComponentWithModel from "./ComponentWithModel";
 import InputField from "./InputField";
+import namePrefixes from "@/json/name-prefixes.json";
 import { makeRequest } from "../modules/request";
 import { isEmpty, clone, isEqual } from "../modules/object";
 import { getCookie, setCookie } from "../modules/cookie";
@@ -448,6 +495,8 @@ export default {
     block: { type: Boolean, default: false },
   },
   data: () => ({
+    namePrefixes,
+    prefixes: ["Mr", "Mrs", "Ms", "+ More"],
     patientModel: {},
     address: {},
     avatar: {
@@ -456,7 +505,8 @@ export default {
     },
 
     step: 1,
-    email: false,
+    showEmailField: false,
+    showPhoneField: false,
     birthDateMenu: false,
     closeConformation: false,
     fullscreen: false,
@@ -464,6 +514,7 @@ export default {
     dragEvent: { dragging: false, x: 0, y: 0 },
     loading: false,
     areas: [],
+    pins: [],
     age: getCookie("clinax.addPatient.age") == "true",
   }),
   computed: {
@@ -488,13 +539,15 @@ export default {
       if (a) {
         makeRequest("get", "patient/areas")
           .then(({ data }) => {
-            this.areas = data;
+            this.areas = data.areas;
+            this.pins = data.pins;
           })
           .catch((err) => {
             this.errorHandler(err);
           });
         this.added = false;
-        this.email = Boolean(this.patient && this.patientModel.email);
+        this.showEmailField = Boolean(this.patient && this.patient.email);
+        this.showPhoneField = Boolean(this.patient && this.patient.phone);
         this.step = 1;
         this.patientModel = {};
         this.address = {};

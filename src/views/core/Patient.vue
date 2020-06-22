@@ -19,7 +19,37 @@
           vertical
           inset
         ></v-divider>
-
+        <v-btn
+          @click="ui.dense = !ui.dense"
+          :class="{ 'v-btn--active': ui.dense }"
+          :color="ui.dense ? 'primary' : ''"
+          :outlined="ui.dense"
+          class="mx-3"
+          icon
+        >
+          <icon
+            :icon="
+              ui.dense ? 'mdi-format-list-text' : 'mdi-format-list-bulleted'
+            "
+            title="(Un) Dense"
+          >
+          </icon>
+        </v-btn>
+        <v-btn
+          @click="ui.groupBy = !ui.groupBy"
+          :class="{ 'v-btn--active': ui.groupBy }"
+          :color="ui.groupBy ? 'primary' : ''"
+          :outlined="ui.groupBy"
+          icon
+        >
+          <icon icon="mdi-gender-transgender" title="Group By Gender"> </icon>
+        </v-btn>
+        <v-divider
+          v-if="$vuetify.breakpoint.mdAndUp"
+          class="mx-3"
+          vertical
+          inset
+        ></v-divider>
         <toolbar-tools
           @search="(ev) => (ui.search = ev)"
           :filter-items="[
@@ -32,18 +62,6 @@
           :filter.sync="filter"
           :items="() => items"
         >
-          <v-btn @click="ui.dense = !ui.dense" icon>
-            <icon
-              :icon="
-                ui.dense ? 'mdi-format-list-text' : 'mdi-format-list-bulleted'
-              "
-              title="(Un) dense"
-            >
-            </icon>
-          </v-btn>
-          <v-btn @click="ui.groupBy = !ui.groupBy" icon>
-            <icon icon="mdi-group" title="Group By Gender"> </icon>
-          </v-btn>
         </toolbar-tools>
       </v-toolbar>
       <v-btn
@@ -68,181 +86,143 @@
         :sort-by.sync="ui.sortBy"
         :sort-desc.sync="ui.sortDesc"
         :dense="ui.dense"
+        item-key="_id"
       >
-        <template v-slot:item="{ item, headers }">
-          <tr
-            :class="[item.gender, { mobile: $vuetify.breakpoint.xs }]"
-            @click="
-              profile = {
-                model: true,
-                patient: item,
-              }
+        <template
+          v-slot:group.header="{ group, headers, items, isOpen, toggle }"
+        >
+          <td :colspan="headers.length">
+            <v-card-actions class="w-100">
+              <span class="pa-1 primary--text text-uppercase">
+                {{ group }}&nbsp;
+              </span>
+              <span>patients</span>
+              <v-spacer></v-spacer>
+              <v-btn color="primary" @click="toggle" small text>
+                <span>{{ items.length }} item(s)</span>
+                <v-icon small>
+                  mdi-chevron-down
+                  <template v-if="isOpen">
+                    mdi-rotate-180
+                  </template>
+                </v-icon>
+              </v-btn>
+            </v-card-actions>
+          </td>
+        </template>
+
+        <template v-slot:item.pid="{ item }">
+          <div :class="[item.gender]">
+            <kbd>{{ item.pid }}</kbd>
+          </div>
+        </template>
+        <template v-slot:item.createdAt="{ item }">
+          <div
+            class="text-capitalize"
+            :title="
+              'Since ' + moment(item.createdAt).format('DD MMM YYYY / LT')
             "
           >
-            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
-              <div
-                class="v-data-table__mobile-row__header"
-                v-if="$vuetify.breakpoint.xs"
-              >
-                {{ headers[0].text }}
-              </div>
-              <div
-                :class="{
-                  'v-data-table__mobile-row__cell': $vuetify.breakpoint.xs,
-                }"
-                class="text-truncate"
-              >
-                {{ moment(item.createdAt).format("Do MMMM 'YY") }}
-              </div>
-            </td>
-            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
-              <div
-                v-if="$vuetify.breakpoint.xs"
-                class="v-data-table__mobile-row__header"
-              >
-                {{ headers[1].text }}
-              </div>
-              <div
-                :class="{
-                  'v-data-table__mobile-row__cell': $vuetify.breakpoint.xs,
-                }"
-              >
-                <span>{{ item.fullname }}</span>
-              </div>
-            </td>
-            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
-              <div
-                v-if="$vuetify.breakpoint.xs"
-                class="v-data-table__mobile-row__header"
-              >
-                {{ headers[2].text }}
-              </div>
-              <div
-                :class="{
-                  'v-data-table__mobile-row__cell': $vuetify.breakpoint.xs,
-                }"
-              >
-                <span v-if="item.email || item.phone">
-                  <a v-if="item.phone" :href="'tel:' + item.phone">
-                    {{ item.phone }}
-                  </a>
-                  <a v-else-if="item.email" :href="'mailto:' + item.email">
-                    {{ item.email }}
-                  </a>
+            {{ moment(item.createdAt).fromNow() }}
+          </div>
+        </template>
+        <template v-slot:item.phone="{ item }">
+          <div class="contact-info">
+            <span v-if="item.email || item.phone">
+              <a v-if="item.phone" :href="'tel:' + item.phone">
+                {{ item.phone }}
+              </a>
+              <a v-else-if="item.email" :href="'mailto:' + item.email">
+                {{ item.email }}
+              </a>
+            </span>
+            <pre v-else>-</pre>
+            <template v-if="item.email && item.phone">
+              <br />
+              <small>
+                <a :href="'mailto:' + item.email">{{ item.email }}</a>
+              </small>
+            </template>
+          </div>
+        </template>
+        <template v-slot:item.age="{ item }">
+          <v-tooltip top v-if="item.birthDate">
+            <template v-slot:activator="{ on }">
+              <v-layout v-on="on" class="subheading" align-center>
+                <v-icon
+                  v-if="
+                    moment(item.birthDate).format('L') == moment().format('L')
+                  "
+                  title="Happy Birthday!"
+                  color="pink"
+                  class="mr-2"
+                  small
+                >
+                  mdi-cake
+                </v-icon>
+                <span class="text-no-wrap">
+                  {{ item.age }} / {{ item.gender[0] }}
                 </span>
-                <pre v-else>-</pre>
-                <template v-if="item.email && item.phone">
-                  <br />
-                  <small>
-                    <a :href="'mailto:' + item.email">{{ item.email }}</a>
-                  </small>
-                </template>
-              </div>
-            </td>
-            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
-              <div
-                v-if="$vuetify.breakpoint.xs"
-                class="v-data-table__mobile-row__header"
-              >
-                {{ headers[3].text }}
-              </div>
-              <div
-                :class="{
-                  'v-data-table__mobile-row__cell': $vuetify.breakpoint.xs,
-                }"
-              >
-                <v-tooltip top v-if="item.birthDate">
-                  <template v-slot:activator="{ on }">
-                    <v-layout align-center v-on="on" class="subheading">
-                      <v-icon
-                        v-if="
-                          moment(item.birthDate).format('L') ==
-                          moment().format('L')
-                        "
-                        title="Happy Birthday!"
-                        color="pink"
-                        class="mr-2"
-                        small
-                      >
-                        mdi-cake
-                      </v-icon>
-                      <span class="text-no-wrap">
-                        {{ item.age }} / {{ item.gender[0] }}
-                      </span>
-                    </v-layout>
-                  </template>
-                  <v-simple-table dense dark class="transparent">
-                    <tr>
-                      <th>Birth Date</th>
-                      <td>
-                        {{ moment(item.birthDate).format("Do MMMM 'YY") }}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Gender</th>
-                      <td>
-                        {{ item.gender }}
-                      </td>
-                    </tr>
-                  </v-simple-table>
-                </v-tooltip>
-                <pre v-else>Not provided</pre>
-              </div>
-            </td>
-            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
-              <div
-                v-if="$vuetify.breakpoint.xs"
-                class="v-data-table__mobile-row__header"
-              >
-                {{ headers[4].text }}
-              </div>
-              <div
-                :class="{
-                  'v-data-table__mobile-row__cell': $vuetify.breakpoint.xs,
-                }"
-              >
-                <v-tooltip v-if="item.address" top>
-                  <template v-slot:activator="{ on }">
-                    <b v-on="on">{{ item.address.area }}</b>
-                  </template>
-                  <span>{{ item.address.street }}</span>
-                </v-tooltip>
-                <pre v-else>-</pre>
-              </div>
-            </td>
-            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
-              <div
-                v-if="$vuetify.breakpoint.xs"
-                class="v-data-table__mobile-row__header"
-              >
-                {{ headers[5].text }}
-              </div>
-              <div
-                :class="{
-                  'v-data-table__mobile-row__cell': $vuetify.breakpoint.xs,
-                }"
-              >
-                <div class="text-truncate">
-                  {{ moment(item.updatedAt).format("Do MMMM 'YY") }}
-                </div>
-                <small>
-                  {{ moment(item.updatedAt).format("LT") }}
-                </small>
-              </div>
-            </td>
-            <td :class="{ 'v-data-table__mobile-row': $vuetify.breakpoint.xs }">
-              <v-btn
-                color="primary"
-                title="Open patient case"
-                @click.stop="$router.push('/app/case/' + item._id)"
-                depressed
-                block
-                small
-              >
-                open Case
-              </v-btn>
-            </td>
-          </tr>
+              </v-layout>
+            </template>
+            <v-simple-table class="transparent" dense dark>
+              <tbody>
+                <tr>
+                  <th>Birth Date</th>
+                  <td>
+                    {{ moment(item.birthDate).format("Do MMM YYYY") }}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Gender</th>
+                  <td>
+                    {{ item.gender }}
+                  </td>
+                </tr>
+              </tbody>
+            </v-simple-table>
+          </v-tooltip>
+          <pre v-else>Not provided</pre>
+        </template>
+        <template v-slot:item.address.area="{ item }">
+          <v-tooltip v-if="item.address" top>
+            <template v-slot:activator="{ on }">
+              <b v-on="on">{{ item.address.area }}</b>
+            </template>
+            <span>{{ item.address.street }}</span>
+          </v-tooltip>
+          <pre v-else>-</pre>
+        </template>
+        <template v-slot:item.updatedAt="{ item }">
+          <span class="text-truncate">
+            {{ moment(item.updatedAt).format("Do MMM YYYY") }}
+          </span>
+          <br />
+          <small class="text-truncate">
+            {{ moment(item.updatedAt).format("LTS") }}
+          </small>
+        </template>
+        <template v-slot:item.action="{ item }">
+          <v-card-actions>
+            <v-btn
+              color="primary"
+              outlined
+              small
+              icon
+              @click="profile = { model: true, patient: item }"
+            >
+              <v-icon small>mdi-pencil</v-icon>
+            </v-btn>
+            <v-btn
+              color="primary"
+              title="Open patient case"
+              @click.stop="$router.push('/app/case/' + item._id)"
+              depressed
+              small
+            >
+              open Case
+            </v-btn>
+          </v-card-actions>
         </template>
       </v-data-table>
     </v-card>
@@ -280,42 +260,42 @@ export default {
     ui: {
       headers: [
         {
-          text: "Patient Since",
-          value: "createdAt",
-          hidden: true,
+          text: "Patient Id",
+          value: "pid",
         },
         {
-          text: "Full name",
+          text: "Patient Since",
+          value: "createdAt",
+        },
+        {
+          text: "name",
           value: "fullname",
         },
         {
           text: "Contact Info",
           value: "phone",
           filter: (value, search, item) => {
-            var b = true;
-            if (!item.phone && !item.email) return false;
-
             let regex = stringToRegex(search);
             if (regex) {
+              if (!item.phone && !item.email) return false;
               var match =
                 (item.phone && item.phone.replace(/ /g, "").match(regex)) ||
                 (item.email && item.email.match(regex));
 
-              b = Boolean(match);
+              return Boolean(match);
             }
 
-            return b;
+            return true;
           },
         },
         {
-          text: "Age & gender",
+          text: "Age & Sex",
           value: "age",
         },
         {
-          text: "Area",
+          text: "area",
           value: "address.area",
           filter: (value, search, item) => {
-            var b = true;
             let regex = stringToRegex(search);
 
             if (regex) {
@@ -326,10 +306,10 @@ export default {
                 (item.address.street.match(regex) ||
                   item.address.area.match(regex));
 
-              b = Boolean(match);
+              return Boolean(match);
             }
 
-            return b;
+            return true;
           },
         },
         {
@@ -339,14 +319,15 @@ export default {
         },
         {
           text: "Action",
-          align: "right",
+          value: "action",
+          align: "center",
           sortable: false,
         },
       ],
       groupBy: getCookie("clinax.patient.groupBy") == "true",
       dense: getCookie("clinax.patient.dense") == "true",
       sortDesc: getCookie("clinax.patient.sortDesc") == "true",
-      sortBy: getCookie("clinax.patient.sortBy") || "createdAt",
+      sortBy: getCookie("clinax.patient.sortBy") || "updatedAt",
       search: "",
       loading: false,
     },
@@ -397,60 +378,40 @@ export default {
 </script>
 
 <style lang="scss">
-.item {
+.v-data-table__wrapper tr {
   position: relative;
   transition: 350ms cubic-bezier(0.075, 0.82, 0.165, 1);
-  cursor: pointer;
 
   & > td:first-child {
     position: relative;
-    &:after {
-      position: absolute;
-      content: "";
-      left: 0;
-      top: 0;
-      bottom: 0;
-      transition: 350ms cubic-bezier(0.075, 0.82, 0.165, 1);
-      border-left-style: solid;
-      border-color: rgb(56, 116, 194);
-    }
-  }
-  &.female {
-    // background: #ffd7e3;
-    & > td:first-child::after {
-      border-color: rgb(109, 4, 21) !important;
-    }
-  }
-  &:hover {
-    & > td:first-child::after {
-      border-left-width: 4px;
-      box-shadow: 3px 0px 6px rgba($color: #000000, $alpha: 0.3);
-    }
-  }
-  & > td .head {
-    display: none;
-  }
-  &.mobile {
-    & > td {
-      height: auto !important;
-      padding: 0.5rem 1.5rem;
-      display: block !important;
-      text-align: start !important;
-      .head {
-        display: block;
-        font-size: 10pt;
-        font-weight: bold;
-        font-family: monospace !important;
-        margin-bottom: 0.25rem;
-        margin-left: -0.5rem;
+    div {
+      &.female,
+      &.male {
         &:after {
-          content: ":";
+          position: absolute;
+          content: "";
+          left: 0;
+          top: 0;
+          bottom: 0;
+          transition: 350ms cubic-bezier(0.075, 0.82, 0.165, 1);
+          border-left-style: solid;
         }
       }
-      border-bottom: 0.25px solid rgba($color: #000000, $alpha: 0.12);
+      &.male::after {
+        border-color: rgb(76, 153, 255);
+      }
+      &.female::after {
+        border-color: rgb(165, 54, 72) !important;
+      }
     }
   }
+
+  &:hover > td:first-child div::after {
+    border-left-width: 4px;
+    box-shadow: 3px 0px 6px rgba($color: #000000, $alpha: 0.3);
+  }
 }
+
 .contact-info {
   a {
     color: #474747;

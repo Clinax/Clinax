@@ -1,17 +1,27 @@
 <template>
   <v-container>
     <v-card class="mx-auto">
-      <v-toolbar flat>
+      <v-toolbar flat :prominent="$vuetify.breakpoint.smAndDown">
         <v-app-bar-nav-icon @click="$router.go(-1)">
           <v-icon>mdi-arrow-left</v-icon>
         </v-app-bar-nav-icon>
         <v-spacer></v-spacer>
 
-        <v-btn color="primary" depressed @click="ui.appoinmentDialog = true">
+        <v-btn
+          v-if="$vuetify.breakpoint.mdAndUp"
+          color="primary"
+          depressed
+          @click="ui.appoinmentDialog = true"
+        >
           <v-icon class="mr-2">mdi-calendar-plus</v-icon>
           Add appointment
         </v-btn>
-        <v-divider vertical inset class="mx-3"></v-divider>
+        <v-divider
+          v-if="$vuetify.breakpoint.mdAndUp"
+          vertical
+          class="ml-3"
+          inset
+        ></v-divider>
         <v-menu
           v-model="ui.rangeFilterMenu"
           :close-on-content-click="false"
@@ -21,6 +31,7 @@
           <template v-slot:activator="{ on }">
             <v-btn
               v-on="on"
+              class="mx-3"
               color="primary"
               title="Date Range Filter"
               dark
@@ -39,26 +50,14 @@
             "
           ></range-picker>
         </v-menu>
-        <div class="ml-3">
-          <v-text-field
-            label="Search"
-            v-model="ui.search"
-            :disabled="ui.loading"
-            prepend-inner-icon="mdi-magnify"
-            solo-inverted
-            hide-details
-            single-line
-            clearable
-            dense
-            solo
-            flat
-          ></v-text-field>
-        </div>
-        <v-toolbar-items class="ml-3" title="Refresh">
-          <v-btn @click="init" text>
-            <v-icon color="grey darken-2">mdi-refresh-circle</v-icon>
-          </v-btn>
-        </v-toolbar-items>
+
+        <toolbar-tools
+          @search="(ev) => (ui.search = ev)"
+          @refresh="init"
+          :items="() => appointments"
+          :fileName="`Appointments-${moment().format('DD-MM-YYYY')}`"
+        >
+        </toolbar-tools>
       </v-toolbar>
       <v-divider></v-divider>
 
@@ -143,7 +142,7 @@
               <span>Appointments on&nbsp;</span>
               <span class="pa-1 primary--text">{{ group }}</span>
               <v-spacer></v-spacer>
-              <v-btn color="primary" @click="toggle" small depressed>
+              <v-btn color="primary" @click="toggle" small text>
                 <span>{{ items.length }} item(s)</span>
                 <v-icon small>
                   mdi-chevron-down
@@ -222,10 +221,10 @@ import AppointmentForm from "@/components/AppointmentForm";
 import RangePicker from "@/components/RangePicker";
 import moment from "moment";
 import { makeRequest } from "../../modules/request";
-import Logger from "../../modules/Logger";
+import ToolbarTools from "@/components/ToolbarTools";
 
 export default {
-  components: { AppointmentForm, RangePicker },
+  components: { AppointmentForm, RangePicker, ToolbarTools },
   data() {
     return {
       dates: [
@@ -316,8 +315,8 @@ export default {
           this.errorHandler(err);
         });
     },
-    deleteEntry(item) {
-      Logger.d(item);
+    deleteEntry() {
+      // Logger.d(item);
     },
   },
   mounted() {

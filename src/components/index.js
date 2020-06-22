@@ -11,16 +11,15 @@ import List from "./List";
 import Snackbar from "./Snackbar";
 import WOI from "./WOI";
 import PatientDialog from "./PatientDialog";
-import { WebCam } from "vue-web-cam";
 import PortalVue from "portal-vue";
 import "vue2-perfect-scrollbar/dist/vue2-perfect-scrollbar.css";
 
-Vue.use(PortalVue);
 Vue.use(VueMask);
+Vue.use(PortalVue);
 Vue.use(VueClipboard);
 Vue.use(PerfectScrollbar);
+
 Vue.component("draggable", draggable);
-Vue.component("web-cam", WebCam);
 
 Vue.component("icon", Icon);
 Vue.component("woi", WOI);

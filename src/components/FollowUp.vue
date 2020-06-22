@@ -8,435 +8,446 @@
         <small class="text-truncate"> {{ tab.text }} </small>
       </v-tab>
     </v-tabs>
-
-    <v-divider></v-divider>
-    <v-card-text>
-      <v-tabs-items v-model="ui.tab">
-        <v-tab-item>
-          <input-field
-            @input="disabled || onChange()"
-            v-model="followUpModel.chiefComplain"
-            label="Cheif Complain"
-            field="v-textarea"
-            :textfield="{
-              placeholder: 'Complain by patient..',
-              autoGrow: true,
-              rows: 4,
-              flat: disabled,
-              class: { border: disabled },
-              disabled,
-            }"
-          ></input-field>
-          <input-field
-            @input="disabled || onChange()"
-            v-if="patient && patient.gender == 'female'"
-            v-model="followUpModel.femaleComplain"
-            label="Female Complain"
-            field="v-textarea"
-            :textfield="{
-              placeholder: 'Complain by patient..',
-              autoGrow: true,
-              rows: 3,
-              flat: disabled,
-              class: { border: disabled },
-              disabled,
-            }"
-          ></input-field>
-
-          <v-card-title class="title">
-            <v-divider></v-divider>
-            <span class="px-3 mb-1">Criteria</span>
-            <v-divider></v-divider>
-          </v-card-title>
-          <v-slide-y-transition
-            class="row align-center justify-center mx-0"
-            tag="div"
-            group
-          >
+    <v-form ref="form" lazy-validation>
+      <v-divider></v-divider>
+      <v-card-text>
+        <v-tabs-items v-model="ui.tab">
+          <v-tab-item>
             <input-field
-              v-for="(field, i) in criteria"
-              :key="i"
-              v-model="field[1]"
-              :label.sync="field[0]"
-              :col="{ cols: 12, md: 6, lg: 4 }"
+              @input="disabled || onChange()"
+              v-model="followUpModel.chiefComplain"
+              label="Cheif Complain"
+              field="v-textarea"
               :textfield="{
-                placeholder: disabled ? 'Not Provided' : 'Start Typing...',
-                class: { border: disabled },
+                placeholder: 'Complain by patient..',
+                autoGrow: true,
+                rows: 4,
                 flat: disabled,
+                class: { border: disabled },
                 disabled,
               }"
-              @remove="criteria = criteria.filter((_, index) => i != index)"
-              editable-header
-              removable
-            >
-            </input-field>
-            <v-col cols="12" sm="6" md="4" key="add" v-if="!disabled">
-              <v-layout fill-height justify-center align-center>
-                <v-btn
-                  color="primary"
-                  @click.prevent="
-                    criteria.push(['Click here to change title', ''])
-                  "
-                  outlined
-                  small
-                >
-                  Add Creatira
-                </v-btn>
-              </v-layout>
-            </v-col>
-          </v-slide-y-transition>
-          <v-divider class="my-5"></v-divider>
-
-          <v-slide-y-transition group>
+            ></input-field>
             <input-field
-              v-for="(field, i) in extra"
-              :key="i"
+              @input="disabled || onChange()"
+              v-if="patient && patient.gender == 'female'"
+              v-model="followUpModel.femaleComplain"
+              label="Female Complain"
               field="v-textarea"
-              v-model="field[1]"
-              :label.sync="field[0]"
               :textfield="{
-                placeholder: disabled ? 'Not Provided' : 'Start Typing...',
-                class: { border: disabled },
-                flat: disabled,
+                placeholder: 'Complain by patient..',
                 autoGrow: true,
                 rows: 3,
-                disabled,
-              }"
-              @remove="extra = extra.filter((_, index) => i != index)"
-              editable-header
-              removable
-            >
-            </input-field>
-          </v-slide-y-transition>
-          <v-card-actions v-if="!disabled">
-            <v-spacer></v-spacer>
-            <v-btn
-              color="primary"
-              outlined
-              @click.prevent="extra.push(['Click here to change title', ''])"
-            >
-              Add extra field
-            </v-btn>
-            <v-spacer></v-spacer>
-          </v-card-actions>
-        </v-tab-item>
-
-        <!-- physicalGeneral -->
-        <v-tab-item>
-          <v-slide-y-transition
-            class="row align-center justify-center mx-0"
-            tag="div"
-            group
-          >
-            <input-field
-              v-for="(field, i) in physicalGeneral"
-              :key="i"
-              v-model="field[1]"
-              :label.sync="field[0]"
-              :textfield="{
-                placeholder: disabled ? 'Not Provided' : 'Start Typing...',
-                class: { border: disabled },
                 flat: disabled,
-                disabled,
-              }"
-              :col="{ sm: 6, md: 4, cols: 12 }"
-              @remove="
-                physicalGeneral = physicalGeneral.filter(
-                  (_, index) => i != index
-                )
-              "
-              :removable="field[2]"
-              :editable-header="field[2]"
-            >
-            </input-field>
-            <v-col cols="12" sm="6" md="4" key="add" v-if="!disabled">
-              <v-layout fill-height justify-center align-center>
-                <v-btn
-                  color="primary"
-                  @click.prevent="
-                    physicalGeneral.push([
-                      'Click here to change title',
-                      '',
-                      true,
-                    ])
-                  "
-                  outlined
-                  small
-                >
-                  Add Extra Field
-                </v-btn>
-              </v-layout>
-            </v-col>
-          </v-slide-y-transition>
-        </v-tab-item>
-
-        <!-- onExamination -->
-        <v-tab-item>
-          <v-slide-y-transition
-            class="row align-center justify-center mx-0"
-            tag="div"
-            group
-          >
-            <input-field
-              v-for="(field, i) in onExamination"
-              :key="i"
-              v-model="field[1]"
-              :label.sync="field[0]"
-              :textfield="{
-                placeholder: disabled ? 'Not Provided' : 'Start Typing...',
                 class: { border: disabled },
-                flat: disabled,
                 disabled,
               }"
-              :col="{ sm: 6, md: 4, cols: 12 }"
-              @remove="
-                onExamination = onExamination.filter((_, index) => i != index)
-              "
-              :removable="field[2]"
-              :editable-header="field[2]"
-            >
-            </input-field>
-            <v-col cols="12" sm="6" md="4" key="add" v-if="!disabled">
-              <v-layout fill-height justify-center align-center>
-                <v-btn
-                  color="primary"
-                  @click.prevent="
-                    onExamination.push(['Click here to change title', '', true])
-                  "
-                  outlined
-                  small
-                >
-                  Add Extra Field
-                </v-btn>
-              </v-layout>
-            </v-col>
-          </v-slide-y-transition>
-        </v-tab-item>
+            ></input-field>
 
-        <!-- Treatment -->
-        <v-tab-item>
-          <v-menu
-            v-model="ui.dateMenu"
-            :close-on-content-click="false"
-            max-width="290px"
-            min-width="290px"
-            offset-y
-            top
-          >
-            <template v-slot:activator="{ on }">
+            <v-card-title class="title">
+              <v-divider></v-divider>
+              <span class="px-3 mb-1">Criteria</span>
+              <v-divider></v-divider>
+            </v-card-title>
+            <v-slide-y-transition
+              class="row align-center justify-center mx-0"
+              tag="div"
+              group
+            >
               <input-field
-                v-model="followupDate"
-                :on="disabled ? null : on"
-                :value="
-                  (followUpModel.nextFollowUpDate &&
-                    moment(followUpModel.nextFollowUpDate).format(
-                      'Do MMM YYYY'
-                    )) ||
-                  'Not provided'
-                "
-                @input="disabled || onChange()"
-                label="Next Follow up date"
+                v-for="(field, i) in criteria"
+                :key="i"
+                v-model="field[1]"
+                :label.sync="field[0]"
+                :col="{ cols: 12, md: 6, lg: 4 }"
                 :textfield="{
-                  autocomplete: 'off',
-                  prependInnerIcon: ' mdi-calendar-refresh-outline',
+                  placeholder: disabled ? 'Not Provided' : 'Start Typing...',
                   class: { border: disabled },
                   flat: disabled,
-                  readonly: true,
-                  clearable: true,
                   disabled,
                 }"
-              ></input-field>
-            </template>
-            <v-card>
-              <v-date-picker
-                class="elevation-0"
-                ref="datePicker"
+                @remove="criteria = criteria.filter((_, index) => i != index)"
+                editable-header
+                removable
+              >
+              </input-field>
+              <v-col cols="12" sm="6" md="4" key="add" v-if="!disabled">
+                <v-layout fill-height justify-center align-center>
+                  <v-btn
+                    color="primary"
+                    @click.prevent="
+                      criteria.push(['Click here to change title', ''])
+                    "
+                    outlined
+                    small
+                  >
+                    Add Creatira
+                  </v-btn>
+                </v-layout>
+              </v-col>
+            </v-slide-y-transition>
+            <v-divider class="my-5"></v-divider>
+
+            <v-slide-y-transition group>
+              <input-field
+                v-for="(field, i) in extra"
+                :key="i"
+                field="v-textarea"
+                v-model="field[1]"
+                :label.sync="field[0]"
+                :textfield="{
+                  placeholder: disabled ? 'Not Provided' : 'Start Typing...',
+                  class: { border: disabled },
+                  flat: disabled,
+                  autoGrow: true,
+                  rows: 3,
+                  disabled,
+                }"
+                @remove="extra = extra.filter((_, index) => i != index)"
+                editable-header
+                removable
+              >
+              </input-field>
+            </v-slide-y-transition>
+            <v-card-actions v-if="!disabled">
+              <v-spacer></v-spacer>
+              <v-btn
                 color="primary"
-                :value="followUpModel.nextFollowUpDate"
-                :min="moment().format('YYYY-MM-DD')"
-                no-title
-              ></v-date-picker>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn depressed text small @click="ui.dateMenu = false">
-                  cancel
-                </v-btn>
-                <v-btn
-                  color="primary"
-                  depressed
-                  small
-                  @click="
-                    followUpModel.nextFollowUpDate = $refs.datePicker.inputDate;
-                    ui.dateMenu = false;
-                  "
-                >
-                  ok
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-menu>
-          <v-divider class="mt-5"></v-divider>
+                outlined
+                @click.prevent="extra.push(['Click here to change title', ''])"
+              >
+                Add extra field
+              </v-btn>
+              <v-spacer></v-spacer>
+            </v-card-actions>
+          </v-tab-item>
 
-          <input-field
-            @input="disabled || onChange()"
-            field="v-textarea"
-            v-model="followUpModel.treatment.diagnosis"
-            label="Diagnosis"
-            :textfield="{
-              placeholder: disabled ? 'Not Provided' : 'Start Typing...',
-              class: { border: disabled },
-              flat: disabled,
-              disabled,
-              rows: 3,
-              autoGrow: true,
-            }"
-          >
-          </input-field>
-
-          <input-field
-            v-if="ui.parallelTreatment"
-            @input="disabled || onChange()"
-            field="v-textarea"
-            v-model="followUpModel.treatment.parallelTreatment"
-            label="Parallel Treatment"
-            :textfield="{
-              placeholder: disabled ? 'Not Provided' : 'Start Typing...',
-              class: { border: disabled },
-              flat: disabled,
-              disabled,
-              rows: 3,
-              autoGrow: true,
-            }"
-          >
-          </input-field>
-          <div v-else class="my-3 mx-5 text-right">
-            <a @click="ui.parallelTreatment = true">+ Parallel Treatment</a>
-          </div>
-          <v-card-title class="title pb-0">
-            <v-divider></v-divider>
-            <span class="px-3 mb-1">Drugs</span>
-            <v-divider></v-divider>
-          </v-card-title>
-          <v-alert
-            v-if="!followUpModel.treatment.drugs.length"
-            type="info"
-            dense
-            outlined
-            class="mx-3 mt-4"
-          >
-            Click '<b>ADD</b>' to add drugs
-          </v-alert>
-          <v-alert v-else-if="disabled" type="warning" dense class="mx-3 mt-4">
-            No drugs were given
-          </v-alert>
-          <v-slide-y-transition group>
-            <div
-              v-for="(drug, i) in followUpModel.treatment.drugs"
-              :key="i"
-              class="border rounded pb-3 mb-2"
+          <!-- physicalGeneral -->
+          <v-tab-item>
+            <v-slide-y-transition
+              class="row align-center justify-center mx-0"
+              tag="div"
+              group
             >
-              <v-layout class="pt-2 pl-5">
-                <span class="text--primary font-weight-bold">
-                  Drug #{{ i + 1 }}
-                </span>
-                <v-spacer></v-spacer>
-                <v-btn
-                  v-if="!disabled"
-                  color="error"
-                  text
-                  x-small
-                  @click="
-                    followUpModel.treatment.drugs = followUpModel.treatment.drugs.filter(
-                      (_, index) => index != i
-                    );
-                    onChange();
-                  "
-                >
-                  <v-icon small>mdi-close</v-icon> remove
-                </v-btn>
-              </v-layout>
-              <v-row class="mx-0 align-center justify-center">
+              <input-field
+                v-for="(field, i) in physicalGeneral"
+                :key="i"
+                v-model="field[1]"
+                :label.sync="field[0]"
+                :textfield="{
+                  placeholder: disabled ? 'Not Provided' : 'Start Typing...',
+                  class: { border: disabled },
+                  flat: disabled,
+                  disabled,
+                }"
+                :col="{ sm: 6, md: 4, cols: 12 }"
+                @remove="
+                  physicalGeneral = physicalGeneral.filter(
+                    (_, index) => i != index
+                  )
+                "
+                :removable="field[2]"
+                :editable-header="field[2]"
+              >
+              </input-field>
+              <v-col cols="12" sm="6" md="4" key="add" v-if="!disabled">
+                <v-layout fill-height justify-center align-center>
+                  <v-btn
+                    color="primary"
+                    @click.prevent="
+                      physicalGeneral.push([
+                        'Click here to change title',
+                        '',
+                        true,
+                      ])
+                    "
+                    outlined
+                    small
+                  >
+                    Add Extra Field
+                  </v-btn>
+                </v-layout>
+              </v-col>
+            </v-slide-y-transition>
+          </v-tab-item>
+
+          <!-- onExamination -->
+          <v-tab-item>
+            <v-slide-y-transition
+              class="row align-center justify-center mx-0"
+              tag="div"
+              group
+            >
+              <input-field
+                v-for="(field, i) in onExamination"
+                :key="i"
+                v-model="field[1]"
+                :label.sync="field[0]"
+                :textfield="{
+                  placeholder: disabled ? 'Not Provided' : 'Start Typing...',
+                  class: { border: disabled },
+                  flat: disabled,
+                  disabled,
+                }"
+                :col="{ sm: 6, md: 4, cols: 12 }"
+                @remove="
+                  onExamination = onExamination.filter((_, index) => i != index)
+                "
+                :removable="field[2]"
+                :editable-header="field[2]"
+              >
+              </input-field>
+              <v-col cols="12" sm="6" md="4" key="add" v-if="!disabled">
+                <v-layout fill-height justify-center align-center>
+                  <v-btn
+                    color="primary"
+                    @click.prevent="
+                      onExamination.push([
+                        'Click here to change title',
+                        '',
+                        true,
+                      ])
+                    "
+                    outlined
+                    small
+                  >
+                    Add Extra Field
+                  </v-btn>
+                </v-layout>
+              </v-col>
+            </v-slide-y-transition>
+          </v-tab-item>
+
+          <!-- Treatment -->
+          <v-tab-item>
+            <v-menu
+              v-model="ui.dateMenu"
+              :close-on-content-click="false"
+              max-width="290px"
+              min-width="290px"
+              offset-y
+              top
+            >
+              <template v-slot:activator="{ on }">
                 <input-field
+                  v-model="followupDate"
+                  :on="disabled ? null : on"
+                  :value="
+                    (followUpModel.nextFollowUpDate &&
+                      moment(followUpModel.nextFollowUpDate).format(
+                        'Do MMM YYYY'
+                      )) ||
+                    'Not provided'
+                  "
                   @input="disabled || onChange()"
-                  v-model="drug.name"
-                  field="v-autocomplete"
-                  label="Name"
+                  label="Next Follow up date"
                   :textfield="{
-                    items: drugs,
+                    autocomplete: 'off',
+                    prependInnerIcon: ' mdi-calendar-refresh-outline',
+                    class: { border: disabled },
+                    flat: disabled,
+                    readonly: true,
                     clearable: true,
-                    autocomplete: 'false',
-                    dense: true,
-                    class: { border: disabled },
-                    flat: disabled,
                     disabled,
                   }"
-                  :col="{ cols: 6, md: 4 }"
-                  :required="!disabled"
-                >
-                </input-field>
-                <input-field
-                  @input="disabled || onChange()"
-                  v-model="drug.potency"
-                  label="Potency"
-                  :textfield="{
-                    class: { border: disabled },
-                    flat: disabled,
-                    disabled,
-                    dense: true,
-                  }"
-                  :col="{ cols: 6, md: 2 }"
-                  :required="!disabled"
-                >
-                </input-field>
-                <input-field
-                  @input="disabled || onChange()"
-                  v-model="drug.dosage"
-                  field="v-select"
-                  label="Dosage"
-                  :textfield="{
-                    items: ['OA', 'BD', 'TDS', 'QDS', 'PID'],
-                    dense: true,
-                    class: { border: disabled },
-                    flat: disabled,
-                    disabled,
-                  }"
-                  :col="{ cols: 6, md: 2 }"
-                >
-                </input-field>
-                <input-field
-                  @input="disabled || onChange()"
-                  v-model="drug.duration"
-                  field="v-slider"
-                  :label="`Duration: ${drug.duration} day(s)`"
-                  :textfield="{
-                    max: 30,
-                    min: 1,
-                    dense: true,
-                    thumbLabel: true,
-                    flat: disabled,
-                    disabled,
-                  }"
-                  :col="{ cols: 6, md: 4 }"
-                >
-                </input-field>
-              </v-row>
-            </div>
-          </v-slide-y-transition>
-          <v-card-actions v-if="!disabled" class="mt-3">
-            <v-spacer></v-spacer>
-            <v-btn
-              color="primary"
-              @click="followUpModel.treatment.drugs.push({ id: drugId++ })"
-              small
-              outlined
+                ></input-field>
+              </template>
+              <v-card>
+                <v-date-picker
+                  class="elevation-0"
+                  ref="datePicker"
+                  color="primary"
+                  :value="followUpModel.nextFollowUpDate"
+                  :min="moment().format('YYYY-MM-DD')"
+                  no-title
+                ></v-date-picker>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn depressed text small @click="ui.dateMenu = false">
+                    cancel
+                  </v-btn>
+                  <v-btn
+                    color="primary"
+                    depressed
+                    small
+                    @click="
+                      followUpModel.nextFollowUpDate =
+                        $refs.datePicker.inputDate;
+                      ui.dateMenu = false;
+                    "
+                  >
+                    ok
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-menu>
+            <v-divider class="mt-5"></v-divider>
+
+            <input-field
+              @input="disabled || onChange()"
+              field="v-textarea"
+              v-model="followUpModel.treatment.diagnosis"
+              label="Diagnosis"
+              :textfield="{
+                placeholder: disabled ? 'Not Provided' : 'Start Typing...',
+                class: { border: disabled },
+                flat: disabled,
+                disabled,
+                rows: 3,
+                autoGrow: true,
+              }"
             >
-              Add
-            </v-btn>
-            <v-spacer></v-spacer>
-          </v-card-actions>
-        </v-tab-item>
-      </v-tabs-items>
-    </v-card-text>
+            </input-field>
+
+            <input-field
+              v-if="ui.parallelTreatment"
+              @input="disabled || onChange()"
+              field="v-textarea"
+              v-model="followUpModel.treatment.parallelTreatment"
+              label="Parallel Treatment"
+              :textfield="{
+                placeholder: disabled ? 'Not Provided' : 'Start Typing...',
+                class: { border: disabled },
+                flat: disabled,
+                disabled,
+                rows: 3,
+                autoGrow: true,
+              }"
+            >
+            </input-field>
+            <div v-else class="my-3 mx-5 text-right">
+              <a @click="ui.parallelTreatment = true">+ Parallel Treatment</a>
+            </div>
+            <v-card-title class="title pb-0">
+              <v-divider></v-divider>
+              <span class="px-3 mb-1">Drugs</span>
+              <v-divider></v-divider>
+            </v-card-title>
+            <v-alert
+              v-if="!followUpModel.treatment.drugs.length"
+              type="info"
+              dense
+              outlined
+              class="mx-3 mt-4"
+            >
+              Click '<b>ADD</b>' to add drugs
+            </v-alert>
+            <v-alert
+              v-else-if="disabled"
+              type="warning"
+              dense
+              class="mx-3 mt-4"
+            >
+              No drugs were given
+            </v-alert>
+            <v-slide-y-transition group>
+              <div
+                v-for="(drug, i) in followUpModel.treatment.drugs"
+                :key="i"
+                class="border rounded pb-3 mb-2"
+              >
+                <v-layout class="pt-2 pl-5">
+                  <span class="text--primary font-weight-bold">
+                    Drug #{{ i + 1 }}
+                  </span>
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    v-if="!disabled"
+                    color="error"
+                    text
+                    x-small
+                    @click="
+                      followUpModel.treatment.drugs = followUpModel.treatment.drugs.filter(
+                        (_, index) => index != i
+                      );
+                      onChange();
+                    "
+                  >
+                    <v-icon small>mdi-close</v-icon> remove
+                  </v-btn>
+                </v-layout>
+                <v-row class="mx-0 align-center justify-center">
+                  <input-field
+                    @input="disabled || onChange()"
+                    v-model="drug.name"
+                    field="v-autocomplete"
+                    label="Name"
+                    :textfield="{
+                      items: drugs,
+                      clearable: true,
+                      autocomplete: 'false',
+                      dense: true,
+                      class: { border: disabled },
+                      flat: disabled,
+                      disabled,
+                    }"
+                    :col="{ cols: 6, md: 4 }"
+                    :required="!disabled"
+                  >
+                  </input-field>
+                  <input-field
+                    @input="disabled || onChange()"
+                    v-model="drug.potency"
+                    label="Potency"
+                    :textfield="{
+                      class: { border: disabled },
+                      flat: disabled,
+                      disabled,
+                      dense: true,
+                    }"
+                    :col="{ cols: 6, md: 2 }"
+                    :required="!disabled"
+                  >
+                  </input-field>
+                  <input-field
+                    @input="disabled || onChange()"
+                    v-model="drug.dosage"
+                    field="v-combobox"
+                    label="Dosage"
+                    :textfield="{
+                      items: ['OA', 'BD', 'TDS', 'QDS', 'PID', 'SOS'],
+                      dense: true,
+                      class: { border: disabled },
+                      flat: disabled,
+                      disabled,
+                    }"
+                    :col="{ cols: 6, md: 2 }"
+                  >
+                  </input-field>
+                  <input-field
+                    @input="disabled || onChange()"
+                    v-model="drug.duration"
+                    field="v-slider"
+                    :label="`Duration: ${drug.duration} day(s)`"
+                    :textfield="{
+                      max: 30,
+                      min: 1,
+                      dense: true,
+                      thumbLabel: true,
+                      flat: disabled,
+                      disabled,
+                    }"
+                    :col="{ cols: 6, md: 4 }"
+                  >
+                  </input-field>
+                </v-row>
+              </div>
+            </v-slide-y-transition>
+            <v-card-actions v-if="!disabled" class="mt-3">
+              <v-spacer></v-spacer>
+              <v-btn
+                color="primary"
+                @click="followUpModel.treatment.drugs.push({ id: drugId++ })"
+                small
+                outlined
+              >
+                Add
+              </v-btn>
+              <v-spacer></v-spacer>
+            </v-card-actions>
+          </v-tab-item>
+        </v-tabs-items>
+      </v-card-text>
+    </v-form>
     <v-footer app inset v-if="ui.saving || ui.saved" class="grey darken-2" dark>
       <v-spacer></v-spacer>
       <v-progress-circular
@@ -452,11 +463,12 @@
 </template>
 
 <script>
+import moment from "moment";
+import drugs from "@/json/drugs.json";
+
 import { clone, isEqual } from "../modules/object";
 import { sortBy } from "../modules/list";
 import { makeRequest } from "../modules/request";
-import drugs from "@/json/drugs.json";
-import moment from "moment";
 
 export default {
   props: {
@@ -523,6 +535,7 @@ export default {
       dateMenu: false,
       saving: false,
       saved: false,
+      changed: false,
     },
   }),
   computed: {
@@ -577,12 +590,19 @@ export default {
     onChange() {
       if (this.disabled) return;
 
+      if (!this.$refs.form.validate()) return;
+
       let setTimer = () => {
         if (this.ui.saveDelayTimerId) clearTimeout(this.ui.saveDelayTimerId);
 
         this.ui.saveDelayTimerId = setTimeout(() => {
-          if (this.ui.saving) setTimer();
-          else this.save();
+          if (this.ui.saving) {
+            this.ui.changed = true;
+            setTimer();
+          } else {
+            this.save();
+            this.ui.changed = false;
+          }
         }, 1000);
       };
 
@@ -616,9 +636,11 @@ export default {
         method = "post";
       }
 
+      data.query = { patientId: this.patient._id };
+
       makeRequest(method, "followUp", data)
         .then(({ data }) => {
-          this.followUpModel = clone(data);
+          if (!this.ui.changed) this.followUpModel = clone(data);
 
           if (data.nextFollowUpDate)
             this.$store.commit("addEvent", {

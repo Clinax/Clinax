@@ -1,9 +1,10 @@
 <template>
-  <div id="toolbar-tools" :class="{ 'w-100': $vuetify.breakpoint.smAndDown }">
+  <div id="toolbar-tools">
     <div class="d-flex align-center">
       <v-spacer></v-spacer>
       <slot></slot>
       <v-menu
+        v-if="filterItems"
         left
         :close-on-content-click="false"
         class="flex-grow-0"
@@ -17,7 +18,7 @@
               </template>
               <icon
                 icon="mdi-filter-variant"
-                :title="'Filter by' + filterBy || 'status'"
+                :title="'Filter by ' + filterBy || 'status'"
               ></icon>
             </v-badge>
           </v-btn>
@@ -25,7 +26,7 @@
         <v-card>
           <v-subheader>Filters</v-subheader>
           <v-list class="pt-0">
-            <v-list-group v-if="filterItems" :value="!!filterModel.length">
+            <v-list-group v-if="filterItems">
               <template v-slot:activator>
                 <v-list-item>
                   <v-list-item-content>
@@ -40,11 +41,13 @@
               <v-layout px-1>
                 <v-btn-toggle
                   v-model="filterModel"
-                  class="elevation-0 flex-column w-100"
+                  class="elevation-0 grey lighten-5 flex-column w-100"
                   @change="emitFilterChange"
                   multiple
                 >
                   <v-btn
+                    text
+                    class="border-0"
                     v-for="item in filterItems"
                     :key="item.text || item"
                     :value="item.value || item.text || item"
@@ -127,7 +130,10 @@
         </v-card>
       </v-menu>
     </div>
-    <div v-if="$vuetify.breakpoint.smAndDown">
+    <div
+      v-if="$vuetify.breakpoint.smAndDown"
+      style="left: 1rem; position: absolute; right: 1rem;"
+    >
       <v-text-field
         v-model="search"
         class="flex-grow-1 my-2"
