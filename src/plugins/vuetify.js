@@ -3,11 +3,20 @@ import Vuetify, {
   VTextField,
   VTextarea,
   VCombobox,
+  VSlider,
+  VAutocomplete,
   VSelect,
 } from "vuetify/lib";
 
 Vue.use(Vuetify, {
-  components: { VTextField, VTextarea, VCombobox, VSelect },
+  components: {
+    VTextField,
+    VTextarea,
+    VCombobox,
+    VSelect,
+    VSlider,
+    VAutocomplete,
+  },
 });
 
 export default new Vuetify({
