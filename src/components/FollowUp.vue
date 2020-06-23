@@ -14,7 +14,6 @@
         <v-tabs-items v-model="ui.tab">
           <v-tab-item>
             <input-field
-              @input="disabled || onChange()"
               v-model="followUpModel.chiefComplain"
               label="Cheif Complain"
               field="v-textarea"
@@ -26,9 +25,9 @@
                 class: { border: disabled },
                 disabled,
               }"
+              required
             ></input-field>
             <input-field
-              @input="disabled || onChange()"
               v-if="patient && patient.gender == 'female'"
               v-model="followUpModel.femaleComplain"
               label="Female Complain"
@@ -217,7 +216,7 @@
             </v-slide-y-transition>
           </v-tab-item>
 
-          <!-- Treatment -->
+          <!--  Treatment -->
           <v-tab-item>
             <v-menu
               v-model="ui.dateMenu"
@@ -238,7 +237,6 @@
                       )) ||
                     'Not provided'
                   "
-                  @input="disabled || onChange()"
                   label="Next Follow up date"
                   :textfield="{
                     autocomplete: 'off',
@@ -283,7 +281,6 @@
             <v-divider class="mt-5"></v-divider>
 
             <input-field
-              @input="disabled || onChange()"
               field="v-textarea"
               v-model="followUpModel.treatment.diagnosis"
               label="Diagnosis"
@@ -300,7 +297,6 @@
 
             <input-field
               v-if="ui.parallelTreatment"
-              @input="disabled || onChange()"
               field="v-textarea"
               v-model="followUpModel.treatment.parallelTreatment"
               label="Parallel Treatment"
@@ -367,7 +363,6 @@
                 </v-layout>
                 <v-row class="mx-0 align-center justify-center">
                   <input-field
-                    @input="disabled || onChange()"
                     v-model="drug.name"
                     field="v-autocomplete"
                     label="Name"
@@ -385,7 +380,6 @@
                   >
                   </input-field>
                   <input-field
-                    @input="disabled || onChange()"
                     v-model="drug.potency"
                     label="Potency"
                     :textfield="{
@@ -399,7 +393,6 @@
                   >
                   </input-field>
                   <input-field
-                    @input="disabled || onChange()"
                     v-model="drug.dosage"
                     field="v-combobox"
                     label="Dosage"
@@ -410,11 +403,11 @@
                       flat: disabled,
                       disabled,
                     }"
-                    :col="{ cols: 6, md: 2 }"
+                    :col="{ cols: 6, md: 6 }"
                   >
                   </input-field>
                   <input-field
-                    @input="disabled || onChange()"
+                    v-if="false"
                     v-model="drug.duration"
                     field="v-slider"
                     :label="`Duration: ${drug.duration} day(s)`"
@@ -445,20 +438,14 @@
               <v-spacer></v-spacer>
             </v-card-actions>
           </v-tab-item>
+          <!-- fees -->
+          <v-tab-item> <woi></woi></v-tab-item>
         </v-tabs-items>
       </v-card-text>
     </v-form>
-    <v-footer app inset v-if="ui.saving || ui.saved" class="grey darken-2" dark>
-      <v-spacer></v-spacer>
-      <v-progress-circular
-        indeterminate
-        color="#ffffffaf"
-        v-if="ui.saving"
-        size="12"
-        width="2"
-      ></v-progress-circular>
-      <span class="mx-3">{{ ui.saving ? "Saving..." : "Saved" }} </span>
-    </v-footer>
+    <saving-alert
+      v-bind="{ saving: ui.saving, saved: ui.saved, changed: ui.changed }"
+    ></saving-alert>
   </v-sheet>
 </template>
 
@@ -470,19 +457,20 @@ import { clone, isEqual } from "../modules/object";
 import { sortBy } from "../modules/list";
 import { makeRequest } from "../modules/request";
 
+import SavingAlert from "@/components/SavingAlert";
+
 export default {
   props: {
     patient: Object,
     followUp: Object,
     disabled: { default: false, type: Boolean },
   },
+  components: { SavingAlert },
   data: () => ({
     drugs,
     drugId: 1,
     followUpModel: {
-      treatment: {
-        drugs: [],
-      },
+      treatment: { drugs: [] },
       nextFollowUpDate: null,
     },
 
@@ -527,6 +515,7 @@ export default {
         { icon: "mdi-human", text: "Physical General" },
         { icon: "mdi-card-text", text: "On Examination" },
         { icon: "mdi-pill", text: "Treatment" },
+        { icon: "mdi-receipt", text: "Fees" },
       ],
       parallelTreatment: false,
       tab: 0,
@@ -561,30 +550,29 @@ export default {
     extra(a) {
       this.followUpModel.extra = {};
       a.forEach((entry) => (this.followUpModel.extra[entry[0]] = entry[1]));
-      this.onChange();
     },
     criteria(a) {
       this.followUpModel.criteria = {};
       a.forEach((entry) => (this.followUpModel.criteria[entry[0]] = entry[1]));
-      this.onChange();
     },
     physicalGeneral(a) {
       this.followUpModel.physicalGeneral = {};
       a.forEach(
         (entry) => (this.followUpModel.physicalGeneral[entry[0]] = entry[1])
       );
-      this.onChange();
     },
     onExamination(a) {
       this.followUpModel.onExamination = {};
       a.forEach(
         (entry) => (this.followUpModel.onExamination[entry[0]] = entry[1])
       );
-      this.onChange();
     },
-    // "followUpModel.treatment.drugs"(a) {
-    //   this.onChange();
-    // },
+    followUpModel: {
+      handler() {
+        this.onChange();
+      },
+      deep: true,
+    },
   },
   methods: {
     onChange() {
@@ -595,79 +583,77 @@ export default {
       let setTimer = () => {
         if (this.ui.saveDelayTimerId) clearTimeout(this.ui.saveDelayTimerId);
 
-        this.ui.saveDelayTimerId = setTimeout(() => {
+        this.ui.saveDelayTimerId = setTimeout(async () => {
           if (this.ui.saving) {
-            this.ui.changed = true;
             setTimer();
           } else {
-            this.save();
+            await this.save();
             this.ui.changed = false;
           }
-        }, 1000);
+        }, 2500);
       };
 
+      this.ui.changed = true;
       setTimer();
     },
-    save() {
-      if (isEqual(this.followUpModel, this.followUp)) return;
+    async save() {
+      if (isEqual(this.followUpModel, this.followUp) || this.ui.saving) return;
 
-      if (this.ui.saving) return;
       this.ui.saving = true;
       this.ui.saved = false;
 
-      let method, data;
+      let method, body;
       if (this.followUpModel._id) {
-        data = {
-          id: this.followUpModel._id,
-        };
+        body = { id: this.followUpModel._id };
 
         for (const key in this.followUpModel) {
           if (this.followUpModel.hasOwnProperty(key)) {
             const element = this.followUpModel[key];
-            if (!isEqual(element, this.followUp[key])) data[key] = element;
+            if (!isEqual(element, this.followUp[key])) body[key] = element;
           }
         }
 
         method = "put";
-        delete data.updatedAt;
+        delete body.updatedAt;
       } else {
-        data = clone(this.followUpModel);
-        data.id = this.patient._id;
+        body = clone(this.followUpModel);
+        body.id = this.patient._id;
         method = "post";
       }
 
-      data.query = { patientId: this.patient._id };
+      body.query = { patientId: this.patient._id };
 
-      makeRequest(method, "followUp", data)
-        .then(({ data }) => {
-          if (!this.ui.changed) this.followUpModel = clone(data);
+      try {
+        let { data } = await makeRequest(method, "followUp", body);
 
-          if (data.nextFollowUpDate)
-            this.$store.commit("addEvent", {
-              _id: this.patient._id,
-              followUpId: data._id,
-              name: this.patient.fullname,
-              date: data.nextFollowUpDate,
-            });
+        this.followUpModel._id = data._id;
 
-          this.$emit("update:followUp", data);
-
-          this.$nextTick(() => {
-            this.ui.saving = false;
-            this.ui.saved = true;
-            if (this.ui.saveBadgeTimerId)
-              clearTimeout(this.ui.saveBadgeTimerId);
-            this.ui.saveBadgeTimerId = setTimeout(
-              () => (this.ui.saved = false),
-              1200
-            );
+        if (data.nextFollowUpDate)
+          this.$store.commit("addEvent", {
+            _id: this.patient._id,
+            followUpId: data._id,
+            name: this.patient.fullname,
+            date: data.nextFollowUpDate,
           });
-        })
-        .catch((err) => {
+
+        this.$emit("update:followUp", data);
+
+        this.$nextTick(() => {
           this.ui.saving = false;
-          this.ui.saved = false;
-          this.errorHandler(err);
+          this.ui.changed = false;
+          if (this.ui.saveBadgeTimerId) clearTimeout(this.ui.saveBadgeTimerId);
+
+          this.ui.saved = true;
+          this.ui.saveBadgeTimerId = setTimeout(
+            () => (this.ui.saved = false),
+            1200
+          );
         });
+      } catch (err) {
+        this.ui.saving = false;
+        this.ui.saved = false;
+        this.errorHandler(err);
+      }
     },
   },
   destroyed() {
@@ -677,6 +663,7 @@ export default {
   mounted() {
     if (this.followUp) {
       this.followUpModel = clone(this.followUp);
+      this.followUpModel.treatment.drugs = [];
       this.ui.parallelTreatment = !!this.followUp.treatment.parallelTreatment;
 
       ["onExamination", "criteria", "extra", "physicalGeneral"].forEach(
@@ -690,12 +677,9 @@ export default {
 
             for (const key in this.followUpModel[ev]) {
               if (this.followUpModel[ev].hasOwnProperty(key)) {
-                const element = this.followUpModel[ev][key];
-                if (typeof indexNameMap[key] == "number") {
-                  this[ev][indexNameMap[key]][1] = element;
-                } else {
-                  this[ev].push([key, element, true]);
-                }
+                if (typeof indexNameMap[key] == "number")
+                  this[ev][indexNameMap[key]][1] = "";
+                else this[ev].push([key, "", true]);
               }
             }
           }

@@ -62,7 +62,7 @@
       <v-divider></v-divider>
 
       <v-data-table
-        v-if="appointments.length"
+        v-if="appointments.length || ui.loading"
         :items="appointments"
         :loading="ui.loading"
         :search="ui.search"
@@ -316,7 +316,7 @@ export default {
         });
     },
     deleteEntry() {
-      // Logger.d(item);
+      // TODO Delete appointmet
     },
   },
   mounted() {

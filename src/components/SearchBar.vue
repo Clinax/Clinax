@@ -17,16 +17,16 @@
     >
       <v-sheet max-width="540" class="transparent mx-auto">
         <v-autocomplete
-          :dense="!$vuetify.breakpoint.mdAndUp"
-          :search-input.sync="search"
+          class="search-bar"
           label="Search by name, address, phone, etc..."
           :class="{ focused, 'shadow-lg': focused }"
-          class="search-bar"
           :items="items"
-          :rounded="!focused"
+          :dense="!$vuetify.breakpoint.mdAndUp"
           :menu-props="{
             maxWidth: $vuetify.breakpoint.mdAndUp ? 540 : '100%',
           }"
+          :search-input.sync="search"
+          :rounded="!focused"
           :shaped="focused"
           :flat="!focused"
           :filter="filter"
@@ -103,9 +103,9 @@
 </template>
 
 <script>
+import { decompressFromUTF16 } from "lz-string";
 import { stringToRegex } from "../modules/regex";
 import { makeRequest } from "../modules/request";
-import { decompressFromUTF16 } from "lz-string";
 
 export default {
   props: { minimal: Boolean },
@@ -118,13 +118,9 @@ export default {
       model: false,
       patient: null,
     },
+    items: [],
   }),
-  computed: {
-    items() {
-      if (!this.search) return [];
-      return Object.values(this.cachedItems);
-    },
-  },
+
   watch: {
     search(a) {
       this.onInput(a);
@@ -132,13 +128,12 @@ export default {
   },
   methods: {
     onInput(search) {
-      if (!search || search.length < 2) return;
+      if (!search) return;
 
       this.loading = true;
 
       makeRequest("get", "search", {
-        id: search,
-        query: { minimal: this.minimal },
+        query: { minimal: this.minimal, search: encodeURI(search) },
       })
         .then(({ data }) => {
           data = JSON.parse(decompressFromUTF16(data.compressedData));
@@ -146,12 +141,18 @@ export default {
 
           // console.log(data);
           data.forEach((ev) => {
-            if (ev.case)
-              ev.case.followUps = ev.case.followUps.map(
-                (ev) => ev.chiefComplain
-              );
+            ev.casekeys = ev.case.followUps
+              .map((ev) => [
+                ev.treatment && ev.treatment.diagnosis,
+                ev.chiefComplain,
+              ])
+              .flat()
+              .filter((ev) => !!ev);
+
+            delete ev.case;
             this.cachedItems[ev._id] = ev;
           });
+          this.items = Object.values(this.cachedItems);
         })
         .catch((err) => {
           this.loading = false;
@@ -160,11 +161,6 @@ export default {
     },
     filter(object, search) {
       let regex = stringToRegex(search);
-
-      // console.log(
-      //   object.case && !!object.case.followUps.find((ev) => ev.test(regex))
-      // );
-
       if (regex)
         return (
           regex.test(object.fullname) ||
@@ -172,10 +168,10 @@ export default {
           regex.test(object.phone) ||
           (object.address &&
             (regex.test(object.address.street) ||
-              regex.test(object.address.area)))
-          // (object.case && !!object.case.followUps.find((ev) => ev.test(regex)))
+              regex.test(object.address.area))) ||
+          !!object.casekeys.find((ev) => regex.test(ev))
         );
-      return false;
+      return true;
     },
   },
 };

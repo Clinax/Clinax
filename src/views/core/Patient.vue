@@ -87,6 +87,7 @@
         :sort-desc.sync="ui.sortDesc"
         :dense="ui.dense"
         item-key="_id"
+        @click:row="(item) => (profile = { model: true, patient: item })"
       >
         <template
           v-slot:group.header="{ group, headers, items, isOpen, toggle }"
@@ -112,7 +113,7 @@
         </template>
 
         <template v-slot:item.pid="{ item }">
-          <div :class="[item.gender]">
+          <div :class="[item.gender]" class="text-truncate">
             <kbd>{{ item.pid }}</kbd>
           </div>
         </template>
@@ -126,13 +127,33 @@
             {{ moment(item.createdAt).fromNow() }}
           </div>
         </template>
+        <template v-slot:item.diagnosis="{ item }">
+          <v-tooltip v-if="item.diagnosis" top>
+            <template v-slot:activator="{ on }">
+              <b v-on="on">{{ item.diagnosis }}</b>
+            </template>
+            <v-simple-table>
+              <tbody>
+                <tr v-for="(value, key) in item.diagnoses" :key="value">
+                  <td>{{ moment(value).format("DD MMM YYYY") }}</td>
+                  <th>{{ key }}</th>
+                </tr>
+              </tbody>
+            </v-simple-table>
+          </v-tooltip>
+          <pre v-else>-</pre>
+        </template>
         <template v-slot:item.phone="{ item }">
           <div class="contact-info">
             <span v-if="item.email || item.phone">
-              <a v-if="item.phone" :href="'tel:' + item.phone">
+              <a v-if="item.phone" @click.stop :href="'tel:' + item.phone">
                 {{ item.phone }}
               </a>
-              <a v-else-if="item.email" :href="'mailto:' + item.email">
+              <a
+                v-else-if="item.email"
+                @click.stop
+                :href="'mailto:' + item.email"
+              >
                 {{ item.email }}
               </a>
             </span>
@@ -148,7 +169,7 @@
         <template v-slot:item.age="{ item }">
           <v-tooltip top v-if="item.birthDate">
             <template v-slot:activator="{ on }">
-              <v-layout v-on="on" class="subheading" align-center>
+              <v-layout v-on="on" align-center>
                 <v-icon
                   v-if="
                     moment(item.birthDate).format('L') == moment().format('L')
@@ -165,31 +186,28 @@
                 </span>
               </v-layout>
             </template>
-            <v-simple-table class="transparent" dense dark>
-              <tbody>
-                <tr>
-                  <th>Birth Date</th>
-                  <td>
-                    {{ moment(item.birthDate).format("Do MMM YYYY") }}
-                  </td>
-                </tr>
-                <tr>
-                  <th>Gender</th>
-                  <td>
-                    {{ item.gender }}
-                  </td>
-                </tr>
-              </tbody>
-            </v-simple-table>
+            <span class="text-uppercase">
+              {{ moment(item.birthDate).format("YYYY") }} /
+              {{ item.gender }}
+            </span>
           </v-tooltip>
           <pre v-else>Not provided</pre>
         </template>
         <template v-slot:item.address.area="{ item }">
           <v-tooltip v-if="item.address" top>
             <template v-slot:activator="{ on }">
-              <b v-on="on">{{ item.address.area }}</b>
+              <span v-on="on">{{ item.address.area }}</span>
             </template>
-            <span>{{ item.address.street }}</span>
+            <v-list-item dense dark>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ item.address.street || "-" }}
+                </v-list-item-title>
+                <v-list-item-subtitle>
+                  {{ item.address.area || "-" }}
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
           </v-tooltip>
           <pre v-else>-</pre>
         </template>
@@ -204,15 +222,6 @@
         </template>
         <template v-slot:item.action="{ item }">
           <v-card-actions>
-            <v-btn
-              color="primary"
-              outlined
-              small
-              icon
-              @click="profile = { model: true, patient: item }"
-            >
-              <v-icon small>mdi-pencil</v-icon>
-            </v-btn>
             <v-btn
               color="primary"
               title="Open patient case"
@@ -237,11 +246,8 @@
 </template>
 
 <script>
-// import colorGenerate from "string-to-color";
 import { makeRequest, baseUrl } from "@/modules/request";
 import ToolbarTools from "@/components/ToolbarTools";
-import { stringToRegex } from "@/modules/regex";
-import { getCookie, setCookie } from "../../modules/cookie";
 
 export default {
   components: { ToolbarTools },
@@ -268,49 +274,25 @@ export default {
           value: "createdAt",
         },
         {
-          text: "name",
+          text: "Name",
           value: "fullname",
         },
         {
           text: "Contact Info",
           value: "phone",
-          filter: (value, search, item) => {
-            let regex = stringToRegex(search);
-            if (regex) {
-              if (!item.phone && !item.email) return false;
-              var match =
-                (item.phone && item.phone.replace(/ /g, "").match(regex)) ||
-                (item.email && item.email.match(regex));
-
-              return Boolean(match);
-            }
-
-            return true;
-          },
         },
         {
           text: "Age & Sex",
           value: "age",
         },
         {
-          text: "area",
+          text: "Diagnosis",
+          value: "diagnosis",
+        },
+        {
+          text: "Area",
           value: "address.area",
-          filter: (value, search, item) => {
-            let regex = stringToRegex(search);
-
-            if (regex) {
-              if (!item.address) return false;
-
-              var match =
-                item.address &&
-                (item.address.street.match(regex) ||
-                  item.address.area.match(regex));
-
-              return Boolean(match);
-            }
-
-            return true;
-          },
+          width: 120,
         },
         {
           text: "Date updated",
@@ -324,26 +306,26 @@ export default {
           sortable: false,
         },
       ],
-      groupBy: getCookie("clinax.patient.groupBy") == "true",
-      dense: getCookie("clinax.patient.dense") == "true",
-      sortDesc: getCookie("clinax.patient.sortDesc") == "true",
-      sortBy: getCookie("clinax.patient.sortBy") || "updatedAt",
+      groupBy: localStorage.getItem("clinax.patient.groupBy") == "true",
+      dense: localStorage.getItem("clinax.patient.dense") == "true",
+      sortDesc: localStorage.getItem("clinax.patient.sortDesc") == "true",
+      sortBy: localStorage.getItem("clinax.patient.sortBy") || "updatedAt",
       search: "",
       loading: false,
     },
   }),
   watch: {
     "ui.groupBy"(a) {
-      setCookie("clinax.patient.groupBy", a);
+      localStorage.setItem("clinax.patient.groupBy", a);
     },
     "ui.sortBy"(a) {
-      setCookie("clinax.patient.sortBy", a);
+      localStorage.setItem("clinax.patient.sortBy", a);
     },
     "ui.dense"(a) {
-      setCookie("clinax.patient.dense", a);
+      localStorage.setItem("clinax.patient.dense", a);
     },
     "ui.sortDesc"(a) {
-      setCookie("clinax.patient.sortDesc", a);
+      localStorage.setItem("clinax.patient.sortDesc", a);
     },
     patients() {
       this.makeitems();
@@ -381,6 +363,7 @@ export default {
 .v-data-table__wrapper tr {
   position: relative;
   transition: 350ms cubic-bezier(0.075, 0.82, 0.165, 1);
+  cursor: pointer;
 
   & > td:first-child {
     position: relative;

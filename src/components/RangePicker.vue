@@ -72,7 +72,6 @@
 
 <script>
 import moment from "moment";
-import Logger from "../modules/Logger";
 
 export default {
   props: {
@@ -118,7 +117,6 @@ export default {
   },
   computed: {
     internalPresets() {
-      Logger.d(this.presets);
       return this.presets.map((ev) =>
         ev == "CUSTOM"
           ? {

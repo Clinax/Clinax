@@ -201,10 +201,10 @@
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        v-on="on"
-                        icon
                         class="mt-7 mr-2"
+                        v-on="on"
                         @click="age = !age"
+                        icon
                       >
                         <v-icon>mdi-counter</v-icon>
                       </v-btn>
@@ -243,6 +243,7 @@
                     items: [
                       'Single',
                       'Married',
+                      'Engaged',
                       'Divorced',
                       'Widowed',
                       'Separated',
