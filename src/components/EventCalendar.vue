@@ -133,8 +133,8 @@
 </template>
 
 <script>
+import moment from "moment-timezone";
 import { makeRequest } from "../modules/request";
-import moment from "moment";
 import { sortBy } from "../modules/list";
 
 export default {
@@ -184,7 +184,9 @@ export default {
       if (this.loading) return;
 
       this.loading = true;
-      makeRequest("get", "followUp/events")
+      makeRequest("get", "followUp/events", {
+        header: { timezone: moment.tz.guess() },
+      })
         .then(({ data }) => {
           this.loading = false;
           this.$store.commit("setEvents", data.compressedData);

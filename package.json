@@ -15,6 +15,7 @@
     "js2excel": "^1.0.1",
     "lz-string": "^1.4.4",
     "moment": "^2.27.0",
+    "moment-timezone": "^0.5.31",
     "portal-vue": "^2.1.7",
     "register-service-worker": "^1.6.2",
     "string-to-color": "^2.1.4",
