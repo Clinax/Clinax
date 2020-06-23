@@ -264,9 +264,9 @@
 <script>
 import moment from "moment";
 
-import { makeRequest, errorHandler } from "@/modules/request";
-import { clone, isEqual } from "@/modules/object";
 import { sortBy } from "@/modules/list";
+import { clone, isEqual } from "@/modules/object";
+import { makeRequest, errorHandler } from "@/modules/request";
 
 import FollowUp from "@/components/FollowUp";
 import SavingAlert from "@/components/SavingAlert";
@@ -427,10 +427,11 @@ export default {
 
         let lastFollowUp = clone(this.case.followUps[0]);
 
-        let prev = moment(lastFollowUp.createdAt),
-          now = moment(new Date());
+        let sameDay =
+          moment().format("YYYYMMDD") ==
+          moment(lastFollowUp.createdAt).format("YYYYMMDD");
 
-        if (prev.year() + prev.dayOfYear() == now.year() + now.dayOfYear()) {
+        if (sameDay) {
           this.case.followUps = this.case.followUps.slice(
             1,
             this.case.followUps.length
@@ -438,7 +439,6 @@ export default {
         } else {
           delete lastFollowUp._id;
           delete lastFollowUp.updatedAt;
-          delete lastFollowUp.createdAt;
         }
 
         this.followUps = this.case.followUps

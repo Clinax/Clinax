@@ -59,7 +59,9 @@
                 :label.sync="field[0]"
                 :col="{ cols: 12, md: 6, lg: 4 }"
                 :textfield="{
-                  placeholder: disabled ? 'Not Provided' : 'Start Typing...',
+                  placeholder: disabled
+                    ? 'Not Provided'
+                    : field[3] || 'Start Typing...',
                   class: { border: disabled },
                   flat: disabled,
                   disabled,
@@ -94,7 +96,9 @@
                 v-model="field[1]"
                 :label.sync="field[0]"
                 :textfield="{
-                  placeholder: disabled ? 'Not Provided' : 'Start Typing...',
+                  placeholder: disabled
+                    ? 'Not Provided'
+                    : field[3] || 'Start Typing...',
                   class: { border: disabled },
                   flat: disabled,
                   autoGrow: true,
@@ -133,7 +137,9 @@
                 v-model="field[1]"
                 :label.sync="field[0]"
                 :textfield="{
-                  placeholder: disabled ? 'Not Provided' : 'Start Typing...',
+                  placeholder: disabled
+                    ? 'Not Provided'
+                    : field[3] || 'Start Typing...',
                   class: { border: disabled },
                   flat: disabled,
                   disabled,
@@ -182,7 +188,9 @@
                 v-model="field[1]"
                 :label.sync="field[0]"
                 :textfield="{
-                  placeholder: disabled ? 'Not Provided' : 'Start Typing...',
+                  placeholder: disabled
+                    ? 'Not Provided'
+                    : field[3] || 'Start Typing...',
                   class: { border: disabled },
                   flat: disabled,
                   disabled,
@@ -328,7 +336,7 @@
               Click '<b>ADD</b>' to add drugs
             </v-alert>
             <v-alert
-              v-else-if="disabled"
+              v-else-if="disabled && !followUpModel.treatment.drugs.length"
               type="warning"
               dense
               class="mx-3 mt-4"
@@ -453,9 +461,9 @@
 import moment from "moment";
 import drugs from "@/json/drugs.json";
 
-import { clone, isEqual } from "../modules/object";
 import { sortBy } from "../modules/list";
 import { makeRequest } from "../modules/request";
+import { clone, isEqual } from "../modules/object";
 
 import SavingAlert from "@/components/SavingAlert";
 
@@ -472,6 +480,10 @@ export default {
     followUpModel: {
       treatment: { drugs: [] },
       nextFollowUpDate: null,
+      extra: {},
+      criteria: {},
+      physicalGeneral: {},
+      onExamination: {},
     },
 
     extra: [],
@@ -541,12 +553,12 @@ export default {
     },
   },
   watch: {
-    "ui.saving"(a) {
-      this.$emit("saving", a);
-    },
-    "ui.saved"(a) {
-      this.$emit("saved", a);
-    },
+    // "ui.saving"(a) {
+    //   this.$emit("saving", a);
+    // },
+    // "ui.saved"(a) {
+    //   this.$emit("saved", a);
+    // },
     extra(a) {
       this.followUpModel.extra = {};
       a.forEach((entry) => (this.followUpModel.extra[entry[0]] = entry[1]));
@@ -663,7 +675,16 @@ export default {
   mounted() {
     if (this.followUp) {
       this.followUpModel = clone(this.followUp);
-      this.followUpModel.treatment.drugs = [];
+
+      let reset =
+        moment().format("YYYYMMDD") !=
+          moment(this.followUp.createdAt).format("YYYYMMDD") && !this.disabled;
+
+      delete this.followUpModel.createdAt;
+      delete this.followUp.createdAt;
+
+      if (reset) this.followUpModel.treatment.drugs = [];
+
       this.ui.parallelTreatment = !!this.followUp.treatment.parallelTreatment;
 
       ["onExamination", "criteria", "extra", "physicalGeneral"].forEach(
@@ -677,9 +698,13 @@ export default {
 
             for (const key in this.followUpModel[ev]) {
               if (this.followUpModel[ev].hasOwnProperty(key)) {
-                if (typeof indexNameMap[key] == "number")
-                  this[ev][indexNameMap[key]][1] = "";
-                else this[ev].push([key, "", true]);
+                let trueValue = this.followUpModel[ev][key];
+                let element = reset ? "" : trueValue;
+
+                if (typeof indexNameMap[key] == "number") {
+                  this[ev][indexNameMap[key]][1] = element;
+                  this[ev][indexNameMap[key]][3] = trueValue;
+                } else this[ev].push([key, element, true, trueValue]);
               }
             }
           }
