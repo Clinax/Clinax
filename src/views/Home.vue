@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import EventCalendar from "@/components/EventCalendar";
+import EventCalendar from "@/components/app/widgets/EventCalendar";
 
 export default {
   components: { EventCalendar },

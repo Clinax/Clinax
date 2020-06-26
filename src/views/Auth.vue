@@ -115,7 +115,7 @@
 
 <script>
 import { makeRequest } from "@/modules/request";
-import { FIELD_EMAIL, getReqiredField } from "../modules/regex";
+import { FIELD_EMAIL, getReqiredField } from "@/modules/regex";
 
 export default {
   data() {

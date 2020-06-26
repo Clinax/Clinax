@@ -16,7 +16,7 @@
 <script>
 import AppBar from "./AppBar";
 import NavBar from "./NavBar";
-import LoadingDialog from "@/components/LoadingDialog";
+import LoadingDialog from "@/components/widgets/LoadingDialog";
 
 export default {
   components: { AppBar, NavBar, LoadingDialog },

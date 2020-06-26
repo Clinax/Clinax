@@ -134,8 +134,8 @@
 
 <script>
 import moment from "moment-timezone";
-import { makeRequest } from "../modules/request";
-import { sortBy } from "../modules/list";
+import { makeRequest } from "@/modules/request";
+import { sortBy } from "@/modules/list";
 
 export default {
   props: {

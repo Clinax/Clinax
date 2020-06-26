@@ -115,8 +115,8 @@
 import moment from "moment";
 
 import DigitalClock from "vue-digital-clock";
-import ComponentWithModel from "@/components/ComponentWithModel";
-import EventCalendar from "@/components/EventCalendar";
+import ComponentWithModel from "@/components/widgets/ComponentWithModel";
+import EventCalendar from "@/components/app/widgets/EventCalendar";
 
 export default {
   extends: ComponentWithModel,

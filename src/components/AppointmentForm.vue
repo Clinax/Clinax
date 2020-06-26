@@ -194,8 +194,9 @@
 <script>
 import moment from "moment";
 import { makeRequest } from "@/modules/request";
-import SearchBar from "@/components/SearchBar";
-import ComponentWithModel from "@/components/ComponentWithModel";
+
+import SearchBar from "@/components/app/widgets/SearchBar";
+import ComponentWithModel from "@/components/widgets/ComponentWithModel";
 
 export default {
   extends: ComponentWithModel,

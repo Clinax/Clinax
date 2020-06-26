@@ -480,16 +480,15 @@
 </template>
 
 <script>
-import ComponentWithModel from "./ComponentWithModel";
-import InputField from "./InputField";
 import namePrefixes from "@/json/name-prefixes.json";
-import { makeRequest } from "../modules/request";
-import { isEmpty, clone, isEqual } from "../modules/object";
-import { getCookie, setCookie } from "../modules/cookie";
+import ComponentWithModel from "@/components/widgets/ComponentWithModel";
+
+import { makeRequest } from "@/modules/request";
+import { isEmpty, clone, isEqual } from "@/modules/object";
+import { getCookie, setCookie } from "@/modules/cookie";
 
 export default {
   extends: ComponentWithModel,
-  components: { InputField },
   props: {
     noActivator: { type: Boolean, default: false },
     patient: { value: Object },

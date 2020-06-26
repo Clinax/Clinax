@@ -269,7 +269,7 @@ import { clone, isEqual } from "@/modules/object";
 import { makeRequest, errorHandler } from "@/modules/request";
 
 import FollowUp from "@/components/FollowUp";
-import SavingAlert from "@/components/SavingAlert";
+import SavingAlert from "@/components/widgets/SavingAlert";
 
 export default {
   components: { FollowUp, SavingAlert },

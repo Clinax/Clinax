@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import AppLayout from "./app/AppLayout";
+import AppLayout from "@/components/app/AppLayout";
 import Auth from "@/views/Auth";
 
 export default {

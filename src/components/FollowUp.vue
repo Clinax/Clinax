@@ -461,11 +461,11 @@
 import moment from "moment";
 import drugs from "@/json/drugs.json";
 
-import { sortBy } from "../modules/list";
-import { makeRequest } from "../modules/request";
-import { clone, isEqual } from "../modules/object";
+import { sortBy } from "@/modules/list";
+import { makeRequest } from "@/modules/request";
+import { clone, isEqual } from "@/modules/object";
 
-import SavingAlert from "@/components/SavingAlert";
+import SavingAlert from "@/components/widgets/SavingAlert";
 
 export default {
   props: {

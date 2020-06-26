@@ -247,7 +247,8 @@
 
 <script>
 import { makeRequest, baseUrl } from "@/modules/request";
-import ToolbarTools from "@/components/ToolbarTools";
+
+import ToolbarTools from "@/components/widgets/ToolbarTools";
 
 export default {
   components: { ToolbarTools },

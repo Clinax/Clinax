@@ -43,8 +43,8 @@
 </template>
 
 <script>
-import ComponentWithModel from "../ComponentWithModel";
-import SearchBar from "../SearchBar";
+import ComponentWithModel from "@/components/widgets/ComponentWithModel";
+import SearchBar from "@/components/app/widgets/SearchBar";
 
 export default {
   extends: ComponentWithModel,

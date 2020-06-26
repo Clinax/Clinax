@@ -104,8 +104,9 @@
 
 <script>
 import { decompressFromUTF16 } from "lz-string";
-import { stringToRegex } from "../modules/regex";
-import { makeRequest } from "../modules/request";
+
+import { stringToRegex } from "@/modules/regex";
+import { makeRequest } from "@/modules/request";
 
 export default {
   props: { minimal: Boolean },

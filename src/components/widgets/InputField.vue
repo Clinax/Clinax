@@ -62,7 +62,7 @@
 </template>
 
 <script>
-import { getReqiredField } from "../modules/regex";
+import { getReqiredField } from "@/modules/regex";
 
 export default {
   props: {
