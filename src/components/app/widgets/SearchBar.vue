@@ -142,13 +142,16 @@ export default {
 
           // console.log(data);
           data.forEach((ev) => {
-            ev.casekeys = ev.case.followUps
-              .map((ev) => [
-                ev.treatment && ev.treatment.diagnosis,
-                ev.chiefComplain,
-              ])
-              .flat()
-              .filter((ev) => !!ev);
+            ev.casekeys =
+              (ev.case &&
+                ev.case.followUps
+                  .map((ev) => [
+                    ev.treatment && ev.treatment.diagnosis,
+                    ev.chiefComplain,
+                  ])
+                  .flat()
+                  .filter((ev) => !!ev)) ||
+              [];
 
             delete ev.case;
             this.cachedItems[ev._id] = ev;
