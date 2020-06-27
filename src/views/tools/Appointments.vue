@@ -11,7 +11,7 @@
           v-if="$vuetify.breakpoint.mdAndUp"
           color="primary"
           depressed
-          @click="ui.appoinmentDialog = true"
+          @click="ui.appoinmentDialog.model = { mdoel: true }"
         >
           <v-icon class="mr-2">mdi-calendar-plus</v-icon>
           Add appointment
@@ -42,7 +42,6 @@
           </template>
           <range-picker
             v-model="dates"
-            min-now
             :presets="ui.presets"
             @input="
               init();
@@ -60,14 +59,13 @@
         </toolbar-tools>
       </v-toolbar>
       <v-divider></v-divider>
-
       <v-data-table
         v-if="appointments.length || ui.loading"
         :items="appointments"
         :loading="ui.loading"
         :search="ui.search"
         :headers="ui.headers"
-        group-by="date"
+        group-by="groupKey"
         disable-pagination
         hide-default-footer
       >
@@ -85,31 +83,38 @@
               </small>
               <v-spacer></v-spacer>
               <small>
-                <b>{{ appointments.length }}</b> item(s)
+                Total: <b> {{ appointments.length }} item(s)</b>
               </small>
             </v-card-actions>
           </td>
         </template>
+        <template v-slot:item.time="{ value }">
+          <b>{{ value }}</b>
+        </template>
         <template v-slot:item.createdAt="{ item }">
-          <span>
-            {{ moment(item.createdAt).format("DD MMM YYYY") }}
-          </span>
-          <br />
-          <small>
-            {{ moment(item.createdAt).format("LT") }}
+          <div class="text-no-wrap">
+            <span>
+              {{ moment(item.createdAt).format("Do MMM YYYY") }}
+            </span>
+            <small>
+              {{ moment(item.createdAt).format("LT") }}
+            </small>
+          </div>
+          <small class="text-no-wrap">
+            {{ moment(item.createdAt).fromNow() }}
           </small>
         </template>
         <template v-slot:item.action="{ item }">
-          <v-menu left bottom>
+          <v-menu left bottom min-width="190">
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon disabled>
+              <v-btn v-on="on" :disabled="ui.loading" icon>
                 <v-icon>mdi-dots-horizontal</v-icon>
               </v-btn>
             </template>
             <v-card>
               <v-list dense nav>
                 <v-subheader> {{ item.patientName }}</v-subheader>
-                <v-list-item>
+                <v-list-item @click="updateEntry(item)">
                   <v-list-item-action>
                     <v-icon>mdi-calendar-refresh</v-icon>
                   </v-list-item-action>
@@ -122,7 +127,7 @@
 
                 <v-list-item @click="deleteEntry(item)" class="error lighten-4">
                   <v-list-item-action>
-                    <v-icon color="error ">mdi-delete</v-icon>
+                    <v-icon color="error">mdi-delete</v-icon>
                   </v-list-item-action>
                   <v-list-item-content>
                     <v-list-item-title>
@@ -140,7 +145,9 @@
           <td :colspan="headers.length">
             <v-card-actions class="w-100">
               <span>Appointments on&nbsp;</span>
-              <span class="pa-1 primary--text">{{ group }}</span>
+              <span class="pa-1 primary--text">{{
+                moment(items[0].dateTime).format("Do MMMM YYYY")
+              }}</span>
               <v-spacer></v-spacer>
               <v-btn color="primary" @click="toggle" small text>
                 <span>{{ items.length }} item(s)</span>
@@ -158,11 +165,13 @@
       <no-appointment-illustration
         v-else
         v-bind="{ date1: formattedDate1, date2: formattedDate2 }"
+        @click:add="ui.appoinmentDialog.model = true"
       ></no-appointment-illustration>
+
       <v-btn
         v-if="$vuetify.breakpoint.smAndDown"
         color="primary"
-        @click="ui.appoinmentDialog = true"
+        @click="ui.appoinmentDialog.model = true"
         bottom
         fixed
         right
@@ -172,8 +181,12 @@
       </v-btn>
     </v-card>
     <appointment-form
-      v-model="ui.appoinmentDialog"
-      @add="appointments.push"
+      v-model="ui.appoinmentDialog.model"
+      :appointment="ui.appoinmentDialog.item"
+      @update:appointment="(ui.appoinmentDialog = { model: false }), init()"
+      @add="
+        ((ev) => (init(), (ui.appoinmentDialog.model = false)))
+      "
     ></appointment-form>
   </v-container>
 </template>
@@ -182,6 +195,7 @@
 import moment from "moment";
 
 import { makeRequest } from "@/modules/request";
+import { sortBy } from "@/modules/list";
 
 import AppointmentForm from "@/components/AppointmentForm";
 import NoAppointmentIllustration from "@/components/NoAppointmentIllustration";
@@ -204,7 +218,7 @@ export default {
       appointments: [],
       ui: {
         rangeFilterMenu: false,
-        appoinmentDialog: false,
+        appoinmentDialog: { model: false },
         search: "",
         headers: [
           {
@@ -253,6 +267,7 @@ export default {
           },
           "CUSTOM",
         ],
+        loading: false,
       },
     };
   },
@@ -264,6 +279,11 @@ export default {
       return moment(this.dates[1]).format("DD MMM YYYY");
     },
   },
+  watch: {
+    "ui.appoinmentDialog.model"(a) {
+      if (!a) this.ui.appoinmentDialog.item = null;
+    },
+  },
   methods: {
     init() {
       if (this.ui.loading) return;
@@ -273,20 +293,39 @@ export default {
       })
         .then(({ data }) => {
           this.ui.loading = false;
-          this.appointments = data.map((ev) => {
-            let m = moment(ev.dateTime);
-            ev.date = m.format("Do MMMM YYYY");
-            ev.time = m.format("LT");
-            return ev;
-          });
+          this.appointments = data
+            .map((ev) => {
+              let m = moment(ev.dateTime);
+              ev.groupKey = m.format("YYYYMMDD");
+              ev.time = m.format("LT");
+              return ev;
+            })
+            .sort(sortBy("dateTime"), true);
         })
         .catch((err) => {
           this.ui.loading = false;
           this.errorHandler(err);
         });
     },
-    deleteEntry() {
-      // TODO Delete appointmet
+    deleteEntry(item) {
+      const self = this;
+      self.ui.loading = true;
+
+      this.$store.dispatch("deleteAppointment", {
+        id: item._id,
+        callback: (err) => {
+          self.ui.loading = false;
+
+          if (err) self.errorHandler(err);
+          else
+            this.appointments = this.appointments.filter(
+              (ev) => ev._id != item._id
+            );
+        },
+      });
+    },
+    updateEntry(item) {
+      this.ui.appoinmentDialog = { model: true, item };
     },
   },
   mounted() {

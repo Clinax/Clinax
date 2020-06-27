@@ -104,7 +104,13 @@ const store = new Vuex.Store({
     addListener({ state }, { event, name, callback }) {
       state.listeners[event][name] = callback;
     },
-
+    deleteAppointment(_, { id, callback }) {
+      makeRequest("delete", "appointment", { id })
+        .then(() => callback && typeof callback == "function" && callback())
+        .catch(
+          (err) => callback && typeof callback == "function" && callback(err)
+        );
+    },
     getUser() {
       makeRequest("get", "self", (res) => {
         store.commit("setUser", res.data);

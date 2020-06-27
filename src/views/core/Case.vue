@@ -243,6 +243,12 @@
               </v-tabs-items>
             </v-card>
           </v-tab-item>
+          <v-tab-item>
+            <woi></woi>
+          </v-tab-item>
+          <v-tab-item>
+            <woi></woi>
+          </v-tab-item>
         </v-tabs-items>
         <saving-alert
           v-bind="{ saving: ui.saving, saved: ui.saved, changed: ui.changed }"
@@ -307,6 +313,8 @@ export default {
           { icon: "mdi-brain", text: "Mind" },
           { icon: "mdi-face", text: " Patient History" },
           { icon: "mdi-folder-account", text: "Case" },
+          { icon: "mdi-text-box-search-outline", text: "Investigation" },
+          { icon: "mdi-image-multiple-outline", text: "Gallery" },
         ],
         saveDelayTimerId: null,
         saveBadgeTimerId: null,
