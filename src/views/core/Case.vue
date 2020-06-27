@@ -68,7 +68,7 @@
         </v-toolbar>
         <v-tabs v-model="ui.tab">
           <v-tab v-for="tab in ui.tabs" :key="tab.text">
-            <v-icon v-if="tab.icon && $vuetify.breakpoint.smAndUp" class="mr-2">
+            <v-icon v-if="tab.icon && isBiggerScreen" class="mr-2">
               {{ tab.icon }}
             </v-icon>
             <small class="text-truncate"> {{ tab.text }} </small>
@@ -81,7 +81,14 @@
             <v-subheader class="white" v-if="ui.tab == 2">
               <v-menu right max-height="340" :close-on-content-click="false">
                 <template v-slot:activator="{ on }">
-                  <v-btn v-on="on" absolute left small depressed>
+                  <v-btn
+                    v-on="on"
+                    class="mr-3"
+                    :absolute="isBiggerScreen"
+                    depressed
+                    small
+                    left
+                  >
                     <v-icon>mdi-history</v-icon>
                   </v-btn>
                 </template>
@@ -103,8 +110,8 @@
                   </template>
                 </v-card>
               </v-menu>
-              <v-spacer v-if="$vuetify.breakpoint.smAndUp"></v-spacer>
-              <v-sheet max-width="240">
+              <v-spacer v-if="isBiggerScreen"></v-spacer>
+              <v-sheet max-width="240" class="flex-grow-1">
                 <v-select
                   v-model="ui.followUpTab"
                   :items="followUpsDateItems"
@@ -119,11 +126,12 @@
               <v-btn
                 color="primary"
                 title="Previous visit"
-                class="mr-12"
+                class="mx-3"
+                :class="{ 'mr-12': isBiggerScreen }"
                 :disabled="ui.followUpTab == 0"
                 @click="ui.followUpTab--"
                 depressed
-                absolute
+                :absolute="isBiggerScreen"
                 x-small
                 right
               >
@@ -135,7 +143,7 @@
                 :disabled="ui.followUpTab == followUps.length"
                 @click="ui.followUpTab++"
                 depressed
-                absolute
+                :absolute="isBiggerScreen"
                 x-small
                 right
               >
@@ -320,6 +328,9 @@ export default {
         },
       ].reverse();
     },
+    isBiggerScreen() {
+      return this.$vuetify.breakpoint.smAndUp;
+    },
   },
   methods: {
     onChange() {
@@ -386,9 +397,7 @@ export default {
     },
     setHeight() {
       this.$store.state.app.extensionHeight =
-        (this.$vuetify.breakpoint.smAndUp ? 96 : 116) +
-        (this.ui.tab == 2 ? 48 : 0) +
-        1;
+        (this.isBiggerScreen ? 96 : 116) + (this.ui.tab == 2 ? 48 : 0) + 1;
     },
     patientUpdated(updates) {
       updates.case = this.patient.case;

@@ -101,7 +101,6 @@ const store = new Vuex.Store({
     },
   },
   actions: {
-    setTitle: ({ state }, title) => (state.app.title = title),
     addListener({ state }, { event, name, callback }) {
       state.listeners[event][name] = callback;
     },
@@ -121,6 +120,9 @@ const store = new Vuex.Store({
       store.commit("setUser", null);
       store.commit("setToken", null);
     },
+
+    // UI actions
+    setTitle: ({ state }, title) => (state.app.title = title),
     errorHandler(_, err) {
       this.dispatch("showError", errorHandler(err));
     },

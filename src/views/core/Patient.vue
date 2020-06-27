@@ -143,28 +143,79 @@
           </v-tooltip>
           <pre v-else>-</pre>
         </template>
-        <template v-slot:item.phone="{ item }">
-          <div class="contact-info">
-            <span v-if="item.email || item.phone">
-              <a v-if="item.phone" @click.stop :href="'tel:' + item.phone">
-                {{ item.phone }}
-              </a>
-              <a
-                v-else-if="item.email"
-                @click.stop
-                :href="'mailto:' + item.email"
-              >
-                {{ item.email }}
-              </a>
-            </span>
-            <pre v-else>-</pre>
-            <template v-if="item.email && item.phone">
-              <br />
-              <small>
-                <a :href="'mailto:' + item.email">{{ item.email }}</a>
-              </small>
+
+        <template v-slot:item.fullname="{ item, value }">
+          <v-menu :close-on-content-click="false" open-on-hover top offset-y>
+            <template v-slot:activator="{ on }">
+              <span v-on="on" class="dashed">{{ value }}</span>
             </template>
-          </div>
+            <v-card min-width="240" max-width="320">
+              <v-card-text class="text-center">
+                <v-avatar color="primary" size="64">
+                  <v-img
+                    v-if="item.profile"
+                    :src="baseUrl + item.profile"
+                    contain
+                  ></v-img>
+                  <span v-else class="white--text title">
+                    {{ item.initials }}
+                  </span>
+                </v-avatar>
+                <v-list-item class="contact-info">
+                  <v-list-item-content>
+                    <v-list-item-title> {{ value }} </v-list-item-title>
+                    <template v-if="item.phone || item.phone">
+                      <v-list-item-subtitle :title="item.phone || item.phone">
+                        <a v-if="item.phone" :href="'tel:' + item.phone">
+                          {{ item.phone }}
+                        </a>
+                        <a
+                          v-else-if="item.email"
+                          :href="'mailto:' + item.email"
+                        >
+                          {{ item.email }}
+                        </a>
+                      </v-list-item-subtitle>
+                    </template>
+                    <v-list-item-subtitle v-else>-</v-list-item-subtitle>
+                    <v-list-item-subtitle
+                      v-if="item.email && item.phone"
+                      :title="item.email"
+                    >
+                      <a :href="'mailto:' + item.email">{{ item.email }}</a>
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-card v-if="item.address" outlined>
+                  <v-list-item dense class="py-0 text-left">
+                    <v-list-item-content>
+                      <v-list-item-title
+                        class="text-wrap"
+                        :title="item.address.street"
+                        v-if="item.address.street"
+                      >
+                        {{ item.address.street }}
+                      </v-list-item-title>
+                      <v-list-item-subtitle
+                        class="text-wrap"
+                        v-if="item.address.area"
+                      >
+                        {{ item.address.area }}
+                      </v-list-item-subtitle>
+                      <v-list-item-subtitle
+                        class="text-wrap"
+                        v-if="item.address.pincode"
+                      >
+                        <small>
+                          {{ item.address.pincode }}
+                        </small>
+                      </v-list-item-subtitle>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-card>
+              </v-card-text>
+            </v-card>
+          </v-menu>
         </template>
         <template v-slot:item.age="{ item }">
           <v-tooltip top v-if="item.birthDate">
@@ -217,7 +268,7 @@
           </span>
           <br />
           <small class="text-truncate">
-            {{ moment(item.updatedAt).format("LTS") }}
+            {{ moment(item.updatedAt).format("LT") }}
           </small>
         </template>
         <template v-slot:item.action="{ item }">
@@ -277,10 +328,6 @@ export default {
         {
           text: "Name",
           value: "fullname",
-        },
-        {
-          text: "Contact Info",
-          value: "phone",
         },
         {
           text: "Age & Sex",
@@ -361,6 +408,10 @@ export default {
 </script>
 
 <style lang="scss">
+.v-data-table-header tr th {
+  white-space: nowrap;
+}
+
 .v-data-table__wrapper tr {
   position: relative;
   transition: 350ms cubic-bezier(0.075, 0.82, 0.165, 1);
@@ -395,11 +446,16 @@ export default {
     box-shadow: 3px 0px 6px rgba($color: #000000, $alpha: 0.3);
   }
 }
-
+.dashed {
+  border-bottom: 1px dashed rgba($color: #000000, $alpha: 0.24);
+}
 .contact-info {
   a {
-    color: #474747;
-    border-bottom: 1px dashed rgba($color: #000000, $alpha: 0.12);
+    @extend .dashed;
+
+    margin: 0.2rem 0;
+    font-size: 9pt;
+    color: currentColor;
   }
 }
 </style>

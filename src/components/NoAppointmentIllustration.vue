@@ -23,7 +23,7 @@
             </ul>
           </div>
           <v-card-actions class="my-5 justify-center">
-            <v-btn color="primary" @click="ui.appoinmentDialog = true">
+            <v-btn color="primary" @click="$emit('click:add')">
               <v-icon class="mr-2">mdi-calendar-plus</v-icon>
               Add appointment
             </v-btn>

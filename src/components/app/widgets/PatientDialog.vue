@@ -1,7 +1,7 @@
 <template>
   <v-dialog
     v-model="model"
-    :fullscreen="$vuetify.breakpoint.smAndDown"
+    :fullscreen="$vuetify.breakpoint.xs"
     :persistent="!closeable"
     max-width="640"
   >
