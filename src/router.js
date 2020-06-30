@@ -57,7 +57,7 @@ export default new Router({
     },
     {
       name: "Page Not Found",
-      path: "/404",
+      path: "*",
       component: () => import("./views/Errors/404"),
     },
   ],

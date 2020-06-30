@@ -1,5 +1,25 @@
 <template>
-  <v-container> 404 Page not Found</v-container>
+  <v-app>
+    <v-main>
+      <v-container fill-height>
+        <v-layout fill-height align-center justify-center column>
+          <img src="@/assets/404.svg" class="w-auto" height="398px" />
+          <p class="my-12 body-1 text--secondary">
+            The page you are looking you doesn't exist...
+          </p>
+          <v-btn
+            v-if="this.$store.state.token"
+            color="primary"
+            to="/app"
+            replace
+          >
+            Take me to console
+          </v-btn>
+          <v-btn to.replace="/" v-else>Take me home</v-btn>
+        </v-layout>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script>

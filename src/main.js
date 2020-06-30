@@ -21,13 +21,6 @@ router.afterEach((to) => {
   window.document.title += " | ClinaX";
 });
 
-router.beforeEach((to, _, next) => {
-  if (!store.state.token) next();
-
-  if (!to.matched.length) next("/404");
-  else next();
-});
-
 Vue.mixin({
   data() {
     return {
@@ -35,13 +28,13 @@ Vue.mixin({
     };
   },
   methods: {
+    moment,
     log(ev) {
       if (!isProduction()) {
         // eslint-disable-next-line no-console
         console.log(ev);
       }
     },
-    moment,
     errorHandler(err) {
       store.dispatch("errorHandler", err);
     },
