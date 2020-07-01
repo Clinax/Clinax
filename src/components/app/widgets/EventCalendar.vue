@@ -119,7 +119,9 @@
                 <v-list-item-title> {{ event.name }}</v-list-item-title>
                 <v-list-item-subtitle> {{ event.notes }}</v-list-item-subtitle>
               </v-list-item-content>
-              <v-list-item-action>
+              <v-list-item-action
+                v-if="moment(event.start).format('LT') != '5:30 AM'"
+              >
                 <v-list-item-action-text>
                   {{ moment(event.start).format("LT") }}
                 </v-list-item-action-text>

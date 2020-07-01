@@ -144,77 +144,13 @@
           <pre v-else>-</pre>
         </template>
 
-        <template v-slot:item.fullname="{ item, value }">
+        <template v-slot:item.prefixFullname="{ item, value }">
           <v-menu :close-on-content-click="false" open-on-hover top offset-y>
             <template v-slot:activator="{ on }">
               <span v-on="on" class="dashed">{{ value }}</span>
             </template>
-            <v-card min-width="240" max-width="320">
-              <v-card-text class="text-center">
-                <v-avatar color="primary" size="64">
-                  <v-img
-                    v-if="item.profile"
-                    :src="baseUrl + item.profile"
-                    contain
-                  ></v-img>
-                  <span v-else class="white--text title">
-                    {{ item.initials }}
-                  </span>
-                </v-avatar>
-                <v-list-item class="contact-info">
-                  <v-list-item-content>
-                    <v-list-item-title> {{ value }} </v-list-item-title>
-                    <template v-if="item.phone || item.phone">
-                      <v-list-item-subtitle :title="item.phone || item.phone">
-                        <a v-if="item.phone" :href="'tel:' + item.phone">
-                          {{ item.phone }}
-                        </a>
-                        <a
-                          v-else-if="item.email"
-                          :href="'mailto:' + item.email"
-                        >
-                          {{ item.email }}
-                        </a>
-                      </v-list-item-subtitle>
-                    </template>
-                    <v-list-item-subtitle v-else>-</v-list-item-subtitle>
-                    <v-list-item-subtitle
-                      v-if="item.email && item.phone"
-                      :title="item.email"
-                    >
-                      <a :href="'mailto:' + item.email">{{ item.email }}</a>
-                    </v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-                <v-card v-if="item.address" outlined>
-                  <v-list-item dense class="py-0 text-left">
-                    <v-list-item-content>
-                      <v-list-item-title
-                        class="text-wrap"
-                        :title="item.address.street"
-                        v-if="item.address.street"
-                      >
-                        {{ item.address.street }}
-                      </v-list-item-title>
-                      <v-list-item-subtitle
-                        class="text-wrap"
-                        v-if="item.address.area"
-                      >
-                        {{ item.address.area }}
-                      </v-list-item-subtitle>
-                      <v-list-item-subtitle
-                        class="text-wrap"
-                        v-if="item.address.pincode"
-                      >
-                        <small>
-                          {{ item.address.pincode }}
-                        </small>
-                      </v-list-item-subtitle>
-                    </v-list-item-content>
-                  </v-list-item>
-                </v-card>
-              </v-card-text>
-            </v-card>
+
+            <patient-mini-card :patient="item"> </patient-mini-card>
           </v-menu>
         </template>
         <template v-slot:item.age="{ item }">
@@ -300,9 +236,10 @@
 import { makeRequest, baseUrl } from "@/modules/request";
 
 import ToolbarTools from "@/components/widgets/ToolbarTools";
+import PatientMiniCard from "@/components/app/widgets/PatientMiniCard";
 
 export default {
-  components: { ToolbarTools },
+  components: { ToolbarTools, PatientMiniCard },
   data: () => ({
     baseUrl,
 
@@ -324,10 +261,11 @@ export default {
         {
           text: "Patient Since",
           value: "createdAt",
+          width: 80,
         },
         {
           text: "Name",
-          value: "fullname",
+          value: "prefixFullname",
         },
         {
           text: "Age & Sex",
@@ -444,18 +382,6 @@ export default {
   &:hover > td:first-child div::after {
     border-left-width: 4px;
     box-shadow: 3px 0px 6px rgba($color: #000000, $alpha: 0.3);
-  }
-}
-.dashed {
-  border-bottom: 1px dashed rgba($color: #000000, $alpha: 0.24);
-}
-.contact-info {
-  a {
-    @extend .dashed;
-
-    margin: 0.2rem 0;
-    font-size: 9pt;
-    color: currentColor;
   }
 }
 </style>
