@@ -22,6 +22,8 @@ const store = new Vuex.Store({
       extensionHeight: 78,
       navbarVisibility: true,
       appbarVisibility: true,
+
+      serviceWorkerState: null,
     },
     listeners: {
       eventChange: {},
@@ -85,6 +87,39 @@ const store = new Vuex.Store({
       Object.values(state.listeners.eventChange).forEach((ev) => {
         ev && typeof ev == "function" && ev();
       });
+    },
+    setServiceWorkerState(state, serviceWorkerState) {
+      state.app.serviceWorkerState = serviceWorkerState;
+
+      switch (serviceWorkerState) {
+        case "ready":
+          break;
+        case "registered":
+          break;
+        case "cached":
+          this.dispatch("showSnackbar", "Website has been Cached");
+          break;
+        case "updatefound":
+          this.dispatch("showSnackbar", "Downloading website updates");
+          break;
+        case "updated":
+          if (localStorage.getItem("clinax.updated") != "true") {
+            window.location.reload();
+            localStorage.setItem("clinax.updated", true);
+          } else {
+            localStorage.setItem("clinax.updated", false);
+            this.dispatch("showSnackbar", "Site Just got Updated");
+          }
+          break;
+        case "offline":
+          this.dispatch(
+            "showSnackbar",
+            "You are offline, Connect to internet for the website to functin properly"
+          );
+          break;
+        case "error":
+          break;
+      }
     },
   },
   getters: {

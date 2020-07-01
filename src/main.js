@@ -54,5 +54,9 @@ new Vue({
   render: (h) => h(App),
   mounted() {
     if (store.state.token) store.dispatch("getUser");
+
+    // todo: temporary fixed for 404 page on shortcut creation
+    let location = window.location.pathname;
+    if (location == "/icons/www.clinax.in/app") this.$router.replace("/");
   },
 }).$mount("#app");
