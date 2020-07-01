@@ -10,6 +10,9 @@ export default {};
 .w-100 {
   width: 100%;
 }
+h-100 {
+  height: 100%;
+}
 .brand {
   font-family: "Androgyne Medium" !important;
   text-decoration: none !important;
@@ -17,12 +20,24 @@ export default {};
 a {
   text-decoration: none !important;
 }
+.overflow-auto {
+  overflow: auto;
+}
+.overflow-hidden {
+  overflow: hidden;
+}
 
 $border: 1px solid
   rgba(
     $color: #000000,
     $alpha: 0.12,
-  ) !important;
+  );
+$border-dashed: 1px dashed
+  rgba(
+    $color: #000000,
+    $alpha: 0.12,
+  );
+
 .border-0 {
   border: none !important;
 }
@@ -43,6 +58,10 @@ $border: 1px solid
 }
 .highlight {
   background: rgba(rgb(0, 102, 255), 0.3);
+}
+
+.dashed {
+  border-bottom: $border-dashed;
 }
 
 .highlight {

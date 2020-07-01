@@ -12,10 +12,10 @@
         </v-btn>
       </slot>
     </template>
-    <v-card v-if="added">
+    <v-card v-if="ui.added">
       <v-card-title>
         <b>{{ patientModel.fullname }}</b>
-        &nbsp;added
+        <span>&nbsp;added</span>
       </v-card-title>
       <v-card-text>
         <v-layout align-center justify-center column>
@@ -55,10 +55,10 @@
         </v-btn>
       </v-subheader>
       <v-divider></v-divider>
-      <v-stepper v-model="step">
+      <v-stepper v-model="ui.step">
         <v-stepper-header>
           <v-stepper-step
-            :complete="step > 1 || !!patientModel._id"
+            :complete="ui.step > 1 || !!patientModel._id"
             :editable="!!patientModel._id"
             step="1"
           >
@@ -66,7 +66,7 @@
           </v-stepper-step>
           <v-divider></v-divider>
           <v-stepper-step
-            :complete="step > 2 || !!patientModel._id"
+            :complete="ui.step > 2 || !!patientModel._id"
             :editable="!!patientModel._id"
             step="2"
           >
@@ -166,7 +166,7 @@
                   ></input-field>
                   <v-menu
                     v-else
-                    v-model="birthDateMenu"
+                    v-model="ui.birthDateMenu"
                     :close-on-content-click="false"
                     max-width="290px"
                     min-width="290px"
@@ -176,7 +176,9 @@
                     <template v-slot:activator="{ on }">
                       <input-field
                         :on="on"
-                        v-model="patientModel.birthDate"
+                        :value="
+                          moment(patientModel.birthDate).format('Do MMM YYYY')
+                        "
                         :textfield="{
                           label: 'Date of Birth',
                           autocomplete: 'off',
@@ -190,7 +192,7 @@
                       @input="
                         (ev) => {
                           patientModel.birthDate = ev;
-                          birthDateMenu = false;
+                          ui.birthDateMenu = false;
                         }
                       "
                       :value="patientModel.birthDate"
@@ -216,26 +218,6 @@
                 </v-layout>
                 <input-field
                   field="v-select"
-                  v-model="patientModel.bloodGroup"
-                  label="Blood group"
-                  :textfield="{
-                    prependInnerIcon: 'mdi-water',
-                    items: [
-                      'a+',
-                      'b+',
-                      'o+',
-                      'ab+',
-                      'a-',
-                      'b-',
-                      'o-',
-                      'ab-',
-                      'unknown',
-                    ],
-                  }"
-                  required
-                ></input-field>
-                <input-field
-                  field="v-select"
                   v-model="patientModel.maritalStatus"
                   label="Marital Status"
                   :textfield="{
@@ -251,46 +233,48 @@
                   }"
                   required
                 ></input-field>
+                <input-field
+                  field="v-combobox"
+                  v-model="patientModel.occupation"
+                  label="Occupation"
+                  :textfield="{
+                    prependInnerIcon: 'mdi-tie',
+                    items: ui.occupations,
+                  }"
+                ></input-field>
                 <v-divider class="mt-5"></v-divider>
-                <input-field
-                  v-if="showPhoneField"
-                  v-model="patientModel.phone"
-                  label="Phone"
-                  mask="+91 ### ### ####"
-                  :textfield="{
-                    autocomplete: 'off',
-                    placeholder: '12345 12345',
-                    prependInnerIcon: 'mdi-phone-classic',
-                    count: 10,
-                  }"
-                ></input-field>
-                <div v-else class="my-3 mx-5 text-right">
-                  <a @click="showPhoneField = true">+ Contact</a>
-                </div>
-                <input-field
-                  v-if="showEmailField"
-                  v-model="patientModel.email"
-                  label="Email (optional)"
-                  :textfield="{
-                    placeholder: 'johndoe@abc.com',
-                    autocomplete: 'off',
-                    prependInnerIcon: 'mdi-email',
-                  }"
-                ></input-field>
-                <div v-else class="my-3 mx-5 text-right">
-                  <a @click="showEmailField = true">+ Email</a>
-                </div>
+                <template v-for="(field, model) in extraFileds">
+                  <input-field
+                    v-if="field.visibility"
+                    v-bind="field"
+                    v-model="patientModel[model]"
+                    :key="model"
+                  ></input-field>
+                </template>
+                <v-layout justify-end>
+                  <template v-for="(field, model) in extraFileds">
+                    <div
+                      v-if="!field.visibility"
+                      :key="model"
+                      class="my-3 mx-3 text-right"
+                    >
+                      <a @click="field.visibility = true">
+                        + {{ field.label }}
+                      </a>
+                    </div>
+                  </template>
+                </v-layout>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn text @click="closeDialog" :disabled="loading">
-                  cancel
+                <v-btn text @click="closeDialog" :disabled="ui.loading">
+                  Cancel
                 </v-btn>
                 <v-btn
                   color="primary"
                   type="submit"
-                  :loading="loading"
-                  :disabled="loading"
+                  :loading="ui.loading"
+                  :disabled="ui.loading"
                   depressed
                 >
                   Next
@@ -333,8 +317,8 @@
                 <v-btn
                   color="primary"
                   @click="uploadPicture"
-                  :loading="loading"
-                  :disabled="loading || !avatar.fd"
+                  :loading="ui.loading"
+                  :disabled="ui.loading || !avatar.fd"
                   block
                 >
                   Upload
@@ -364,7 +348,7 @@
                 </v-card-actions>
                 <div
                   class="drag-region"
-                  :class="{ dragging: dragEvent.dragging }"
+                  :class="{ dragging: ui.dragEvent.dragging }"
                   @click="$refs.avatar.click()"
                   @drop.prevent="onFileDrag"
                   @dragover.prevent="onFileDrag"
@@ -375,17 +359,20 @@
                   <v-layout fill-height align-center justify-center column>
                     <v-icon
                       class="mb-2"
-                      :x-large="dragEvent.dragging"
-                      :large="!dragEvent.dragging"
+                      :x-large="ui.dragEvent.dragging"
+                      :large="!ui.dragEvent.dragging"
                     >
                       {{
-                        dragEvent.dragging ? "mdi-package-down" : "mdi-image"
+                        ui.dragEvent.dragging ? "mdi-package-down" : "mdi-image"
                       }}
                     </v-icon>
                     <v-slide-y-transition mode="out-in">
-                      <span class="text--secondary" :key="dragEvent.dragging">
+                      <span
+                        class="text--secondary"
+                        :key="ui.dragEvent.dragging"
+                      >
                         {{
-                          dragEvent.dragging
+                          ui.dragEvent.dragging
                             ? "Drop your file here"
                             : "Drag and drop photo file here"
                         }}
@@ -396,7 +383,7 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="grey" text @click="step = 3">
+                <v-btn color="grey" text @click="ui.step = 3">
                   skip
                   <v-icon>mdi-skip-next</v-icon>
                 </v-btn>
@@ -427,7 +414,7 @@
                     label="Area"
                     :col="{ md: 6, xs: 12 }"
                     :textfield="{
-                      items: areas,
+                      items: ui.areas,
                       prependInnerIcon: 'mdi-image-filter-hdr',
                     }"
                     required
@@ -441,7 +428,7 @@
                       (v) => String(v).length == 6 || 'Invalid Pincode',
                     ]"
                     :textfield="{
-                      items: pins,
+                      items: ui.pins,
                       type: 'number',
                       prependInnerIcon: 'mdi-map-marker-radius-outline',
                     }"
@@ -459,7 +446,7 @@
       </v-stepper>
     </v-card>
 
-    <v-dialog v-model="closeConformation" max-width="280">
+    <v-dialog v-model="ui.closeConformation" max-width="280">
       <v-card>
         <v-card-title>Are you sure?</v-card-title>
         <v-card-text>You will lose all the progess</v-card-text>
@@ -468,7 +455,7 @@
           <v-btn
             color="primary"
             depressed
-            @click.native="closeConformation = false"
+            @click.native="ui.closeConformation = false"
           >
             cancel
           </v-btn>
@@ -503,24 +490,54 @@ export default {
       fd: null,
       preview: "",
     },
-
-    step: 1,
-    showEmailField: false,
-    showPhoneField: false,
-    birthDateMenu: false,
-    closeConformation: false,
-    fullscreen: false,
-    added: false,
-    dragEvent: { dragging: false, x: 0, y: 0 },
-    loading: false,
-    areas: [],
-    pins: [],
     age: getCookie("clinax.addPatient.age") == "true",
+    extraFileds: {
+      email: {
+        visibility: false,
+        label: "Email",
+        textfield: {
+          placeholder: "johndoe@abc.com",
+          autocomplete: "off",
+          prependInnerIcon: "mdi-email",
+        },
+      },
+      phone: {
+        visibility: false,
+        label: "Contact",
+        textfield: {
+          autocomplete: "off",
+          placeholder: "12345 12345",
+          prependInnerIcon: "mdi-phone-classic",
+          count: 10,
+        },
+      },
+      bloodGroup: {
+        visibility: false,
+        label: "Blood group",
+        field: "v-select",
+        textfield: {
+          prependInnerIcon: "mdi-water",
+          items: ["a+", "b+", "o+", "ab+", "a-", "b-", "o-", "ab-", "unknown"],
+        },
+      },
+    },
+
+    ui: {
+      birthDateMenu: false,
+      dragEvent: { dragging: false, x: 0, y: 0 },
+      added: false,
+      closeConformation: false,
+      step: 1,
+      loading: false,
+      areas: [],
+      pins: [],
+      occupations: [],
+    },
   }),
   computed: {
     closeable() {
       return (
-        !this.loading &&
+        !this.ui.loading &&
         ((this.patient &&
           this.patient.address &&
           isEqual(this.patient.address, this.address)) ||
@@ -537,18 +554,22 @@ export default {
     age: (a) => setCookie("clinax.addPatient.age", a, 100),
     model(a) {
       if (a) {
-        makeRequest("get", "patient/areas")
+        makeRequest("get", "patient/options")
           .then(({ data }) => {
-            this.areas = data.areas;
-            this.pins = data.pins;
+            this.ui.areas = data.areas;
+            this.ui.pins = data.pins;
+            this.ui.occupations = data.occupations;
           })
           .catch((err) => {
             this.errorHandler(err);
           });
-        this.added = false;
-        this.showEmailField = Boolean(this.patient && this.patient.email);
-        this.showPhoneField = Boolean(this.patient && this.patient.phone);
-        this.step = 1;
+        this.ui.added = false;
+
+        if (this.patient)
+          for (const key in this.extraFileds)
+            this.extraFileds[key].visibility = Boolean(this.patient[key]);
+
+        this.ui.step = 1;
         this.patientModel = {};
         this.address = {};
         if (this.patient) this.clonePatientProp();
@@ -573,10 +594,10 @@ export default {
   methods: {
     closeDialog() {
       if (this.closeable) this.model = false;
-      else this.closeConformation = true;
+      else this.ui.closeConformation = true;
     },
     addPatient() {
-      if (this.loading) return;
+      if (this.ui.loading) return;
 
       if (this.$refs.patientForm.validate()) {
         if (this.patient) {
@@ -593,33 +614,33 @@ export default {
           }
           this.updatePatient(data, () => this.showSnackbar("Saved"));
         } else {
-          this.loading = true;
+          this.ui.loading = true;
           makeRequest("post", "patient", this.patientModel)
             .then(({ data }) => {
               if (this.patient) this.$emit("update:patient", data);
               else this.patientModel = clone(data);
 
-              this.loading = false;
-              this.$nextTick(() => (this.step = 2));
+              this.ui.loading = false;
+              this.$nextTick(() => (this.ui.step = 2));
             })
             .catch((err) => {
-              this.loading = false;
+              this.ui.loading = false;
               this.errorHandler(err);
             });
         }
       } else this.showSnackbar("Please enter all the details");
     },
     uploadPicture() {
-      if (this.loading) return;
+      if (this.ui.loading) return;
 
       let data = new FormData();
       data.append("avatar", this.avatar.fd, this.avatar.fd.name);
       data.append("id", this.patientModel._id);
 
-      this.updatePatient(data, () => (this.step = 3));
+      this.updatePatient(data, () => (this.ui.step = 3));
     },
     updateExtra() {
-      if (this.loading) return;
+      if (this.ui.loading) return;
 
       if (this.$refs.extraForm.validate())
         this.updatePatient(
@@ -629,7 +650,7 @@ export default {
           },
           () => {
             if (this.patient) this.showSnackbar("Saved");
-            else this.added = true;
+            else this.ui.added = true;
           }
         );
       else this.showSnackbar("Please enter all the details");
@@ -639,31 +660,31 @@ export default {
       let dragging = ev.type == "dragenter" || ev.type == "dragover";
 
       if (dragging) {
-        this.dragEvent.x = ev.x;
-        this.dragEvent.y = ev.y;
+        this.ui.dragEvent.x = ev.x;
+        this.ui.dragEvent.y = ev.y;
       }
 
       if (ev.type == "drop")
         this.avatar.fd = ev.dataTransfer.files && ev.dataTransfer.files[0];
 
-      if (this.dragEvent.dragging != dragging)
-        this.$nextTick(() => (this.dragEvent.dragging = dragging));
+      if (this.ui.dragEvent.dragging != dragging)
+        this.$nextTick(() => (this.ui.dragEvent.dragging = dragging));
     },
     updatePatient(data, then) {
-      if (this.loading) return;
+      if (this.ui.loading) return;
 
       if (this.$refs.patientForm.validate()) {
-        this.loading = true;
+        this.ui.loading = true;
 
         makeRequest("put", "patient", data)
           .then(({ data }) => {
-            this.loading = false;
+            this.ui.loading = false;
             if (this.patient) this.$emit("update:patient", data);
             else this.patientModel = clone(data);
             then && then();
           })
           .catch((err) => {
-            this.loading = false;
+            this.ui.loading = false;
             this.errorHandler(err);
           });
       }
