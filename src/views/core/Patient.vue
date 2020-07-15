@@ -10,7 +10,7 @@
         <patient-dialog
           v-model="patientDialog"
           :no-activator="$vuetify.breakpoint.smAndDown"
-          @patient-add="(ev) => patients.push(ev)"
+          @patient:added="(ev) => patients.push(ev)"
         >
         </patient-dialog>
         <v-divider
@@ -227,6 +227,9 @@
       v-model="profile.model"
       :patient.sync="profile.patient"
       @update:patient="init"
+      @patient:removed="
+        (id) => (patients = patients.filter((patient) => patient._id != id))
+      "
       no-activator
     ></patient-dialog>
   </v-container>
@@ -254,27 +257,15 @@ export default {
 
     ui: {
       headers: [
-        {
-          text: "Patient Id",
-          value: "pid",
-        },
+        { text: "Patient Id", value: "pid" },
         {
           text: "Patient Since",
           value: "createdAt",
           width: 80,
         },
-        {
-          text: "Name",
-          value: "prefixFullname",
-        },
-        {
-          text: "Age & Sex",
-          value: "age",
-        },
-        {
-          text: "Diagnosis",
-          value: "diagnosis",
-        },
+        { text: "Name", value: "prefixFullname" },
+        { text: "Age & Sex", value: "age" },
+        { text: "Diagnosis", value: "diagnosis" },
         {
           text: "Area",
           value: "address.area",
@@ -313,8 +304,11 @@ export default {
     "ui.sortDesc"(a) {
       localStorage.setItem("clinax.patient.sortDesc", a);
     },
-    patients() {
-      this.makeitems();
+    patients: {
+      deep: true,
+      handler() {
+        this.makeitems();
+      },
     },
     filter() {
       this.makeitems();

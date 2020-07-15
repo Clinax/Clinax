@@ -38,11 +38,18 @@
     <v-card v-else-if="model">
       <v-subheader v-if="patientModel._id" class="grey lighten-4">
         <span>{{ patientModel.fullname }}'s Profile</span>
-        <v-spacer></v-spacer>
+        <v-spacer class="mx-3"></v-spacer>
+        <v-btn
+          color="error"
+          @click="ui.deleteConfirmation = { model: true, name: '' }"
+          icon
+        >
+          <v-icon>mdi-delete-circle</v-icon>
+        </v-btn>
         <v-btn
           class="mx-3"
-          color="primary"
           :to="'/app/case/' + patientModel._id"
+          color="primary"
           @click="closeDialog"
           depressed
           small
@@ -446,7 +453,7 @@
       </v-stepper>
     </v-card>
 
-    <v-dialog v-model="ui.closeConformation" max-width="280">
+    <v-dialog v-model="ui.closeConfirmation" max-width="280">
       <v-card>
         <v-card-title>Are you sure?</v-card-title>
         <v-card-text>You will lose all the progess</v-card-text>
@@ -455,11 +462,50 @@
           <v-btn
             color="primary"
             depressed
-            @click.native="ui.closeConformation = false"
+            @click.native="ui.closeConfirmation = false"
           >
             cancel
           </v-btn>
           <v-btn outlined @click.native="model = false">OK</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="ui.deleteConfirmation.model" max-width="340">
+      <v-card>
+        <v-card-title>Are you sure?</v-card-title>
+        <v-card-text>
+          <p>
+            <span> Retype patient name </span>
+            <code class="text-truncate">{{ patientModel.fullname }}</code>
+            <span> to confirm delete </span>
+          </p>
+          <v-text-field
+            v-model="ui.deleteConfirmation.name"
+            solo-inverted
+            hide-details
+            solo
+            flat
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            @click.native="ui.deleteConfirmation.model = false"
+            depressed
+          >
+            cancel
+          </v-btn>
+          <v-btn
+            v-if="patientModel.fullname"
+            color="error"
+            :disabled="patientModel.fullname != ui.deleteConfirmation.name"
+            @click="deletePatient"
+            outlined
+          >
+            Delete
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -526,7 +572,8 @@ export default {
       birthDateMenu: false,
       dragEvent: { dragging: false, x: 0, y: 0 },
       added: false,
-      closeConformation: false,
+      closeConfirmation: false,
+      deleteConfirmation: { model: false, name: "" },
       step: 1,
       loading: false,
       areas: [],
@@ -594,7 +641,7 @@ export default {
   methods: {
     closeDialog() {
       if (this.closeable) this.model = false;
-      else this.ui.closeConformation = true;
+      else this.ui.closeConfirmation = true;
     },
     addPatient() {
       if (this.ui.loading) return;
@@ -688,6 +735,22 @@ export default {
             this.errorHandler(err);
           });
       }
+    },
+    deletePatient() {
+      makeRequest("delete", "patient", { id: this.patientModel._id })
+        .then(() => {
+          this.$emit("patient:removed", this.patientModel._id);
+
+          this.ui.deleteConfirmation = { model: false, name: "" };
+          this.model = false;
+
+          if (window.location.pathname != "/app/patients/")
+            this.$router.push("/app/patients/");
+        })
+        .catch((err) => {
+          this.ui.loading = false;
+          this.errorHandler(err);
+        });
     },
     clonePatientProp() {
       if (this.patient) {
