@@ -12,10 +12,8 @@ import List from "./widgets/List";
 import Snackbar from "./widgets/Snackbar";
 import WOI from "./widgets/WOI";
 import PatientDialog from "./app/widgets/PatientDialog";
-import { RecycleScroller } from "vue-virtual-scroller";
 
 import "vue2-perfect-scrollbar/dist/vue2-perfect-scrollbar.css";
-import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 
 Vue.use(VueMask);
 Vue.use(PortalVue);
@@ -23,7 +21,6 @@ Vue.use(VueClipboard);
 Vue.use(PerfectScrollbar);
 
 Vue.component("draggable", draggable);
-Vue.component("RecycleScroller", RecycleScroller);
 
 Vue.component("icon", Icon);
 Vue.component("woi", WOI);
