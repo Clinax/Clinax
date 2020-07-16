@@ -115,11 +115,11 @@
 import moment from "moment";
 
 import DigitalClock from "vue-digital-clock";
-import ComponentWithModel from "@/components/widgets/ComponentWithModel";
+import Toggleable from "@/components/widgets/Toggleable";
 import EventCalendar from "@/components/app/widgets/EventCalendar";
 
 export default {
-  extends: ComponentWithModel,
+  extends: Toggleable,
   components: { DigitalClock, EventCalendar },
 
   data: () => ({
