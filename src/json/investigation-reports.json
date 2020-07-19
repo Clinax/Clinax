@@ -1,0 +1,157 @@
+[
+  {
+    "name": "CBC",
+    "heads": ["Test", "Result", "Unit", "Normal Value"],
+    "rows": [
+      {
+        "name": "Haemoglobin",
+        "head": true,
+        "3": "gm/dL",
+        "4": "M: 14 &mdash; 18 F: 12 &mdash;16"
+      },
+      { "name": "R.B.Cs", "3": "", "4": "" },
+      { "name": "R.B.C. Count", "3": "mill/cu.mm", "4": "3.8 &mdash; 5.8" },
+      { "name": "P.C.V.", "3": "%", "4": "35 &mdash; 47" },
+      { "name": "M.C.V.", "3": "fl ", "4": "76 &mdash; 96" },
+      { "name": "M.C.H.", "3": "pg", "4": "27 &mdash; 32" },
+      { "name": "M.C.H.C.", "3": "g/dL", "4": "32 &mdash; 36" },
+      { "name": "W.B.Cs", "3": "", "4": "" },
+      { "section": "Differential WBC count" },
+      { "name": "Neutrophils", "3": "%", "4": "40 &mdash; 70" },
+      { "name": "Lymphocytes", "3": "%", "4": "20 &mdash; 40" },
+      { "name": "Eosinophils", "3": "%", "4": "0 &mdash; 6" },
+      { "name": "Monocytes", "3": "%", "4": "1 &mdash; 8" },
+      { "name": "Basophils", "3": "%", "4": "0 &mdash; 1" },
+      {
+        "name": "E.S.R (Westergren's method)",
+        "3": "mm",
+        "4": "M: 0 &mdash; 15 mm after 1<sup>st</sup>hrs.<br>F: 0 &mdash; 20 mm after 1<sup>st</sup>hrs."
+      },
+      { "name": "Platelete", "3": "10^3/ul", "4": "150 &mdash; 450" }
+    ]
+  },
+  "HBsAg",
+  "VDRL",
+  "HIV",
+  "USG",
+  "Beta HCG",
+  {
+    "name": "Blood Sugar",
+    "heads": ["Test", "Result", "Normal Value"],
+    "rows": [
+      {
+        "name": "Random Sugar",
+        "3": ""
+      },
+      {
+        "name": "Fasting Sugar",
+        "3": ""
+      },
+      {
+        "name": "PP Sugar",
+        "3": ""
+      },
+      {
+        "name": "Urine Sugar",
+        "3": ""
+      }
+    ]
+  },
+  {
+    "name": "Urine Routine (Tabular)",
+    "heads": ["Test", "Result"],
+    "rows": [
+      { "section": "Physical Examination" },
+      { "name": "Quantity" },
+      { "name": "Colour" },
+      { "name": "Apperanace" },
+      { "name": "Specific Gravity" },
+      { "name": "Reaction" },
+      { "section": "Chemical Examination" },
+      { "name": "Proteins" },
+      { "name": "Sugar" },
+      { "name": "Ketone Bodies" },
+      { "name": "Bile Salts" },
+      { "name": "Bile Pigment" },
+      { "name": "Occult Blood" },
+      { "section": "Microscopic Examination" },
+      { "name": "RBC" },
+      { "name": "Pus cells" },
+      { "name": "Epithlical cells" },
+      { "name": "Crystals" },
+      { "name": "Casts" },
+      { "name": "Othes" }
+    ]
+  },
+  "Urine routine (R + M)",
+  {
+    "name": "Lipid Profile Test",
+    "heads": ["Test", "Result", "Normal Value"],
+    "rows": [
+      {
+        "name": "Total Cholestrol",
+        "3": "125 &mdash; 200mg/ dl"
+      },
+      {
+        "name": "HDL Cholestrol (Direct)",
+        "3": "30 &mdash; 65mg/ dl"
+      },
+      {
+        "name": "LDL Cholestrol",
+        "3": "85 &mdash; 130mg/ dl"
+      },
+      {
+        "name": "Triglycerides",
+        "3": "25 &mdash; 200mg/ dl"
+      },
+      {
+        "name": "VLDL Cholestrol",
+        "3": "5 &mdash; 40mg/ dl"
+      },
+      {
+        "name": "TC/ HDL Ratio",
+        "3": "&lt; 3.0 Low risk<br>3.0 &mdash; 5.0 AVG risk<br>&gt; 5.0 High risk"
+      },
+      {
+        "name": "LDL/ HDL Ratio",
+        "3": "1.5 &mdash; 3.5"
+      }
+    ]
+  },
+  {
+    "name": "Thyroid Profile",
+    "heads": [
+      "Investigation",
+      "Observerd Value",
+      "Unit",
+      "Biological Reference Interval"
+    ],
+    "rows": [
+      {
+        "name": "Free T3",
+        "3": "pg/mL",
+        "4": "1.4 &mdash; 4.4<br>Pregnancy: 2 &mdash; 3.8"
+      },
+      {
+        "name": "Free T4",
+        "3": "ng/dL",
+        "4": "0.8 &mdash; 1.8<br>First Trimester: 0.7 &mdash; 2.0<br>Second Trimester: 0.5 &mdash; 1.6<br>Third Trimester: 0.5 &mdash; 1.6"
+      },
+      {
+        "name": "TSH (Ultrasensitive)",
+        "3": "µlU/mL",
+        "4": "0.45 &mdash; 4.5<br>First Trimester: 0.1 &mdash; 2.5<br>Second Trimester: 0.2 &mdash; 3.0<br>Third Trimester: 0.3 &mdash; 3.0"
+      },
+      {
+        "name": "Microsomal (TPO) Antibody<br>Titre, Serum",
+        "3": "lU/mL",
+        "4": "&lt;&equals; 5.61"
+      },
+      {
+        "name": "Thyroglobulin Antibody (ATG), Serum",
+        "3": "lU/mL",
+        "4": "&lt;&equals; 4.11"
+      }
+    ]
+  }
+]
