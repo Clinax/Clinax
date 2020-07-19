@@ -514,14 +514,14 @@
 
 <script>
 import namePrefixes from "@/json/name-prefixes.json";
-import ComponentWithModel from "@/components/widgets/ComponentWithModel";
+import Toggleable from "@/components/widgets/Toggleable";
 
 import { makeRequest } from "@/modules/request";
 import { isEmpty, clone, isEqual } from "@/modules/object";
 import { getCookie, setCookie } from "@/modules/cookie";
 
 export default {
-  extends: ComponentWithModel,
+  extends: Toggleable,
   props: {
     noActivator: { type: Boolean, default: false },
     patient: { value: Object },

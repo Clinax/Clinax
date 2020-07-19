@@ -43,11 +43,11 @@
 </template>
 
 <script>
-import ComponentWithModel from "@/components/widgets/ComponentWithModel";
+import Toggleable from "@/components/widgets/Toggleable";
 import SearchBar from "@/components/app/widgets/SearchBar";
 
 export default {
-  extends: ComponentWithModel,
+  extends: Toggleable,
   components: { SearchBar },
   data() {
     return {
