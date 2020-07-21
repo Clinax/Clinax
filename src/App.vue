@@ -50,6 +50,18 @@ $border-dashed: 1px dashed
 .border-top {
   border-top: $border !important;
 }
+.border-left {
+  border-left: $border !important;
+
+  &-bold {
+    border-left: $border !important;
+    border-width: 4px !important;
+  }
+}
+.border-primary {
+  border-color: var(--v-primary-base) !important;
+}
+
 .rounded {
   border-radius: 0.25rem !important;
 }
