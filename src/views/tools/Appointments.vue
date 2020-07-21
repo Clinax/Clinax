@@ -1,14 +1,14 @@
 <template>
   <v-container>
     <v-card class="mx-auto">
-      <v-toolbar flat :prominent="$vuetify.breakpoint.smAndDown">
+      <v-toolbar flat :prominent="isMobile">
         <v-app-bar-nav-icon @click="$router.go(-1)">
           <v-icon>mdi-arrow-left</v-icon>
         </v-app-bar-nav-icon>
         <v-spacer></v-spacer>
 
         <v-btn
-          v-if="$vuetify.breakpoint.mdAndUp"
+          v-if="!isMobile"
           color="primary"
           depressed
           @click="ui.appoinmentDialog.model = { mdoel: true }"
@@ -16,12 +16,7 @@
           <v-icon class="mr-2">mdi-calendar-plus</v-icon>
           Add appointment
         </v-btn>
-        <v-divider
-          v-if="$vuetify.breakpoint.mdAndUp"
-          vertical
-          class="ml-3"
-          inset
-        ></v-divider>
+        <v-divider v-if="!isMobile" vertical class="ml-3" inset></v-divider>
         <v-menu
           v-model="ui.rangeFilterMenu"
           :close-on-content-click="false"
@@ -169,7 +164,7 @@
       ></no-appointment-illustration>
 
       <v-btn
-        v-if="$vuetify.breakpoint.smAndDown"
+        v-if="isMobile"
         color="primary"
         @click="ui.appoinmentDialog.model = true"
         bottom

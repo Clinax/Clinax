@@ -58,7 +58,7 @@
         </v-btn>
         <v-btn text @click="closeDialog" small>
           <v-icon class="ml-2" small>mdi-close</v-icon>
-          <span v-if="$vuetify.breakpoint.mdAndUp">Close</span>
+          <span v-if="!isMobile">Close</span>
         </v-btn>
       </v-subheader>
       <v-divider></v-divider>

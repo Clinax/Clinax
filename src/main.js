@@ -27,6 +27,11 @@ Vue.mixin({
       baseUrl,
     };
   },
+  computed: {
+    isMobile() {
+      return this.$vuetify.breakpoint.smAndDown;
+    },
+  },
   methods: {
     moment,
     log(ev) {

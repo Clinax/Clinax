@@ -5,23 +5,20 @@
       <slot></slot>
       <v-menu
         v-if="filterItems"
-        left
-        :close-on-content-click="false"
-        class="flex-grow-0"
         v-model="menu"
+        class="flex-grow-0"
+        :close-on-content-click="false"
+        left
       >
         <template v-slot:activator="{ on }">
-          <v-btn icon v-on="on" class="flex-grow-0 mr-3">
-            <v-badge :value="filtered" color="transparent" top right>
-              <template v-slot:badge>
-                <v-icon color="primary">mdi-circle-medium</v-icon>
-              </template>
-              <icon
-                icon="mdi-filter-variant"
-                :title="'Filter by ' + filterBy || 'status'"
-              ></icon>
-            </v-badge>
-          </v-btn>
+          <icon-button
+            v-on="on"
+            :badge="filtered"
+            :title="'Filter by ' + filterBy || 'status'"
+            class="flex-grow-0 mr-3"
+            icon="mdi-filter-variant"
+          >
+          </icon-button>
         </template>
         <v-card>
           <v-subheader>Filters</v-subheader>
@@ -87,7 +84,7 @@
         </v-card>
       </v-menu>
       <v-text-field
-        v-if="$vuetify.breakpoint.mdAndUp"
+        v-if="!isMobile"
         v-model="search"
         class="flex-grow-1"
         label="Search"
@@ -130,10 +127,7 @@
         </v-card>
       </v-menu>
     </div>
-    <div
-      v-if="$vuetify.breakpoint.smAndDown"
-      style="left: 1rem; position: absolute; right: 1rem;"
-    >
+    <div v-if="isMobile" style="left: 1rem; position: absolute; right: 1rem;">
       <v-text-field
         v-model="search"
         class="flex-grow-1 my-2"
@@ -152,8 +146,10 @@
 
 <script>
 import { json2excel } from "js2excel";
+import IconButton from "./IconButton";
 
 export default {
+  components: { IconButton },
   props: {
     filterItems: Array,
     filter: { type: Array, default: () => [] },

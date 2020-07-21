@@ -1,7 +1,7 @@
 <template>
-  <v-container>
+  <responsive-container>
     <v-card>
-      <v-toolbar flat :prominent="$vuetify.breakpoint.smAndDown">
+      <v-toolbar flat :prominent="isMobile">
         <v-app-bar-nav-icon @click="$router.go(-1)">
           <v-icon>mdi-arrow-left</v-icon>
         </v-app-bar-nav-icon>
@@ -9,47 +9,27 @@
         <v-spacer></v-spacer>
         <patient-dialog
           v-model="patientDialog"
-          :no-activator="$vuetify.breakpoint.smAndDown"
+          :no-activator="isMobile"
           @patient:added="(ev) => patients.push(ev)"
         >
         </patient-dialog>
-        <v-divider
-          v-if="$vuetify.breakpoint.mdAndUp"
-          class="ml-3"
-          vertical
-          inset
-        ></v-divider>
-        <v-btn
+        <v-divider v-if="!isMobile" class="ml-3" vertical inset></v-divider>
+        <icon-button
+          class="mx-3"
+          :icon="ui.dense ? 'mdi-format-list-text' : 'mdi-format-list-bulleted'"
+          :active="ui.dense"
+          title="(Un) Dense"
           @click="ui.dense = !ui.dense"
-          :class="{ 'v-btn--active': ui.dense }"
-          :color="ui.dense ? 'primary' : ''"
-          :outlined="ui.dense"
-          class="mx-3"
-          icon
         >
-          <icon
-            :icon="
-              ui.dense ? 'mdi-format-list-text' : 'mdi-format-list-bulleted'
-            "
-            title="(Un) Dense"
-          >
-          </icon>
-        </v-btn>
-        <v-btn
+        </icon-button>
+        <icon-button
           @click="ui.groupBy = !ui.groupBy"
-          :class="{ 'v-btn--active': ui.groupBy }"
-          :color="ui.groupBy ? 'primary' : ''"
-          :outlined="ui.groupBy"
-          icon
+          :active="ui.groupBy"
+          title="Group By Gender"
+          icon="mdi-gender-transgender"
         >
-          <icon icon="mdi-gender-transgender" title="Group By Gender"> </icon>
-        </v-btn>
-        <v-divider
-          v-if="$vuetify.breakpoint.mdAndUp"
-          class="mx-3"
-          vertical
-          inset
-        ></v-divider>
+        </icon-button>
+        <v-divider v-if="!isMobile" class="mx-3" vertical inset></v-divider>
         <toolbar-tools
           @search="(ev) => (ui.search = ev)"
           :filter-items="[
@@ -65,7 +45,7 @@
         </toolbar-tools>
       </v-toolbar>
       <v-btn
-        v-if="$vuetify.breakpoint.smAndDown"
+        v-if="isMobile"
         color="primary"
         class="ma-3"
         @click="patientDialog = true"
@@ -232,7 +212,7 @@
       "
       no-activator
     ></patient-dialog>
-  </v-container>
+  </responsive-container>
 </template>
 
 <script>

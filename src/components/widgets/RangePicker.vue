@@ -1,12 +1,7 @@
 <template>
   <v-card>
     <v-layout>
-      <v-sheet
-        v-if="$vuetify.breakpoint.mdAndUp"
-        color="primary"
-        min-width="240"
-        dark
-      >
+      <v-sheet v-if="!isMobile" color="primary" min-width="240" dark>
         <v-list class="transparent">
           <v-subheader>Presets</v-subheader>
           <v-list-item
