@@ -1,28 +1,41 @@
 <template>
   <v-list>
-    <v-subheader v-if="!hideHeader">{{ headerText }}</v-subheader>
-    <v-list-item v-for="(option, i) in options" :class="[option.bg]" :key="i">
-      <v-list-item-action v-if="option.icon">
-        <v-badge :value="Boolean(option.badge)">
-          <template v-slot:badge>{{ option.badge }}</template>
-          <v-icon :color="option.color">{{ option.icon }}</v-icon>
-        </v-badge>
-      </v-list-item-action>
-      <v-list-item-content :class="[option.textcolor]">
-        <v-list-item-title v-html="option.text || option"> </v-list-item-title>
-      </v-list-item-content>
-      <v-list-item-action v-if="option.append">
-        <v-icon>{{ option.append }}</v-icon>
-      </v-list-item-action>
-    </v-list-item>
+    <template v-for="option in options">
+      <v-subheader v-if="option.header" :key="option.header">
+        {{ option.header }}
+      </v-subheader>
+      <ToolbarMenu
+        v-else-if="option.items"
+        :options="option.items"
+        :header-text="option.text"
+        :key="option.text"
+        :menu-props="{ top: true, closeOnContentClick: true }"
+      >
+        <template v-slot:activator="{ on }">
+          <menu-list-item
+            v-on="on"
+            v-bind="option"
+            append="mdi-menu-right"
+          ></menu-list-item>
+        </template>
+      </ToolbarMenu>
+      <menu-list-item
+        v-else
+        v-on="option.on"
+        v-bind="option"
+        :class="[option.bg]"
+        :key="option.text"
+      ></menu-list-item>
+    </template>
   </v-list>
 </template>
 
 <script>
+import MenuListItem from "./MenuListItem";
+
 export default {
+  components: { ToolbarMenu: () => import("./ToolbarMenu"), MenuListItem },
   props: {
-    hideHeader: Boolean,
-    headerText: { type: String, default: () => "Menu" },
     options: { type: Array, default: () => [] },
   },
 };

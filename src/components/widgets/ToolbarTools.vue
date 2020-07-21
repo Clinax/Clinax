@@ -15,7 +15,7 @@
             v-on="on"
             :badge="filtered"
             :title="'Filter by ' + filterBy || 'status'"
-            class="flex-grow-0 mr-3"
+            class="flex-grow-0"
             icon="mdi-filter-variant"
           >
           </icon-button>
@@ -86,7 +86,7 @@
       <v-text-field
         v-if="!isMobile"
         v-model="search"
-        class="flex-grow-1"
+        class="flex-grow-1 mx-3"
         label="Search"
         prepend-inner-icon="mdi-magnify"
         @input="(ev) => $emit('search', ev)"
@@ -97,35 +97,7 @@
         flat
         solo
       ></v-text-field>
-
-      <v-menu left class="flex-grow-0">
-        <template v-slot:activator="{ on }">
-          <v-btn icon v-on="on" class="flex-grow-0 mr-0">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-        <v-card>
-          <v-subheader>Menu</v-subheader>
-          <v-list class="pt-0">
-            <v-list-item @click="$emit('refresh')">
-              <v-list-item-action>
-                <v-icon>mdi-refresh</v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>Refresh</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item @click="downloadXLS">
-              <v-list-item-action>
-                <v-icon>mdi-file-excel-outline</v-icon>
-              </v-list-item-action>
-              <v-list-item-content>
-                <v-list-item-title>Download Excel</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </v-card>
-      </v-menu>
+      <toolbar-menu :options="options" class="flex-grow-0"></toolbar-menu>
     </div>
     <div v-if="isMobile" style="left: 1rem; position: absolute; right: 1rem;">
       <v-text-field
@@ -147,9 +119,10 @@
 <script>
 import { json2excel } from "js2excel";
 import IconButton from "./IconButton";
+import ToolbarMenu from "./ToolbarMenu";
 
 export default {
-  components: { IconButton },
+  components: { IconButton, ToolbarMenu },
   props: {
     filterItems: Array,
     filter: { type: Array, default: () => [] },
@@ -162,7 +135,26 @@ export default {
       menu: false,
       search: "",
       filterModel: [...this.filter],
-
+      options: [
+        {
+          text: "Refresh",
+          icon: "mdi-refresh",
+          on: {
+            click: function () {
+              this.$emit("refresh");
+            }.bind(this),
+          },
+        },
+        {
+          text: "Download Excel",
+          icon: "mdi-file-excel-outline",
+          on: {
+            click: function () {
+              this.downloadXLS();
+            }.bind(this),
+          },
+        },
+      ],
       /* DATE FILTERS */
       clear: false,
     };
@@ -174,7 +166,7 @@ export default {
   },
   computed: {
     filtered() {
-      return this.filterModel.length || this.clear;
+      return !!this.filterModel.length || this.clear;
     },
   },
   methods: {

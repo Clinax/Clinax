@@ -1,6 +1,6 @@
 <template>
   <v-btn
-    @click="(ev) => $emit('click', ev)"
+    v-on="$listeners"
     :class="{ 'v-btn--active': active }"
     :color="active ? 'primary' : ''"
     :outlined="active"

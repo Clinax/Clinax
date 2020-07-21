@@ -1,5 +1,5 @@
 <template>
-  <v-menu v-model="model">
+  <v-menu v-model="model" v-bind="menuProps" min-width="190" bottom left>
     <template v-slot:activator="props">
       <slot name="activator" v-bind="props">
         <v-btn v-on="props.on" icon>
@@ -8,24 +8,25 @@
       </slot>
     </template>
     <v-card>
-      <slot>
-        <menu-list :options="options"></menu-list>
-      </slot>
+      <menu-list
+        :options="hideHeader ? options : [{ header: headerText }, ...options]"
+      ></menu-list>
     </v-card>
   </v-menu>
 </template>
 
 <script>
 import Toggleable from "./Toggleable";
-import MenuList from "./MenuList";
-// eslint-disable-next-line no-console
 
 export default {
   extends: Toggleable,
-  components: { MenuList },
+  components: { MenuList: () => import("./MenuList") },
   props: {
+    options: { type: Array, default: () => [] },
+    hideHeader: Boolean,
+    headerText: { type: String, default: () => "Menu" },
     activatorIcon: { type: String, default: () => "mdi-dots-vertical" },
-    ...MenuList.props,
+    menuProps: Object,
   },
 };
 </script>
