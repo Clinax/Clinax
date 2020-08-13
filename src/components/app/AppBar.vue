@@ -5,6 +5,7 @@
     :extension-height="$store.state.app.extensionHeight"
     elevate-on-scroll
     hide-on-scroll
+    clipped-right
     app
   >
     <v-divider
@@ -17,7 +18,7 @@
     </v-toolbar-title>
 
     <v-spacer v-if="!active"></v-spacer>
-    <search-bar class="mx-3 flex-grow-1"> </search-bar>
+    <search-bar class="mx-3 flex-grow-1" v-if="!isMobile"> </search-bar>
     <v-spacer v-if="!active"></v-spacer>
     <v-btn
       v-if="!active"

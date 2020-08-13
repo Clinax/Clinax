@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <responsive-container>
     <v-card class="mx-auto">
       <v-toolbar flat :prominent="isMobile">
         <v-app-bar-nav-icon @click="$router.go(-1)">
@@ -183,7 +183,7 @@
         ((ev) => (init(), (ui.appoinmentDialog.model = false)))
       "
     ></appointment-form>
-  </v-container>
+  </responsive-container>
 </template>
 
 <script>

@@ -130,9 +130,13 @@ export default {
       rules: {
         username: [
           (v) => !!v || "Username is required",
-          (v) =>
-            ((v && v.length) || 0) <= 16 ||
-            "Username must be less than 16 characters",
+          (v) => {
+            let length = (v && v.length) || 0;
+            return (
+              (4 <= length && length <= 16) ||
+              "Username must be of 4 - 16 characters"
+            );
+          },
         ],
         password: getReqiredField("Password"),
         email: FIELD_EMAIL,
