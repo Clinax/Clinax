@@ -4,7 +4,9 @@
       <v-badge :color="dotColor" :value="badge" dot>
         <span v-on="on" :class="classes" class="d-inline">
           <i v-if="fa" :class="classes" :style="fcolor"></i>
-          <v-icon v-else v-bind="$props">{{ icon }}</v-icon>
+          <v-icon v-else v-bind="$props">
+            <slot>{{ icon }}</slot>
+          </v-icon>
         </span>
       </v-badge>
     </template>
@@ -12,7 +14,9 @@
   </v-tooltip>
   <span v-else :class="classes" class="d-inline">
     <i v-if="fa" :class="classes" :style="fcolor"></i>
-    <v-icon v-else v-bind="$props">{{ icon }}</v-icon>
+    <v-icon v-else v-bind="$props">
+      <slot>{{ icon }}</slot>
+    </v-icon>
   </span>
 </template>
 
@@ -24,7 +28,7 @@ export default {
     ...VIcon.props,
     badge: { type: Boolean, default: false },
     dotColor: { type: String, default: "primary" },
-    icon: { type: String, required: true },
+    icon: { type: String },
     title: { type: String, required: false, default: "" },
     cls: { type: String, default: "" },
     fa: { type: Boolean, default: false },

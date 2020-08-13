@@ -7,6 +7,20 @@ export default {};
 </script>
 
 <style lang="scss">
+.hide-number-arrows {
+  -webkit-appearance: none;
+  /* Chrome, Safari, Edge, Opera */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Firefox */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
 .w-100 {
   width: 100%;
 }
@@ -20,23 +34,37 @@ h-100 {
 a {
   text-decoration: none !important;
 }
+.flex-grow-1 {
+  flex-grow: 1;
+}
+.flex-grow-0 {
+  flex-grow: 0;
+}
 .overflow-auto {
   overflow: auto;
 }
 .overflow-hidden {
   overflow: hidden;
 }
+.overlay {
+  position: relative;
+  * {
+    z-index: 0;
+  }
 
-$border: 1px solid
-  rgba(
-    $color: #000000,
-    $alpha: 0.12,
-  );
-$border-dashed: 1px dashed
-  rgba(
-    $color: #000000,
-    $alpha: 0.12,
-  );
+  &-container {
+    position: absolute;
+    top: 0;
+    z-index: 1;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+}
+
+$border: 1px solid rgba(0, 0, 0, 0.12);
+
+$border-dashed: 1px dashed rgba(0, 0, 0, 0.12);
 
 .border-0 {
   border: none !important;

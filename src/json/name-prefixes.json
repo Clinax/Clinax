@@ -3,6 +3,7 @@
   "1st Lt",
   "Adm",
   "Atty",
+  "Baby",
   "Brother",
   "Capt",
   "Chief",
@@ -16,14 +17,16 @@
   "Gov",
   "Hon",
   "Lt Col",
-  "Maj",
   "MSgt",
+  "Maj",
   "Mr",
   "Mrs",
   "Ms",
+  "Mst",
   "Prince",
   "Prof",
   "Rabbi",
   "Rev",
-  "Sister"
+  "Sister",
+  "Smt"
 ]

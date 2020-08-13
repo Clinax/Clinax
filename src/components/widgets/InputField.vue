@@ -34,7 +34,7 @@
 
     <component
       ref="field"
-      v-on="on"
+      v-on="$listeners"
       v-bind:is="field || 'v-text-field'"
       v-model="model"
       v-bind="textfield"
@@ -79,7 +79,6 @@ export default {
     inputRules: { type: Array, default: () => [] },
     field: String,
     mask: String,
-    on: Object,
     editableHeader: { type: Boolean, default: false },
     removable: { type: Boolean, default: false },
   },

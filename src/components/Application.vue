@@ -20,12 +20,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss">
-.flex-grow-1 {
-  flex-grow: 1;
-}
-.border-bottom {
-  border-bottom: 1px solid #676767 !important;
-}
-</style>
