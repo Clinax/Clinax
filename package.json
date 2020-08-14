@@ -5,7 +5,9 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "upload": "aws s3 sync dist s3://clinax.in --acl public-read",
+    "publish": "npm run build & npm run upload"
   },
   "dependencies": {
     "axios": "^0.19.2",

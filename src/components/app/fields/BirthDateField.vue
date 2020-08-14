@@ -16,7 +16,7 @@
         label: 'Age',
         type: 'number',
         autocomplete: 'off',
-        max: 100,
+        max: 130,
         min: 0,
         ...textfield,
       }"

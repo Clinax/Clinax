@@ -126,6 +126,9 @@ export default {
     validate() {
       return this.$refs.addressForm.validate();
     },
+    reset() {
+      return this.$refs.addressForm.reset();
+    },
     submit() {
       // eslint-disable-next-line no-console
       if (this.validate()) emitUpdate(null, null, "submit");

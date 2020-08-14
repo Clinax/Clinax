@@ -4,13 +4,17 @@
     v-on="$listeners"
     v-bind="$props"
     field="v-select"
-    label="Prefix"
+    :label="inlineLabel ? null : 'Prefix'"
+    :textfield="{
+      label: inlineLabel ? 'Prefix' : '',
+      items: prefixes,
+      ...textfield,
+    }"
     @input="
       (model === '- Less' &&
         ((prefixes = ['Mr', 'Mrs', 'Ms', '+ More']), (model = null))) ||
         (model === '+ More' && ((prefixes = namePrefixes), (model = null)))
     "
-    :textfield="{ items: prefixes, ...textfield }"
   >
   </input-field>
 </template>
@@ -21,7 +25,7 @@ import InputField from "@/components/widgets/InputField";
 
 export default {
   components: { InputField },
-  props: { ...InputField.props },
+  props: { ...InputField.props, inlineLabel: Boolean },
   data() {
     return {
       model: this.value || "",
