@@ -1,5 +1,7 @@
-import { URL_REGEX } from "../modules/regex";
 import stc from "string-to-color";
+
+import { URL_REGEX } from "../modules/regex";
+import { decompressFromUTF16 } from "lz-string";
 
 export function isProduction() {
   return process.env.NODE_ENV === "production";
@@ -32,3 +34,7 @@ export const getFromColorMap = (text) =>
  * @param {String} color hex color
  */
 export const setInColorMap = (text, color) => (colorMap[text] = color);
+
+export function decrypt(data) {
+  return JSON.parse(decompressFromUTF16(data));
+}
