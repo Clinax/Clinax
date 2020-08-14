@@ -58,7 +58,7 @@
         </v-btn>
         <v-btn text @click="closeDialog" small>
           <v-icon class="ml-2" small>mdi-close</v-icon>
-          <span v-if="$vuetify.breakpoint.mdAndUp">Close</span>
+          <span v-if="!isMobile">Close</span>
         </v-btn>
       </v-subheader>
       <v-divider></v-divider>
@@ -99,26 +99,13 @@
             >
               <v-card-text class="grey lighten-4">
                 <v-layout>
-                  <input-field
+                  <prefix-field
                     v-model="patientModel.prefix"
-                    field="v-select"
-                    label="Prefix"
-                    @input="
-                      (patientModel.prefix === '- Less' &&
-                        ((prefixes = ['Mr', 'Mrs', 'Ms', '+ More']),
-                        (patientModel.prefix = null))) ||
-                        (patientModel.prefix === '+ More' &&
-                          ((prefixes = namePrefixes),
-                          (patientModel.prefix = null)))
-                    "
-                    :textfield="{
-                      items: prefixes,
-                      autocomplete: 'off',
-                    }"
+                    :textfield="{ autocomplete: 'off' }"
                     :col="{ cols: 3 }"
                     required
                   >
-                  </input-field>
+                  </prefix-field>
 
                   <input-field
                     v-model="patientModel.fullname"
@@ -132,114 +119,21 @@
                     required
                   ></input-field>
                 </v-layout>
-                <input-field
+                <gender-field
                   field="v-select"
                   v-model="patientModel.gender"
-                  :textfield="{
-                    label: 'Gender',
-                    items: [
-                      { text: 'Male', value: 'male' },
-                      { text: 'Female', value: 'female' },
-                      { text: 'Other', value: 'non-binary' },
-                    ],
-                    prependInnerIcon:
-                      (patientModel.gender &&
-                        `mdi-gender-${patientModel.gender}`) ||
-                      'mdi-help',
-                  }"
                   required
-                ></input-field>
-                <v-layout>
-                  <input-field
-                    v-if="age"
-                    v-model="patientModel.age"
-                    @input="
-                      (ev) =>
-                        (patientModel.birthDate =
-                          ev &&
-                          moment(String(new Date().getFullYear() - ev)).format(
-                            'YYYY-MM-DD'
-                          ))
-                    "
-                    :textfield="{
-                      prependInnerIcon: ' mdi-cake-variant',
-                      label: 'Age',
-                      type: 'number',
-                      autocomplete: 'off',
-                      max: 100,
-                      min: 1,
-                    }"
-                    required
-                  ></input-field>
-                  <v-menu
-                    v-else
-                    v-model="ui.birthDateMenu"
-                    :close-on-content-click="false"
-                    max-width="290px"
-                    min-width="290px"
-                    offset-y
-                    top
-                  >
-                    <template v-slot:activator="{ on }">
-                      <input-field
-                        :on="on"
-                        :value="
-                          moment(patientModel.birthDate).format('Do MMM YYYY')
-                        "
-                        :textfield="{
-                          label: 'Date of Birth',
-                          autocomplete: 'off',
-                          prependInnerIcon: ' mdi-cake-variant',
-                          readonly: true,
-                        }"
-                        required
-                      ></input-field>
-                    </template>
-                    <v-date-picker
-                      @input="
-                        (ev) => {
-                          patientModel.birthDate = ev;
-                          ui.birthDateMenu = false;
-                        }
-                      "
-                      :value="patientModel.birthDate"
-                      :max="moment().format('YYYY-MM-DD')"
-                      no-title
-                    ></v-date-picker>
-                  </v-menu>
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn
-                        class="mt-7 mr-2"
-                        v-on="on"
-                        @click="age = !age"
-                        icon
-                      >
-                        <v-icon>mdi-counter</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>
-                      Change between age input and birth date input
-                    </span>
-                  </v-tooltip>
-                </v-layout>
-                <input-field
-                  field="v-select"
-                  v-model="patientModel.maritalStatus"
+                ></gender-field>
+                <birth-date-field
+                  v-model="patientModel.birthDate"
+                  :age.sync="patientModel.age"
+                  required
+                ></birth-date-field>
+                <marital-status-field
                   label="Marital Status"
-                  :textfield="{
-                    prependInnerIcon: 'mdi-ring',
-                    items: [
-                      'Single',
-                      'Married',
-                      'Engaged',
-                      'Divorced',
-                      'Widowed',
-                      'Separated',
-                    ],
-                  }"
-                  required
-                ></input-field>
+                  v-model="patientModel.maritalStatus"
+                >
+                </marital-status-field>
                 <input-field
                   field="v-combobox"
                   v-model="patientModel.occupation"
@@ -398,56 +292,15 @@
             </template>
           </v-stepper-content>
           <v-stepper-content step="3" class="pa-0">
-            <v-form
+            <address-form
               ref="extraForm"
+              v-bind="address"
+              :pins="ui.pins"
+              :areas="ui.areas"
+              @submit="updateExtra"
+              content-class="grey lighten-4 pt-3 pb-8"
               lazy-validation
-              @submit.prevent="updateExtra"
-            >
-              <v-card-text class="grey lighten-4">
-                <input-field
-                  field="v-textarea"
-                  v-model="address.street"
-                  label="Street address"
-                  :textfield="{
-                    rows: 3,
-                    autoGrow: true,
-                    prependInnerIcon: 'mdi-map',
-                  }"
-                ></input-field>
-                <v-row class="mx-0">
-                  <input-field
-                    field="v-combobox"
-                    v-model="address.area"
-                    label="Area"
-                    :col="{ md: 6, xs: 12 }"
-                    :textfield="{
-                      items: ui.areas,
-                      prependInnerIcon: 'mdi-image-filter-hdr',
-                    }"
-                    required
-                  ></input-field>
-                  <input-field
-                    field="v-combobox"
-                    v-model="address.pincode"
-                    label="Pincode"
-                    :col="{ md: 6, xs: 12 }"
-                    :input-rules="[
-                      (v) => String(v).length == 6 || 'Invalid Pincode',
-                    ]"
-                    :textfield="{
-                      items: ui.pins,
-                      type: 'number',
-                      prependInnerIcon: 'mdi-map-marker-radius-outline',
-                    }"
-                    required
-                  ></input-field>
-                </v-row>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="primary" type="submit">finish</v-btn>
-              </v-card-actions>
-            </v-form>
+            ></address-form>
           </v-stepper-content>
         </v-stepper-items>
       </v-stepper>
@@ -461,12 +314,12 @@
           <v-spacer></v-spacer>
           <v-btn
             color="primary"
-            depressed
             @click.native="ui.closeConfirmation = false"
+            depressed
           >
             cancel
           </v-btn>
-          <v-btn outlined @click.native="model = false">OK</v-btn>
+          <v-btn @click.native="model = false" outlined>OK</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -513,30 +366,37 @@
 </template>
 
 <script>
-import namePrefixes from "@/json/name-prefixes.json";
 import Toggleable from "@/components/widgets/Toggleable";
+import PrefixField from "@/components/app/fields/PrefixField";
+import GenderField from "@/components/app/fields/GenderField";
+import BirthDateField from "@/components/app/fields/BirthDateField";
+import MaritalStatusField from "@/components/app/fields/MaritalStatusField";
+import AddressForm from "@/components/app/forms/AddressForm";
 
 import { makeRequest } from "@/modules/request";
 import { isEmpty, clone, isEqual } from "@/modules/object";
-import { getCookie, setCookie } from "@/modules/cookie";
 
 export default {
   extends: Toggleable,
+  components: {
+    PrefixField,
+    BirthDateField,
+    GenderField,
+    MaritalStatusField,
+    AddressForm,
+  },
   props: {
     noActivator: { type: Boolean, default: false },
     patient: { value: Object },
     block: { type: Boolean, default: false },
   },
   data: () => ({
-    namePrefixes,
-    prefixes: ["Mr", "Mrs", "Ms", "+ More"],
     patientModel: {},
     address: {},
     avatar: {
       fd: null,
       preview: "",
     },
-    age: getCookie("clinax.addPatient.age") == "true",
     extraFileds: {
       email: {
         visibility: false,
@@ -569,7 +429,6 @@ export default {
     },
 
     ui: {
-      birthDateMenu: false,
       dragEvent: { dragging: false, x: 0, y: 0 },
       added: false,
       closeConfirmation: false,
@@ -598,7 +457,6 @@ export default {
     patient() {
       this.clonePatientProp();
     },
-    age: (a) => setCookie("clinax.addPatient.age", a, 100),
     model(a) {
       if (a) {
         makeRequest("get", "patient/options")
@@ -686,21 +544,21 @@ export default {
 
       this.updatePatient(data, () => (this.ui.step = 3));
     },
-    updateExtra() {
+    updateExtra(address) {
+      // eslint-disable-next-line no-console
+      console.log(arguments);
       if (this.ui.loading) return;
 
-      if (this.$refs.extraForm.validate())
-        this.updatePatient(
-          {
-            id: this.patientModel._id,
-            updates: { address: this.address },
-          },
-          () => {
-            if (this.patient) this.showSnackbar("Saved");
-            else this.ui.added = true;
-          }
-        );
-      else this.showSnackbar("Please enter all the details");
+      this.updatePatient(
+        {
+          id: this.patientModel._id,
+          updates: { address },
+        },
+        () => {
+          if (this.patient) this.showSnackbar("Saved");
+          else this.ui.added = true;
+        }
+      );
     },
 
     onFileDrag(ev) {

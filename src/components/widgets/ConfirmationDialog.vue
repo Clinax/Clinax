@@ -1,14 +1,15 @@
 <template>
-  <v-dialog v-model="model">
+  <v-dialog v-model="model" max-width="340">
     <v-card>
       <v-card-title>Are you sure?</v-card-title>
       <v-card-text>
-        Unsaved data will be lost and cannot be recovered
+        Unsaved data will be lost and cannot be recovered.
       </v-card-text>
-      <v-card-action>
-        <v-btn color="primary" @click="close()">cancel</v-btn>
-        <v-btn outlined @click="$emit('next'), close()">ok</v-btn>
-      </v-card-action>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="close()" depressed>cancel</v-btn>
+        <v-btn @click="$emit('next'), close()" text>ok</v-btn>
+      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>

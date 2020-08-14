@@ -1,27 +1,22 @@
 <template>
-  <v-container>
+  <responsive-container>
     <v-card class="mx-auto">
-      <v-toolbar flat :prominent="$vuetify.breakpoint.smAndDown">
+      <v-toolbar flat :prominent="isMobile">
         <v-app-bar-nav-icon @click="$router.go(-1)">
           <v-icon>mdi-arrow-left</v-icon>
         </v-app-bar-nav-icon>
         <v-spacer></v-spacer>
 
         <v-btn
-          v-if="$vuetify.breakpoint.mdAndUp"
+          v-if="!isMobile"
           color="primary"
-          depressed
           @click="ui.appoinmentDialog.model = { mdoel: true }"
+          depressed
         >
           <v-icon class="mr-2">mdi-calendar-plus</v-icon>
           Add appointment
         </v-btn>
-        <v-divider
-          v-if="$vuetify.breakpoint.mdAndUp"
-          vertical
-          class="ml-3"
-          inset
-        ></v-divider>
+        <v-divider v-if="!isMobile" vertical inset class="mx-3"></v-divider>
         <v-menu
           v-model="ui.rangeFilterMenu"
           :close-on-content-click="false"
@@ -31,7 +26,6 @@
           <template v-slot:activator="{ on }">
             <v-btn
               v-on="on"
-              class="mx-3"
               color="primary"
               title="Date Range Filter"
               dark
@@ -145,9 +139,9 @@
           <td :colspan="headers.length">
             <v-card-actions class="w-100">
               <span>Appointments on&nbsp;</span>
-              <span class="pa-1 primary--text">{{
-                moment(items[0].dateTime).format("Do MMMM YYYY")
-              }}</span>
+              <span class="pa-1 primary--text">
+                {{ moment(items[0].dateTime).format("Do MMMM YYYY") }}
+              </span>
               <v-spacer></v-spacer>
               <v-btn color="primary" @click="toggle" small text>
                 <span>{{ items.length }} item(s)</span>
@@ -166,10 +160,11 @@
         v-else
         v-bind="{ date1: formattedDate1, date2: formattedDate2 }"
         @click:add="ui.appoinmentDialog.model = true"
+        @click:date-filter="ui.rangeFilterMenu = true"
       ></no-appointment-illustration>
 
       <v-btn
-        v-if="$vuetify.breakpoint.smAndDown"
+        v-if="isMobile"
         color="primary"
         @click="ui.appoinmentDialog.model = true"
         bottom
@@ -188,7 +183,7 @@
         ((ev) => (init(), (ui.appoinmentDialog.model = false)))
       "
     ></appointment-form>
-  </v-container>
+  </responsive-container>
 </template>
 
 <script>

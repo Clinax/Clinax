@@ -5,6 +5,7 @@
     :extension-height="$store.state.app.extensionHeight"
     elevate-on-scroll
     hide-on-scroll
+    clipped-right
     app
   >
     <v-divider
@@ -12,29 +13,23 @@
     ></v-divider>
     <v-app-bar-nav-icon v-if="!active" @click="model = !model">
     </v-app-bar-nav-icon>
-    <v-toolbar-title v-if="$vuetify.breakpoint.mdAndUp">
+    <v-toolbar-title v-if="!isMobile">
       {{ $store.state.app.title }}
     </v-toolbar-title>
 
     <v-spacer v-if="!active"></v-spacer>
-    <search-bar class="mx-3 flex-grow-1"> </search-bar>
+    <search-bar class="mx-3 flex-grow-1" v-if="!isMobile"> </search-bar>
     <v-spacer v-if="!active"></v-spacer>
     <v-btn
       v-if="!active"
       color="error"
       @click="$store.dispatch('logout')"
       v-bind="
-        $vuetify.breakpoint.smAndDown
-          ? {
-              fab: true,
-              xSmall: true,
-              depressed: true,
-            }
-          : { text: true }
+        isMobile ? { fab: true, xSmall: true, depressed: true } : { text: true }
       "
     >
       <v-icon>mdi-logout</v-icon>
-      <span class="ml-2" v-if="$vuetify.breakpoint.mdAndUp">logout</span>
+      <span class="ml-2" v-if="!isMobile">logout</span>
     </v-btn>
     <template v-slot:extension v-if="$store.state.app.extentedAppBar">
       <portal-target name="app-bar-extension" class="w-100"> </portal-target>

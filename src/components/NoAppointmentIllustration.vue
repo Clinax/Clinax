@@ -23,7 +23,7 @@
             </ul>
           </div>
           <v-card-actions class="my-5 justify-center">
-            <v-btn color="primary" @click="$emit('click:add')">
+            <v-btn color="primary" @click="(ev) => $emit('click:add', ev)">
               <v-icon class="mr-2">mdi-calendar-plus</v-icon>
               Add appointment
             </v-btn>
@@ -31,7 +31,7 @@
             <v-btn
               color="primary"
               title="Date Range Filter"
-              @click="ui.rangeFilterMenu = true"
+              @click="(ev) => $emit('click:date-filter', ev)"
               icon
             >
               <v-icon>mdi-calendar-range</v-icon>

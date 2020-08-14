@@ -27,6 +27,14 @@ Vue.mixin({
       baseUrl,
     };
   },
+  computed: {
+    isMobile() {
+      return this.$vuetify.breakpoint.smAndDown;
+    },
+    isSuperSmall() {
+      return this.$vuetify.breakpoint.xs;
+    },
+  },
   methods: {
     moment,
     log(ev) {
@@ -36,13 +44,16 @@ Vue.mixin({
       }
     },
     errorHandler(err) {
-      store.dispatch("errorHandler", err);
+      store.state.app.snackbar.value = false;
+      this.$nextTick(() => store.dispatch("errorHandler", err));
     },
     showSnackbar(message) {
-      store.dispatch("showSnackbar", message);
+      store.state.app.snackbar.value = false;
+      this.$nextTick(() => store.dispatch("showSnackbar", message));
     },
     showError(message = "Something went wrong") {
-      store.dispatch("showError", message);
+      store.state.app.snackbar.value = false;
+      this.$nextTick(() => store.dispatch("showError", message));
     },
   },
 });
