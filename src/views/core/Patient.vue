@@ -206,7 +206,7 @@
     <patient-dialog
       v-model="profile.model"
       :patient.sync="profile.patient"
-      @update:patient="init"
+      @update:patient="listUpdated"
       @patient:removed="
         (id) => (patients = patients.filter((patient) => patient._id != id))
       "
@@ -299,6 +299,11 @@ export default {
       this.items = this.patients.filter(
         (ev) => !this.filter.length || this.filter.includes(ev.gender)
       );
+    },
+    listUpdated(patient) {
+      let index = this.patients.findIndex((ev) => ev._id == patient._id);
+
+      if (~index) this.patients[index] = patient;
     },
     init() {
       this.ui.loading = true;

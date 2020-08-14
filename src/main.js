@@ -31,6 +31,9 @@ Vue.mixin({
     isMobile() {
       return this.$vuetify.breakpoint.smAndDown;
     },
+    isSuperSmall() {
+      return this.$vuetify.breakpoint.xs;
+    },
   },
   methods: {
     moment,

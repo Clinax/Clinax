@@ -1,0 +1,19 @@
+[
+  { "value": "ayurveda", "text": "Ayurveda" },
+  { "value": "dentist", "text": "Dentist" },
+  { "value": "doctor", "text": "Doctor" },
+  { "value": "ent", "text": "ENT" },
+  { "value": "homeopathic", "text": "Homeopathic" },
+  { "value": "hospital", "text": "Hospital" },
+  { "value": "mr", "text": "Medical Representative (MR)" },
+  { "value": "obstetrician", "text": "Obstetrician" },
+  { "value": "ophthalmologist", "text": "Ophthalmologist" },
+  { "value": "other", "text": "Other" },
+  { "value": "patient", "text": "Patient" },
+  { "value": "pediatrician", "text": "Pediatrician" },
+  { "value": "physician", "text": "Physician" },
+  { "value": "physiotherapist", "text": "Physiotherapist" },
+  { "value": "psychologist", "text": "Psychologist" },
+  { "value": "radiologist", "text": "Radiologist" },
+  { "value": "sonologist", "text": "Sonologist" }
+]
