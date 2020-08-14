@@ -5,12 +5,6 @@
       v-model="ageModel"
       v-on="$listeners"
       v-bind="$props"
-      @input="
-        (ev) =>
-          (model =
-            ev &&
-            moment(String(new Date().getFullYear() - ev)).format('YYYY-MM-DD'))
-      "
       :textfield="{
         prependInnerIcon: ' mdi-cake-variant',
         label: 'Age',
@@ -71,6 +65,7 @@
 </template>
 
 <script>
+import moment from "moment";
 import InputField from "@/components/widgets/InputField";
 import { getCookie, setCookie } from "@/modules/cookie";
 
@@ -81,7 +76,7 @@ export default {
     return {
       model: this.value || "",
       birthDateMenu: false,
-      ageModel: this.age,
+      ageModel: Number(this.age),
       ageField: getCookie("clinax.field.ageField") == "true",
     };
   },
@@ -96,13 +91,19 @@ export default {
       this.model = a;
     },
     model(a) {
-      if (a) {
-        let dateDif = new Date(Date.now() - new Date(a).getTime());
-        this.ageModel = dateDif.getFullYear() - 1970;
-      }
       this.$emit("input", a);
     },
-    ageField: (a) => setCookie("clinax.field.ageField", a, 100),
+    ageField(a) {
+      if (a) {
+        let dateDif = new Date(Date.now() - new Date(this.model).getTime());
+        this.ageModel = dateDif.getFullYear() - 1970;
+      } else
+        this.model = moment(
+          String(new Date().getFullYear() - this.ageModel)
+        ).format("YYYY-MM-DD");
+
+      setCookie("clinax.field.ageField", a, 100);
+    },
   },
 };
 </script>

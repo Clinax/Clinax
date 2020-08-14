@@ -90,7 +90,7 @@ var makeListeners = function (field) {
   });
 
   this.$watch(modelName, function (a) {
-    this.$emit(`update:${field}`, a);
+    emitUpdate.bind(this).call(field, a);
   });
 
   return listeners;
@@ -139,6 +139,7 @@ export default {
   mounted() {
     makeListeners = makeListeners.bind(this);
     emitUpdate = emitUpdate.bind(this);
+
     makeListeners("street");
     makeListeners("area");
     makeListeners("pincode");
