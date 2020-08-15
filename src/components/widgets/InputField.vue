@@ -34,7 +34,7 @@
 
     <component
       ref="field"
-      v-on="$listeners"
+      v-on="$listeners || {}"
       v-bind:is="field || 'v-text-field'"
       v-model="model"
       v-bind="textfield"
