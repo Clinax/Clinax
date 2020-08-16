@@ -1,45 +1,24 @@
 <template>
   <v-dialog
     v-model="model"
-    :fullscreen="$vuetify.breakpoint.xs"
-    :persistent="!closeable"
+    :fullscreen="isSuperSmall"
+    :persistent="!closeable || ui.loading"
     max-width="640"
   >
     <template v-if="!noActivator" v-slot:activator="{ on }">
       <slot name="activator" v-bind:on="on">
-        <v-btn v-on="on" color="primary" depressed :block="block">
+        <v-btn v-on="on" color="primary" :block="block" depressed>
           Add Patient
         </v-btn>
       </slot>
     </template>
-    <v-card v-if="ui.added">
-      <v-card-title>
-        <b>{{ patientModel.fullname }}</b>
-        <span>&nbsp;added</span>
-      </v-card-title>
-      <v-card-text>
-        <v-layout align-center justify-center column>
-          <div>
-            <img src="/img/check.gif" width="348" />
-          </div>
-        </v-layout>
-      </v-card-text>
-      <v-card-actions>
-        <v-btn color="primary" :to="'/app/case/' + patientModel._id" block>
-          View Case
-        </v-btn>
-      </v-card-actions>
-      <v-card-actions>
-        <v-btn text block to="/app/patients/" @click="model = false" small>
-          go to patients
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-    <v-card v-else-if="model">
+
+    <v-card>
       <v-subheader v-if="patientModel._id" class="grey lighten-4">
         <span>{{ patientModel.fullname }}'s Profile</span>
         <v-spacer class="mx-3"></v-spacer>
         <v-btn
+          :disabled="ui.loading"
           color="error"
           @click="ui.deleteConfirmation = { model: true, name: '' }"
           icon
@@ -51,12 +30,13 @@
           :to="'/app/case/' + patientModel._id"
           color="primary"
           @click="closeDialog"
+          :disabled="ui.loading"
           depressed
           small
         >
           <span>View Case</span>
         </v-btn>
-        <v-btn text @click="closeDialog" small>
+        <v-btn @click="closeDialog" :disabled="ui.loading" small text>
           <v-icon class="ml-2" small>mdi-close</v-icon>
           <span v-if="!isMobile">Close</span>
         </v-btn>
@@ -92,11 +72,7 @@
 
         <v-stepper-items>
           <v-stepper-content step="1" class="pa-0">
-            <v-form
-              ref="patientForm"
-              lazy-validation
-              @submit.prevent="addPatient"
-            >
+            <v-form ref="patientForm" lazy-validation @submit.prevent="submit">
               <v-card-text class="grey lighten-4">
                 <v-layout>
                   <prefix-field
@@ -126,7 +102,6 @@
                 ></gender-field>
                 <birth-date-field
                   v-model="patientModel.birthDate"
-                  :age.sync="patientModel.age"
                   required
                 ></birth-date-field>
                 <marital-status-field
@@ -140,7 +115,8 @@
                   label="Occupation"
                   :textfield="{
                     prependInnerIcon: 'mdi-tie',
-                    items: ui.occupations,
+                    items: ui.preLoaders.occupations,
+                    loading: ui.preLoaders.loading,
                   }"
                 ></input-field>
                 <v-divider class="mt-5"></v-divider>
@@ -178,7 +154,7 @@
                   :disabled="ui.loading"
                   depressed
                 >
-                  Next
+                  {{ patientModel._id ? "save" : "Next" }}
                 </v-btn>
               </v-card-actions>
             </v-form>
@@ -243,7 +219,7 @@
                       <v-btn color="success" v-on="on">Open Camera</v-btn>
                     </template>
                     <v-card>
-                      <VueCamera></VueCamera>
+                      <vue-camera></vue-camera>
                     </v-card>
                   </v-dialog>
                 </v-card-actions>
@@ -294,35 +270,23 @@
           <v-stepper-content step="3" class="pa-0">
             <address-form
               ref="extraForm"
-              v-bind="address"
-              :pins="ui.pins"
-              :areas="ui.areas"
-              @submit="updateExtra"
               content-class="grey lighten-4 pt-3 pb-8"
-              lazy-validation
+              v-model="patientModel.address"
+              :pins="ui.preLoaders.pins"
+              :areas="ui.preLoaders.areas"
+              :loading-prefetch="ui.preLoaders.loading"
+              @submit="submit"
+              add-address
             ></address-form>
           </v-stepper-content>
         </v-stepper-items>
       </v-stepper>
     </v-card>
 
-    <v-dialog v-model="ui.closeConfirmation" max-width="280">
-      <v-card>
-        <v-card-title>Are you sure?</v-card-title>
-        <v-card-text>You will lose all the progess</v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="primary"
-            @click.native="ui.closeConfirmation = false"
-            depressed
-          >
-            cancel
-          </v-btn>
-          <v-btn @click.native="model = false" outlined>OK</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <confirmation-dialog
+      v-model="ui.closeConfirmation"
+      @next="model = false"
+    ></confirmation-dialog>
 
     <v-dialog v-model="ui.deleteConfirmation.model" max-width="340">
       <v-card>
@@ -367,18 +331,32 @@
 
 <script>
 import Toggleable from "@/components/widgets/Toggleable";
+import ConfirmationDialog from "@/components/widgets/ConfirmationDialog";
+
 import PrefixField from "@/components/app/fields/PrefixField";
 import GenderField from "@/components/app/fields/GenderField";
 import BirthDateField from "@/components/app/fields/BirthDateField";
 import MaritalStatusField from "@/components/app/fields/MaritalStatusField";
 import AddressForm from "@/components/app/forms/AddressForm";
 
+import moment from "moment";
+import Patient from "@/model/Patient";
 import { makeRequest } from "@/modules/request";
-import { isEmpty, clone, isEqual } from "@/modules/object";
+import { isEmpty, clone, changedFields } from "@/modules/object";
+
+function ExtraField(label, textfield, extras) {
+  this.visibility = false;
+  this.label = label;
+  this.textfield = textfield;
+
+  if (!isEmpty(extras))
+    Object.keys(extras).forEach((key) => (this[key] = extras[key]));
+}
 
 export default {
   extends: Toggleable,
   components: {
+    ConfirmationDialog,
     PrefixField,
     BirthDateField,
     GenderField,
@@ -387,102 +365,77 @@ export default {
   },
   props: {
     noActivator: { type: Boolean, default: false },
-    patient: { value: Object },
+    patient: Object,
     block: { type: Boolean, default: false },
   },
-  data: () => ({
-    patientModel: {},
-    address: {},
-    avatar: {
-      fd: null,
-      preview: "",
-    },
-    extraFileds: {
-      email: {
-        visibility: false,
-        label: "Email",
-        textfield: {
+  data() {
+    return {
+      patientModel: { address: {} },
+      avatar: {
+        fd: null,
+        preview: "",
+      },
+      extraFileds: {
+        email: new ExtraField("Email", {
           placeholder: "johndoe@abc.com",
           autocomplete: "off",
           prependInnerIcon: "mdi-email",
-        },
-      },
-      phone: {
-        visibility: false,
-        label: "Contact",
-        textfield: {
+        }),
+        phone: new ExtraField("Contact", {
           autocomplete: "off",
           placeholder: "12345 12345",
           prependInnerIcon: "mdi-phone-classic",
           count: 10,
-        },
+        }),
+        bloodGroup: new ExtraField(
+          "Blood group",
+          {
+            prependInnerIcon: "mdi-water",
+            items: [
+              "a+",
+              "b+",
+              "o+",
+              "ab+",
+              "a-",
+              "b-",
+              "o-",
+              "ab-",
+              "unknown",
+            ],
+          },
+          { field: "v-select" }
+        ),
       },
-      bloodGroup: {
-        visibility: false,
-        label: "Blood group",
-        field: "v-select",
-        textfield: {
-          prependInnerIcon: "mdi-water",
-          items: ["a+", "b+", "o+", "ab+", "a-", "b-", "o-", "ab-", "unknown"],
-        },
-      },
-    },
 
-    ui: {
-      dragEvent: { dragging: false, x: 0, y: 0 },
-      added: false,
-      closeConfirmation: false,
-      deleteConfirmation: { model: false, name: "" },
-      step: 1,
-      loading: false,
-      areas: [],
-      pins: [],
-      occupations: [],
-    },
-  }),
+      ui: {
+        dragEvent: { dragging: false, x: 0, y: 0 },
+        closeConfirmation: false,
+        deleteConfirmation: { model: false, name: "" },
+        step: 1,
+        loading: false,
+        preLoaders: {
+          loading: false,
+          areas: [],
+          pins: [],
+          occupations: [],
+        },
+        initialState: null,
+      },
+    };
+  },
+
   computed: {
+    changedField() {
+      // this.log(changedFields(this.ui.initialState, this.patientModel));
+      return changedFields(this.ui.initialState, this.patientModel);
+    },
     closeable() {
-      return (
-        !this.ui.loading &&
-        ((this.patient &&
-          this.patient.address &&
-          isEqual(this.patient.address, this.address)) ||
-          isEmpty(this.address)) &&
-        ((this.patient && isEqual(this.patientModel, this.patient)) ||
-          isEmpty(this.patientModel))
-      );
+      return isEmpty(this.changedField);
     },
   },
   watch: {
-    patient() {
-      this.clonePatientProp();
-    },
     model(a) {
-      if (a) {
-        makeRequest("get", "patient/options")
-          .then(({ data }) => {
-            this.ui.areas = data.areas;
-            this.ui.pins = data.pins;
-            this.ui.occupations = data.occupations;
-          })
-          .catch((err) => {
-            this.errorHandler(err);
-          });
-        this.ui.added = false;
-
-        if (this.patient)
-          for (const key in this.extraFileds)
-            this.extraFileds[key].visibility = Boolean(this.patient[key]);
-
-        this.ui.step = 1;
-        this.patientModel = {};
-        this.address = {};
-        if (this.patient) this.clonePatientProp();
-        else {
-          if (this.$refs.patientForm)
-            this.$nextTick(() => this.$refs.patientForm.reset());
-        }
-      }
+      !a || this.reset();
     },
     "avatar.fd"(a) {
       if (!a) {
@@ -501,100 +454,46 @@ export default {
       if (this.closeable) this.model = false;
       else this.ui.closeConfirmation = true;
     },
-    addPatient() {
-      if (this.ui.loading) return;
-
-      if (this.$refs.patientForm.validate()) {
-        if (this.patient) {
-          let data = {
-            id: this.patientModel._id,
-            updates: {},
-          };
-          for (const key in this.patientModel) {
-            if (this.patientModel.hasOwnProperty(key)) {
-              const element = this.patientModel[key];
-              if (!isEqual(element, this.patient[key]))
-                data.updates[key] = element;
-            }
-          }
-          this.updatePatient(data, () => this.showSnackbar("Saved"));
-        } else {
-          this.ui.loading = true;
-          makeRequest("post", "patient", this.patientModel)
-            .then(({ data }) => {
-              if (this.patient) this.$emit("update:patient", data);
-              else this.patientModel = clone(data);
-
-              this.ui.loading = false;
-              this.$nextTick(() => (this.ui.step = 2));
-            })
-            .catch((err) => {
-              this.ui.loading = false;
-              this.errorHandler(err);
-            });
-        }
-      } else this.showSnackbar("Please enter all the details");
-    },
-    uploadPicture() {
-      if (this.ui.loading) return;
-
-      let data = new FormData();
-      data.append("avatar", this.avatar.fd, this.avatar.fd.name);
-      data.append("id", this.patientModel._id);
-
-      this.updatePatient(data, () => (this.ui.step = 3));
-    },
-    updateExtra(address) {
-      // eslint-disable-next-line no-console
-      console.log(arguments);
-      if (this.ui.loading) return;
-
-      this.updatePatient(
-        {
-          id: this.patientModel._id,
-          updates: { address },
-        },
-        () => {
-          if (this.patient) this.showSnackbar("Saved");
-          else this.ui.added = true;
-        }
-      );
-    },
-
-    onFileDrag(ev) {
-      let dragging = ev.type == "dragenter" || ev.type == "dragover";
-
-      if (dragging) {
-        this.ui.dragEvent.x = ev.x;
-        this.ui.dragEvent.y = ev.y;
-      }
-
-      if (ev.type == "drop")
-        this.avatar.fd = ev.dataTransfer.files && ev.dataTransfer.files[0];
-
-      if (this.ui.dragEvent.dragging != dragging)
-        this.$nextTick(() => (this.ui.dragEvent.dragging = dragging));
-    },
-    updatePatient(data, then) {
+    submit() {
       if (this.ui.loading) return;
 
       if (this.$refs.patientForm.validate()) {
         this.ui.loading = true;
+        var data, method;
+        if (this.patient) {
+          method = "put";
+          data = {
+            id: this.patientModel._id,
+            updates: this.changedField,
+          };
+        } else {
+          method = "post";
+          data = this.patientModel;
+        }
 
-        makeRequest("put", "patient", data)
+        makeRequest(method, "patient", data)
           .then(({ data }) => {
+            this.setPatient(data);
+            this.$emit("update:patient", data);
+
             this.ui.loading = false;
-            if (this.patient) this.$emit("update:patient", data);
-            else this.patientModel = clone(data);
-            then && then();
+
+            if (method == "post") this.$nextTick(() => (this.ui.step = 2));
           })
           .catch((err) => {
             this.ui.loading = false;
             this.errorHandler(err);
           });
-      }
+      } else this.showSnackbar("Please enter all the details");
     },
+    uploadPicture() {
+      // todo upload files to aws
+    },
+
     deletePatient() {
+      if (this.ui.loading) return;
+      this.ui.loading = true;
+
       makeRequest("delete", "patient", { id: this.patientModel._id })
         .then(() => {
           this.$emit("patient:removed", this.patientModel._id);
@@ -610,20 +509,62 @@ export default {
           this.errorHandler(err);
         });
     },
-    clonePatientProp() {
-      if (this.patient) {
-        this.patientModel = clone(this.patient);
-        this.avatar.preview =
-          (this.patient.avatar &&
-            this.baseUrl + "img/" + this.patient.avatar) ||
-          "";
+    reset() {
+      Object.assign(this.$data, this.$options.data.apply(this));
 
-        if (this.patient.address) this.address = clone(this.patient.address);
+      this.$nextTick(() => {
+        this.fetchAutoCompleData();
+        this.setPatient(this.patient);
+      });
+    },
+    setPatient(patient) {
+      var patientModel;
+
+      patientModel = new Patient(patient);
+
+      if (patientModel)
+        for (const key in this.extraFileds)
+          this.extraFileds[key].visibility = Boolean(patientModel[key]);
+
+      if (patientModel.birthDate)
+        patientModel.birthDate = moment(patientModel.birthDate).format(
+          "YYYY-MM-DD"
+        );
+
+      this.ui.initialState = clone(patientModel);
+
+      this.patientModel = patientModel;
+    },
+    fetchAutoCompleData() {
+      this.ui.preLoaders.loading = true;
+
+      makeRequest("get", "patient/options")
+        .then(({ data }) => {
+          this.ui.preLoaders.loading = false;
+          this.ui.preLoaders = Object.assign(this.ui.preLoaders, data);
+        })
+        .catch((err) => {
+          this.ui.preLoaders.loading = false;
+          this.errorHandler(err);
+        });
+    },
+    onFileDrag(ev) {
+      let dragging = ev.type == "dragenter" || ev.type == "dragover";
+
+      if (dragging) {
+        this.ui.dragEvent.x = ev.x;
+        this.ui.dragEvent.y = ev.y;
       }
+
+      if (ev.type == "drop")
+        this.avatar.fd = ev.dataTransfer.files && ev.dataTransfer.files[0];
+
+      if (this.ui.dragEvent.dragging != dragging)
+        this.$nextTick(() => (this.ui.dragEvent.dragging = dragging));
     },
   },
   mounted() {
-    this.clonePatientProp();
+    this.setPatient(this.patient);
   },
 };
 </script>

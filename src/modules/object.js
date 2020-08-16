@@ -25,7 +25,7 @@ export const clean = (obj) => {
 export function changedFields(a, b) {
   if ((!a && !b) || !b) return null;
 
-  if (!a) return clone(b);
+  if (!a) return Object.assign({}, b);
 
   return Object.keys(b)
     .filter((key) => !isEqual(a[key], b[key]))
