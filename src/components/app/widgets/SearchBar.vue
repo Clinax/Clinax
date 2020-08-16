@@ -21,10 +21,8 @@
           label="Search by name, address, phone, etc..."
           :class="{ focused, 'shadow-lg': focused }"
           :items="items"
-          :dense="!$vuetify.breakpoint.mdAndUp"
-          :menu-props="{
-            maxWidth: $vuetify.breakpoint.mdAndUp ? 540 : '100%',
-          }"
+          :dense="isMobile"
+          :menu-props="{ maxWidth: !isMobile ? 540 : '100%' }"
           :search-input.sync="search"
           :rounded="!focused"
           :shaped="focused"

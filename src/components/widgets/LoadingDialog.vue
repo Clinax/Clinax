@@ -14,10 +14,10 @@
 </template>
 
 <script>
-import ComponentWithModel from "./ComponentWithModel";
+import Toggleable from "./Toggleable";
 
 export default {
-  extends: ComponentWithModel,
+  extends: Toggleable,
   props: { text: String },
 };
 </script>

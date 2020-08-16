@@ -1,29 +1,38 @@
 <template>
   <v-tooltip v-if="title" bottom>
     <template v-slot:activator="{ on }">
-      <span v-if="!fa" v-on="on" v-bind:class="classes">
-        <v-icon :color="color" :small="small">{{ icon }}</v-icon>
-      </span>
-      <i v-else v-on="on" :class="classes" :style="fcolor"></i>
+      <v-badge :color="dotColor" :value="badge" dot>
+        <span v-on="on" :class="classes" class="d-inline">
+          <i v-if="fa" :class="classes" :style="fcolor"></i>
+          <v-icon v-else v-bind="$props">
+            <slot>{{ icon }}</slot>
+          </v-icon>
+        </span>
+      </v-badge>
     </template>
     <span>{{ title }}</span>
   </v-tooltip>
-  <span v-else v-bind:class="classes" class="d-inline">
-    <v-icon v-if="!fa" :color="color" :small="small">{{ icon }}</v-icon>
-    <i v-else v-on="on" :class="classes" :style="fcolor"></i>
+  <span v-else :class="classes" class="d-inline">
+    <i v-if="fa" :class="classes" :style="fcolor"></i>
+    <v-icon v-else v-bind="$props">
+      <slot>{{ icon }}</slot>
+    </v-icon>
   </span>
 </template>
 
 <script>
+import { VIcon } from "vuetify/lib";
+
 export default {
   props: {
-    icon: { type: String, required: true },
+    ...VIcon.props,
+    badge: { type: Boolean, default: false },
+    dotColor: { type: String, default: "primary" },
+    icon: { type: String },
     title: { type: String, required: false, default: "" },
-    color: { type: String, default: "#676767" },
     cls: { type: String, default: "" },
     fa: { type: Boolean, default: false },
     fas: { type: Boolean, default: false },
-    small: { type: Boolean, default: false },
     outlined: { type: Boolean, default: false },
     "two-tone": { type: Boolean, default: false },
     round: { type: Boolean, default: false },

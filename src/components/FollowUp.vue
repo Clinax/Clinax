@@ -237,7 +237,7 @@
               <template v-slot:activator="{ on }">
                 <input-field
                   v-model="followupDate"
-                  :on="disabled ? null : on"
+                  v-on="disabled ? null : on"
                   :value="
                     (followUpModel.nextFollowUpDate &&
                       moment(followUpModel.nextFollowUpDate).format(
@@ -326,23 +326,21 @@
               <span class="px-3 mb-1">Drugs</span>
               <v-divider></v-divider>
             </v-card-title>
-            <v-alert
-              v-if="!followUpModel.treatment.drugs.length"
-              type="info"
-              dense
-              outlined
-              class="mx-3 mt-4"
-            >
-              Click '<b>ADD</b>' to add drugs
-            </v-alert>
-            <v-alert
-              v-else-if="disabled && !followUpModel.treatment.drugs.length"
-              type="warning"
-              dense
-              class="mx-3 mt-4"
-            >
-              No drugs were given
-            </v-alert>
+
+            <template v-if="!followUpModel.treatment.drugs.length">
+              <v-alert
+                v-if="disabled && !followUpModel.treatment.drugs.length"
+                type="warning"
+                dense
+                class="mx-3 mt-4"
+              >
+                No drugs were given
+              </v-alert>
+              <v-alert v-else type="info" dense outlined class="mx-3 mt-4">
+                Click '<b>ADD</b>' to add drugs
+              </v-alert>
+            </template>
+
             <v-slide-y-transition group>
               <div
                 v-for="(drug, i) in followUpModel.treatment.drugs"

@@ -9,7 +9,12 @@
       v-if="editableHeader || label"
       :class="{ 'error--text': errors && errors[0] != true }"
     >
-      <span ref="header" :contenteditable="editableHeader" @blur="onHeaderBlur">
+      <span
+        ref="header"
+        :contenteditable="editableHeader"
+        onClick="document.execCommand('selectall',null,false);"
+        @blur="onHeaderBlur"
+      >
         {{ label }}
       </span>
       <v-spacer></v-spacer>
@@ -29,15 +34,15 @@
 
     <component
       ref="field"
-      v-on="on"
+      v-on="$listeners || {}"
       v-bind:is="field || 'v-text-field'"
       v-model="model"
       v-bind="textfield"
       :rules="rules || [true]"
       @blur="check"
       @change="(ev) => $emit('change', ev)"
-      :solo="textfield.solo !== false"
-      :hide-details="textfield.hideDetails !== false"
+      :solo="textfield && textfield.solo !== false"
+      :hide-details="textfield && textfield.hideDetails !== false"
     >
       <template
         v-if="
@@ -74,7 +79,6 @@ export default {
     inputRules: { type: Array, default: () => [] },
     field: String,
     mask: String,
-    on: Object,
     editableHeader: { type: Boolean, default: false },
     removable: { type: Boolean, default: false },
   },

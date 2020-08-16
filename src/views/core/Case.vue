@@ -67,11 +67,16 @@
           </span>
         </v-toolbar>
         <v-tabs v-model="ui.tab">
-          <v-tab v-for="tab in ui.tabs" :key="tab.text">
-            <v-icon v-if="tab.icon && isBiggerScreen" class="mr-2">
-              {{ tab.icon }}
-            </v-icon>
-            <small class="text-truncate"> {{ tab.text }} </small>
+          <v-tab v-for="tab in tabs" :key="tab.text">
+            <v-badge left color="primary" :value="!!tab.badge">
+              <template v-slot:badge>
+                <span>{{ tab.badge }}</span>
+              </template>
+              <v-icon v-if="tab.icon && isBiggerScreen" class="mr-2">
+                {{ tab.icon }}
+              </v-icon>
+              <small class="text-truncate"> {{ tab.text }} </small>
+            </v-badge>
           </v-tab>
           <v-tabs-slider class="slider"></v-tabs-slider>
         </v-tabs>
@@ -155,9 +160,9 @@
         </template>
       </portal>
       <v-divider></v-divider>
-      <v-container>
-        <v-tabs-items v-model="ui.tab">
-          <v-tab-item>
+      <v-tabs-items v-model="ui.tab">
+        <v-tab-item>
+          <v-container>
             <input-field
               v-model="$data.case.mind"
               @input="onChange"
@@ -182,8 +187,10 @@
               }"
             >
             </input-field>
-          </v-tab-item>
-          <v-tab-item>
+          </v-container>
+        </v-tab-item>
+        <v-tab-item>
+          <v-container>
             <input-field
               v-model="$data.case.pastHistory"
               @input="onChange"
@@ -220,8 +227,10 @@
               }"
             >
             </input-field>
-          </v-tab-item>
-          <v-tab-item>
+          </v-container>
+        </v-tab-item>
+        <v-tab-item>
+          <v-container>
             <v-card color="grey lighten-4">
               <v-tabs-items v-model="ui.followUpTab">
                 <v-tab-item
@@ -242,18 +251,26 @@
                 </v-tab-item>
               </v-tabs-items>
             </v-card>
-          </v-tab-item>
-          <v-tab-item>
-            <woi></woi>
-          </v-tab-item>
-          <v-tab-item>
-            <woi></woi>
-          </v-tab-item>
-        </v-tabs-items>
-        <saving-alert
-          v-bind="{ saving: ui.saving, saved: ui.saved, changed: ui.changed }"
-        ></saving-alert>
-      </v-container>
+          </v-container>
+        </v-tab-item>
+        <v-tab-item>
+          <investigation
+            @update:investigations="
+              (ev) => {
+                investigations = ev;
+                onChange();
+              }
+            "
+            :investigations="investigations"
+          ></investigation>
+        </v-tab-item>
+        <v-tab-item>
+          <woi></woi>
+        </v-tab-item>
+      </v-tabs-items>
+      <saving-alert
+        v-bind="{ saving: ui.saving, saved: ui.saved, changed: ui.changed }"
+      ></saving-alert>
     </template>
 
     <v-container v-else>
@@ -283,10 +300,12 @@ import { clone, isEqual } from "@/modules/object";
 import { makeRequest, errorHandler } from "@/modules/request";
 
 import FollowUp from "@/components/FollowUp";
+import Investigation from "@/components/Investigation";
 import SavingAlert from "@/components/widgets/SavingAlert";
+import investigationReports from "@/json/investigation-reports.json";
 
 export default {
-  components: { FollowUp, SavingAlert },
+  components: { FollowUp, Investigation, SavingAlert },
   props: { patientId: String },
   data() {
     return {
@@ -299,6 +318,7 @@ export default {
         familyHistory: "",
         medicalNote: "",
       },
+      investigations: [],
       followUps: [],
       lastFollowUp: null,
       ui: {
@@ -309,19 +329,25 @@ export default {
         saved: false,
         changed: false,
         followUpTab: 0,
-        tabs: [
-          { icon: "mdi-brain", text: "Mind" },
-          { icon: "mdi-face", text: " Patient History" },
-          { icon: "mdi-folder-account", text: "Case" },
-          { icon: "mdi-text-box-search-outline", text: "Investigation" },
-          { icon: "mdi-image-multiple-outline", text: "Gallery" },
-        ],
+
         saveDelayTimerId: null,
         saveBadgeTimerId: null,
       },
     };
   },
   computed: {
+    tabs() {
+      return [
+        { icon: "mdi-brain", text: "Mind" },
+        { icon: "mdi-face", text: " Patient History" },
+        { icon: "mdi-folder-account", text: "Case" },
+        {
+          icon: "mdi-text-box-search-outline",
+          text: `Investigation (${this.case.investigations.length})`,
+        },
+        { icon: "mdi-image-multiple-outline", text: "Gallery" },
+      ];
+    },
     followUpsDateItems() {
       return [
         ...this.followUps
@@ -361,8 +387,12 @@ export default {
     async save() {
       let newCase = clone(this.case);
       let prevCase = clone(this.patient.case);
+
+      newCase.investigations = clone(this.investigations);
+
       delete newCase.followUps;
       delete prevCase.followUps;
+
       if (isEqual(newCase, prevCase)) return;
 
       if (this.ui.saving) return;
@@ -385,6 +415,7 @@ export default {
         body.id = this.patientId;
         method = "post";
       }
+
       try {
         await makeRequest(method, "case", body);
 
@@ -418,6 +449,25 @@ export default {
       makeRequest("get", "case", { id: this.patientId })
         .then(({ data }) => {
           data.case = data.case || {};
+
+          data.case.investigations = data.case.investigations || [];
+
+          data.case.investigations = data.case.investigations.map((ev) => {
+            ev.format = investigationReports.find(
+              (e) => (e.name || e) == ev.name
+            );
+            ev.entries = ev.entries.map((ev) => {
+              ev.edit = false;
+              ev.changeDate = false;
+              ev.values = ev.values || (typeof format == "string" ? "" : {});
+
+              return ev;
+            });
+
+            return ev;
+          });
+          this.investigations = clone(data.case.investigations);
+
           this.patient = data;
           this.ui.loading = false;
 

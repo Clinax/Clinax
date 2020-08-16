@@ -31,9 +31,9 @@
           <v-toolbar class="flex-grow-0 transparent" height="98" flat>
             <v-spacer></v-spacer>
             <template v-if="$store.state.token">
-              Not&nbsp;
+              <span class="mr-1">Not</span>
               <b> {{ $store.state.user && $store.state.user.email }}</b>
-              ?
+              <span>?</span>
               <v-btn
                 color="error"
                 class="mx-3"

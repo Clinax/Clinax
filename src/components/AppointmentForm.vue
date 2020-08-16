@@ -218,7 +218,7 @@ import moment from "moment";
 import { makeRequest } from "@/modules/request";
 
 import SearchBar from "@/components/app/widgets/SearchBar";
-import ComponentWithModel from "@/components/widgets/ComponentWithModel";
+import Toggleable from "@/components/widgets/Toggleable";
 
 const defaultEntry = () => ({
   date: moment().add(1, "weeks").format("YYYY-MM-DD"),
@@ -226,7 +226,7 @@ const defaultEntry = () => ({
 });
 
 export default {
-  extends: ComponentWithModel,
+  extends: Toggleable,
   components: { SearchBar },
   props: { appointment: Object },
   data() {
