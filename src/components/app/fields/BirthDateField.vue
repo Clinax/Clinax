@@ -1,9 +1,8 @@
 <template>
   <v-row no-gutter class="mx-0 align-center" style="flex-wrap: nowrap;">
     <input-field
-      v-if="ageField"
+      v-if="fieldToggle"
       v-model="ageModel"
-      v-on="$listeners"
       v-bind="$props"
       :textfield="{
         prependInnerIcon: ' mdi-cake-variant',
@@ -29,7 +28,7 @@
         <input-field
           v-on="on"
           v-bind="$props"
-          :value="model && moment(model).format('ddd, Do MMM YYYY')"
+          :value="moment(model).format('ddd, Do MMM YYYY')"
           :textfield="{
             label: 'Date of Birth',
             autocomplete: 'off',
@@ -56,7 +55,7 @@
       class="mt-5 mr-3"
       :disabled="textfield && textfield.disabled"
       icon="mdi-counter"
-      @click="ageField = !ageField"
+      @click="fieldToggle = !fieldToggle"
       title="Change between age input and birth date input"
       fab
     >
@@ -68,41 +67,66 @@
 import moment from "moment";
 import InputField from "@/components/widgets/InputField";
 import { getCookie, setCookie } from "@/modules/cookie";
+const FIELD_TOGGLE = "clinax.fields.birthDate.fieldToggle";
 
 export default {
   components: { InputField },
-  props: { ...InputField.props, age: [String, Number] },
+  props: { ...InputField.props, value: [String, Date] },
   data() {
     return {
       model: this.value || "",
       birthDateMenu: false,
       ageModel: Number(this.age),
-      ageField: getCookie("clinax.field.ageField") == "true",
+      fieldToggle: getCookie(FIELD_TOGGLE) == "true",
     };
   },
-  watch: {
-    age(a) {
-      this.ageModel = a;
+  computed: {
+    rtAge() {
+      let dateDif = new Date(Date.now() - new Date(this.model).getTime());
+      return dateDif.getFullYear() - 1970;
     },
-    ageModel(a) {
-      this.$emit("update:age", String(a));
+    rtBirthDate() {
+      let momentInstance;
+      let bYear = new Date().getFullYear() - this.ageModel;
+
+      //! FIX for infinite loop !!DO NOT REMOVE!!
+      if (
+        new Date(this.model).getMonth() > new Date().getMonth() ||
+        (new Date(this.model).getMonth() == new Date().getMonth() &&
+          new Date(this.model).getDay() > new Date().getDay())
+      ) {
+        bYear--;
+      }
+
+      if (this.model) {
+        var d = new Date(this.model);
+        d.setFullYear(bYear);
+        momentInstance = moment(d);
+      } else momentInstance = moment(String(bYear));
+
+      return momentInstance.format("YYYY-MM-DD");
+    },
+  },
+  watch: {
+    ageModel() {
+      if (
+        new Date(this.rtBirthDate).getFullYear() !=
+        new Date(this.model).getFullYear()
+      )
+        this.$emit("input", this.rtBirthDate);
     },
     value(a) {
       this.model = a;
+      this.ageModel = this.rtAge;
     },
     model(a) {
       this.$emit("input", a);
     },
-    ageField(a) {
-      if (a) {
-        let dateDif = new Date(Date.now() - new Date(this.model).getTime());
-        this.ageModel = dateDif.getFullYear() - 1970;
-      } else
-        this.model = moment(
-          String(new Date().getFullYear() - this.ageModel)
-        ).format("YYYY-MM-DD");
+    fieldToggle(a) {
+      if (a) this.ageModel = this.rtAge;
+      else this.model = this.rtBirthDate;
 
-      setCookie("clinax.field.ageField", a, 100);
+      setCookie(FIELD_TOGGLE, a, 100);
     },
   },
 };

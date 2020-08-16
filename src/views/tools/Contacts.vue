@@ -92,9 +92,9 @@
 import ContactDialog from "@/components/app/widgets/ContactDialog";
 import ToolbarMenu from "@/components/widgets/ToolbarMenu";
 
-import { decrypt } from "@/utils";
+import { sortBy } from "@/modules/list";
 import { makeRequest } from "@/modules/request";
-import { getFromColorMap } from "@/utils";
+import { decrypt, getFromColorMap } from "@/utils";
 
 export default {
   components: { ContactDialog, ToolbarMenu },
@@ -114,19 +114,19 @@ export default {
             {
               text: "Sort by Name",
               on: {
-                click: function () {}.bind(this),
+                click: this.sortList.bind(this, "displayName"),
               },
             },
             {
               text: "Sort by Email",
               on: {
-                click: function () {}.bind(this),
+                click: this.sortList.bind(this, "email"),
               },
             },
             {
               text: "Sort by Association",
               on: {
-                click: function () {}.bind(this),
+                click: this.sortList.bind(this, "type"),
               },
             },
           ],
@@ -150,7 +150,7 @@ export default {
       makeRequest("get", "contacts")
         .then(({ data }) => {
           // eslint-disable-next-line no-console
-          this.contacts = decrypt(data.contacts);
+          this.contacts = decrypt(data.contacts).sort(sortBy("displayName"));
           this.ui.loading = false;
         })
         .catch((err) => {
@@ -163,6 +163,9 @@ export default {
 
       if (~index) this.contacts[index] = contact;
       else this.contacts.push(contact);
+    },
+    sortList(field) {
+      this.contacts = this.contacts.sort(sortBy(field));
     },
     openProfile(contact) {
       this.ui.contactDetails = contact;

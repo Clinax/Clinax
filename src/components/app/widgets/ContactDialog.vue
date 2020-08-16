@@ -20,7 +20,7 @@
             @click="
               closeable
                 ? (model = false)
-                : ((confirmNext = 'close'), (closeConfimation = true))
+                : ((confirmNext = 'close'), (closeConfirmation = true))
             "
             small
             text
@@ -147,10 +147,11 @@
                 field="v-combobox"
                 v-model="contactModel.occupation"
                 :textfield="{
+                  ...inputFieldProps,
                   label: 'Occupation',
                   prependInnerIcon: 'mdi-tie',
-                  items: preload.occupations,
-                  ...inputFieldProps,
+                  items: preLoaders.occupations,
+                  loading: preLoaders.loading,
                 }"
                 :col="{ cols: 12 }"
               ></input-field>
@@ -173,9 +174,8 @@
               ></marital-status-field>
               <birth-date-field
                 v-model="contactModel.birthDate"
-                :age.sync="contactModel.age"
-                :textfield="inputFieldProps"
                 class="hide-number-arrows"
+                :textfield="inputFieldProps"
               ></birth-date-field>
             </v-row>
           </section>
@@ -185,13 +185,13 @@
             </v-card-subtitle>
             <address-form
               ref="extraForm"
-              v-bind="initialState.address"
-              :field="{ textfield: { ...inputFieldProps } }"
-              :pins="preload.pins"
-              :areas="preload.areas"
-              style="margin: 0 -15px;"
               content-class="px-0 pt-0 "
-              @update="(ev) => (contactModel.address = ev)"
+              style="margin: 0 -15px;"
+              v-model="contactModel.address"
+              :field="{ textfield: { ...inputFieldProps } }"
+              :pins="preLoaders.pins"
+              :areas="preLoaders.areas"
+              :loading-prefetch="preLoaders.loading"
               inline-labels
               hide-submit
             ></address-form>
@@ -211,7 +211,7 @@
             <span>Edit</span>
           </v-btn>
           <v-btn
-            v-if="newContact"
+            v-if="contactModel.newObject"
             :disabled="loading"
             @click="reset"
             type="reset"
@@ -236,13 +236,13 @@
               <span>Save</span>
             </v-btn>
             <v-btn
-              v-if="!newContact"
+              v-if="!contactModel.newObject"
               class="ml-3"
               :disabled="loading"
               @click="
                 closeable
                   ? reset()
-                  : ((confirmNext = 'reset'), (closeConfimation = true))
+                  : ((confirmNext = 'reset'), (closeConfirmation = true))
               "
               outlined
               small
@@ -254,7 +254,7 @@
       </v-card>
     </v-form>
     <confirmation-dialog
-      v-model="closeConfimation"
+      v-model="closeConfirmation"
       @next="confirmClose"
     ></confirmation-dialog>
   </v-dialog>
@@ -271,20 +271,12 @@ import BirthDateField from "@/components/app/fields/BirthDateField";
 import MaritalStatusField from "@/components/app/fields/MaritalStatusField";
 import AddressForm from "@/components/app/forms/AddressForm";
 
-import mongoObjectId from "@/utils/mongoObjectId";
+import moment from "moment";
+import contactTypes from "@/json/contact-types.json";
+import Contact from "@/model/Contact";
 
 import { clone, changedFields, isEmpty } from "@/modules/object";
 import { makeRequest } from "@/modules/request";
-import { getFromColorMap } from "@/utils";
-import contactTypes from "@/json/contact-types.json";
-
-function Contact(userId) {
-  this.name = {};
-  this.address = {};
-  this._id = mongoObjectId();
-  this.color = getFromColorMap(this._id);
-  this.addedBy = userId;
-}
 
 export default {
   extends: Toggleable,
@@ -300,25 +292,26 @@ export default {
   data() {
     return {
       contactTypes,
-      contactModel: null,
-      initialState: null,
+      contactModel: new Contact(this.contact, this.user && this.user._id),
 
-      preload: {
+      preLoaders: {
+        loading: false,
         areas: [],
         pins: [],
         occupations: [],
       },
 
+      initialState: null,
       edit: false,
       loading: false,
       fullscreen: false,
-      newContact: false,
-      closeConfimation: false,
+      closeConfirmation: false,
       confirmNext: "close",
     };
   },
   computed: {
     changedField() {
+      // this.log(changedFields(this.initialState, this.contactModel));
       return changedFields(this.initialState, this.contactModel);
     },
     closeable() {
@@ -349,7 +342,7 @@ export default {
         this.loading = true;
         var method, data;
 
-        if (this.contactModel instanceof Contact) {
+        if (this.contactModel.newObject) {
           method = "post";
           data = this.contactModel;
         } else {
@@ -390,22 +383,34 @@ export default {
       this.$nextTick(() => this.setContact(this.contact));
     },
     setContact(contact) {
-      this.edit = this.newContact = false;
+      var contactModel = new Contact(contact, this.user._id);
 
-      if (contact) this.contactModel = clone(contact);
-      else {
-        this.edit = this.newContact = true;
-        this.contactModel = new Contact(this.user._id);
-      }
+      if (contactModel.birthDate)
+        contactModel.birthDate = moment(contactModel.birthDate).format(
+          "YYYY-MM-DD"
+        );
 
-      this.contactModel.address = this.contactModel.address || {};
-
-      this.initialState = clone(this.contactModel);
+      this.edit = contactModel.newObject;
+      this.initialState = clone(contactModel);
+      this.contactModel = contactModel;
     },
   },
   watch: {
     model(a) {
       !a || this.reset();
+
+      if (a) {
+        this.preLoaders.loading = true;
+        makeRequest("get", "patient/options")
+          .then(({ data }) => {
+            this.preLoaders.loading = false;
+            Object.assign(this.preLoaders, data);
+          })
+          .catch((err) => {
+            this.preLoaders.loading = false;
+            this.errorHandler(err);
+          });
+      }
     },
   },
   mounted() {

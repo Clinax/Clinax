@@ -1,8 +1,5 @@
 <template>
-  <v-card-text
-    v-if="!area && !street && !pincode && !addAddressModel"
-    class="text-center"
-  >
+  <v-card-text v-if="!value && !addAddressModel" class="text-center">
     <v-btn
       v-if="field && field.textfield && !field.textfield.disabled"
       @click="addAddressModel = true"
@@ -18,7 +15,7 @@
       <input-field
         v-bind="field"
         field="v-textarea"
-        v-model="streetModel"
+        v-model="addressModel.street"
         :label="inlineLabels ? 'Street' : ''"
         :textfield="{
           rows: 3,
@@ -27,36 +24,41 @@
           prependInnerIcon: 'mdi-map',
           ...((field && field.textfield) || {}),
         }"
+        @input="emitInput"
       ></input-field>
       <v-row class="mx-0">
         <input-field
           v-bind="field"
-          v-model="areaModel"
+          v-model="addressModel.area"
           field="v-combobox"
           :label="inlineLabels ? 'Area' : ''"
           :col="{ md: 6, xs: 12 }"
           :textfield="{
+            loading: loadingPrefetch,
             items: areas,
             label: inlineLabels ? '' : 'Area',
             prependInnerIcon: 'mdi-image-filter-hdr',
             ...((field && field.textfield) || {}),
           }"
+          @input="emitInput"
           required
         ></input-field>
         <input-field
           v-bind="field"
           field="v-combobox"
-          v-model="pincodeModel"
+          v-model="addressModel.pincode"
           :label="inlineLabels ? 'Pincode' : ''"
           :col="{ md: 6, xs: 12 }"
           :input-rules="[(v) => String(v).length == 6 || 'Invalid Pincode']"
           :textfield="{
             items: pins,
-            type: 'number',
+            loading: loadingPrefetch,
             label: inlineLabels ? '' : 'Pincode',
             prependInnerIcon: 'mdi-map-marker-radius-outline',
+            type: 'number',
             ...((field && field.textfield) || {}),
           }"
+          @input="emitInput"
           required
         ></input-field>
       </v-row>
@@ -70,31 +72,7 @@
 
 <script>
 import InputField from "@/components/widgets/InputField";
-
-var emitUpdate = function (field, value, event = "update") {
-  if (field) this.$emit(`update:${field}`, value);
-
-  this.$emit(event, {
-    street: this.streetModel,
-    area: this.areaModel,
-    pincode: this.pincodeModel,
-  });
-};
-
-var makeListeners = function (field) {
-  let listeners = {};
-  let modelName = `${field}Model`;
-
-  this.$watch(field, function (a) {
-    this[modelName] = a;
-  });
-
-  this.$watch(modelName, function (a) {
-    emitUpdate.bind(this).call(field, a);
-  });
-
-  return listeners;
-};
+import Address from "@/model/Address";
 
 export default {
   components: { InputField },
@@ -102,27 +80,30 @@ export default {
     field: { type: Object, required: false },
 
     // model
-    street: String,
-    area: String,
-    pincode: String,
+    value: { type: Object, default: () => null },
 
-    // UIs and prefills
-    inlineLabels: String,
+    // UIs
     contentClass: String,
+    inlineLabels: String,
     hideSubmit: Boolean,
+    addAddress: Boolean,
+    loadingPrefetch: Boolean,
+    // prefills
     areas: Array,
     pins: Array,
-    addAddress: Boolean,
   },
   data() {
     return {
-      streetModel: this.street,
-      areaModel: this.area,
-      pincodeModel: this.pincode,
+      addressModel: new Address(this.value),
+
       addAddressModel: this.addAddress,
+      emitInput: function () {
+        this.$emit("input", new Address(this.addressModel));
+      }.bind(this),
     };
   },
   methods: {
+    Address,
     validate() {
       return this.$refs.addressForm.validate();
     },
@@ -131,19 +112,14 @@ export default {
     },
     submit() {
       // eslint-disable-next-line no-console
-      if (this.validate()) emitUpdate(null, null, "submit");
+      if (this.validate()) this.$emit("submit", new Address(this.addressModel));
       else this.showSnackbar("Please enter all the details");
     },
   },
-
-  mounted() {
-    makeListeners = makeListeners.bind(this);
-    emitUpdate = emitUpdate.bind(this);
-
-    makeListeners("street");
-    makeListeners("area");
-    makeListeners("pincode");
-    makeListeners("addAddress");
+  watch: {
+    value(a) {
+      this.addressModel = new Address(a);
+    },
   },
 };
 </script>
