@@ -28,10 +28,10 @@ export const mutations = {
 
     switch (serviceWorkerState) {
       case "cached":
-        this.dispatch("app/showSnackbar", "Website has been Cached");
+        this.dispatch("showSnackbar", "Website has been Cached");
         break;
       case "updatefound":
-        this.dispatch("app/showSnackbar", "Downloading website updates");
+        this.dispatch("showSnackbar", "Downloading website updates");
         break;
       case "updated":
         if (localStorage.getItem("clinax.updated") !== "true") {
@@ -39,12 +39,12 @@ export const mutations = {
           localStorage.setItem("clinax.updated", true);
         } else {
           localStorage.setItem("clinax.updated", false);
-          this.dispatch("app/showSnackbar", "Site Just got Updated");
+          this.dispatch("showSnackbar", "Site Just got Updated");
         }
         break;
       case "offline":
         this.dispatch(
-          "app/showSnackbar",
+          "showSnackbar",
           "You are offline, Connect to internet for the website to functin properly"
         );
         break;

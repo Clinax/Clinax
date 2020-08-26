@@ -59,13 +59,17 @@ Vue.mixin({
       store.state.app.snackbar.value = false;
       this.$nextTick(() => store.dispatch("app/errorHandler", err));
     },
-    showSnackbar(message) {
+    showSnackbar(message, ...args) {
       store.state.app.snackbar.value = false;
-      this.$nextTick(() => store.dispatch("app/showSnackbar", message));
+      this.$nextTick(() =>
+        store.dispatch("app/showSnackbar", { message, ...args })
+      );
     },
-    showError(message = "Something went wrong") {
+    showError(message = "Something went wrong", ...args) {
       store.state.app.snackbar.value = false;
-      this.$nextTick(() => store.dispatch("app/showError", message));
+      this.$nextTick(() =>
+        store.dispatch("app/showError", { message, ...args })
+      );
     },
   },
 });

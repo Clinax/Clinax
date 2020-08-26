@@ -438,7 +438,7 @@ export default {
   },
   watch: {
     model(a) {
-      if (!a) this.reset();
+      if (a) this.reset();
     },
     "avatar.fd": function (a) {
       if (!a) {

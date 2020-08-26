@@ -51,7 +51,7 @@ export const getters = {
     const a = {};
 
     Object.values(state.followUpsEvents).forEach((ev) => {
-      if (a[ev.date]) a[ev.date] = [];
+      if (!a[ev.date]) a[ev.date] = [];
 
       a[ev.date].push(ev);
     });

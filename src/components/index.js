@@ -19,6 +19,7 @@ import PatientDialog from "./app/widgets/PatientDialog";
 
 import "vue2-perfect-scrollbar/dist/vue2-perfect-scrollbar.css";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
+import "@/scss/index.scss";
 
 Vue.use(VueMask);
 Vue.use(PortalVue);

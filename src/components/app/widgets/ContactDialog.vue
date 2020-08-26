@@ -337,9 +337,8 @@ export default {
   },
   watch: {
     model(a) {
-      if (!a) this.reset();
-
       if (a) {
+        this.reset();
         this.preLoaders.loading = true;
         this.makeRequest("get", "patient/options")
           .then(({ data }) => {

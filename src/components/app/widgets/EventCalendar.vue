@@ -167,11 +167,12 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch("followUpsEvents/addListener", {
+    this.$store.dispatch("addListener", {
       event: "eventChange",
       name: this.tag,
       callback: () => {
-        this.dateEventMap = this.$store.getters.followUpsEvents.events;
+        this.dateEventMap = this.$store.getters.events;
+
         this.events = [];
         Object.values(this.dateEventMap).forEach((ev) =>
           this.events.push(...ev)
@@ -219,7 +220,7 @@ export default {
       })
         .then(({ data }) => {
           this.loading = false;
-          this.$store.commit("followUpsEvents/setEvents", data.compressedData);
+          this.$store.commit("setEvents", data.compressedData);
         })
         .catch((err) => {
           this.loading = false;

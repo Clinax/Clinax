@@ -89,7 +89,8 @@ import ContactDialog from "@/components/app/widgets/ContactDialog";
 import ToolbarMenu from "@/components/widgets/ToolbarMenu";
 
 import { sortBy } from "@pranavraut033/js-utils/utils/list";
-import { decrypt, getColor } from "@/utils";
+import { decrypt } from "@/utils";
+import getColor from "@pranavraut033/js-utils/utils/getColor";
 
 export default {
   components: { ContactDialog, ToolbarMenu },
