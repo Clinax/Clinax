@@ -7,11 +7,11 @@
           <v-chip
             v-for="report in avaiableReports"
             :key="report"
-            @click="addField(report)"
             color="primary"
             class="ma-1"
             outlined
             label
+            @click="addField(report)"
           >
             {{ report }}
           </v-chip>
@@ -29,10 +29,10 @@ import investigationReports from "@/json/investigation-reports.json";
 
 export default {
   extends: Toggleable,
-  props: { investigations: Array, default: () => [] },
+  props: { investigations: { type: Array, default: () => [] } },
   computed: {
     avaiableReports() {
-      let alreadyAdded = this.investigations.map((ev) => ev.name);
+      const alreadyAdded = this.investigations.map((ev) => ev.name);
 
       return investigationReports
         .map((ev) => ev.name || ev)
@@ -50,7 +50,8 @@ export default {
   },
   methods: {
     addField(key) {
-      let format = investigationReports.find((ev) => (ev.name || ev) == key);
+      const format = investigationReports.find((ev) => (ev.name || ev) === key);
+
       this.$emit("update:investigations", [
         ...this.investigations,
         {
@@ -59,7 +60,7 @@ export default {
             {
               _id: mongoObjectId(),
               reportDate: moment().format("YYYY-MM-DD"),
-              values: typeof format == "string" ? "" : {},
+              values: typeof format === "string" ? "" : {},
               edit: false,
               changeDate: false,
             },

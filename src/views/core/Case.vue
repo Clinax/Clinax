@@ -5,11 +5,11 @@
         <patient-dialog
           v-if="$vuetify.breakpoint.xs"
           :patient="patient"
-          @update:patient="patientUpdated"
           block
+          @update:patient="patientUpdated"
         >
           <template v-slot:activator="{ on }">
-            <v-layout class="white px-5 py-2" v-on="on" v-ripple align-center>
+            <v-layout v-ripple class="white px-5 py-2" align-center v-on="on">
               <v-layout class="flex-grow-1">
                 <div>
                   <div class="title text-truncate">{{ patient.fullname }}</div>
@@ -23,7 +23,7 @@
               </v-layout>
 
               <v-toolbar-items class="h-100">
-                <v-avatar size="48" v-on="on" v-ripple>
+                <v-avatar v-ripple size="48" v-on="on">
                   <v-img
                     v-if="patient.avatar"
                     class="fullscreen"
@@ -83,16 +83,16 @@
         <template v-if="ui.tab == 2">
           <v-divider></v-divider>
           <v-expand-transition>
-            <v-subheader class="white" v-if="ui.tab == 2">
+            <v-subheader v-if="ui.tab == 2" class="white">
               <v-menu right max-height="340" :close-on-content-click="false">
                 <template v-slot:activator="{ on }">
                   <v-btn
-                    v-on="on"
                     class="mr-3"
                     :absolute="isBiggerScreen"
                     depressed
                     small
                     left
+                    v-on="on"
                   >
                     <v-icon>mdi-history</v-icon>
                   </v-btn>
@@ -134,11 +134,11 @@
                 class="mx-3"
                 :class="{ 'mr-12': isBiggerScreen }"
                 :disabled="ui.followUpTab == 0"
-                @click="ui.followUpTab--"
                 depressed
                 :absolute="isBiggerScreen"
                 x-small
                 right
+                @click="ui.followUpTab--"
               >
                 <v-icon small>mdi-chevron-left</v-icon>
               </v-btn>
@@ -146,11 +146,11 @@
                 color="primary"
                 title="Next visit"
                 :disabled="ui.followUpTab == followUps.length"
-                @click="ui.followUpTab++"
                 depressed
                 :absolute="isBiggerScreen"
                 x-small
                 right
+                @click="ui.followUpTab++"
               >
                 <v-icon small>mdi-chevron-right</v-icon>
               </v-btn>
@@ -165,7 +165,6 @@
           <v-container>
             <input-field
               v-model="$data.case.mind"
-              @input="onChange"
               label="Mind"
               field="v-textarea"
               :textfield="{
@@ -173,11 +172,11 @@
                 autoGrow: true,
                 rows: 3,
               }"
+              @input="onChange"
             >
             </input-field>
             <input-field
               v-model="$data.case.duringAcute"
-              @input="onChange"
               label="During Acute"
               field="v-textarea"
               :textfield="{
@@ -185,6 +184,7 @@
                 autoGrow: true,
                 rows: 3,
               }"
+              @input="onChange"
             >
             </input-field>
           </v-container>
@@ -193,7 +193,6 @@
           <v-container>
             <input-field
               v-model="$data.case.pastHistory"
-              @input="onChange"
               label="Past History"
               field="v-textarea"
               :textfield="{
@@ -201,11 +200,11 @@
                 autoGrow: true,
                 rows: 3,
               }"
+              @input="onChange"
             >
             </input-field>
             <input-field
               v-model="$data.case.familyHistory"
-              @input="onChange"
               label="Family History"
               field="v-textarea"
               :textfield="{
@@ -213,11 +212,11 @@
                 autoGrow: true,
                 rows: 3,
               }"
+              @input="onChange"
             >
             </input-field>
             <input-field
               v-model="$data.case.medicalNote"
-              @input="onChange"
               label="Medical note"
               field="v-textarea"
               :textfield="{
@@ -225,6 +224,7 @@
                 autoGrow: true,
                 rows: 3,
               }"
+              @input="onChange"
             >
             </input-field>
           </v-container>
@@ -255,13 +255,13 @@
         </v-tab-item>
         <v-tab-item>
           <investigation
+            :investigations="investigations"
             @update:investigations="
               (ev) => {
                 investigations = ev;
                 onChange();
               }
             "
-            :investigations="investigations"
           ></investigation>
         </v-tab-item>
         <v-tab-item>
@@ -286,18 +286,24 @@
             </v-layout>
           </v-card-text>
         </v-card>
-        <v-btn text @click="$router.go(-1)" class="mt-8" block>Go Back</v-btn>
+        <v-btn text class="mt-8" block @click="$router.go(-1)">Go Back</v-btn>
       </v-sheet>
     </v-container>
   </v-skeleton-loader>
 </template>
 
 <script>
+/* eslint-disable func-names */
+
 import moment from "moment";
 
-import { sortBy } from "@/modules/list";
-import { clone, isEqual } from "@/modules/object";
-import { makeRequest, errorHandler } from "@/modules/request";
+import { sortBy } from "@pranavraut033/js-utils/utils/list";
+import { errorHandler } from "@pranavraut033/js-utils";
+import {
+  clone,
+  isEqual,
+  changeFields,
+} from "@pranavraut033/js-utils/utils/object";
 
 import FollowUp from "@/components/FollowUp";
 import Investigation from "@/components/Investigation";
@@ -306,7 +312,7 @@ import investigationReports from "@/json/investigation-reports.json";
 
 export default {
   components: { FollowUp, Investigation, SavingAlert },
-  props: { patientId: String },
+  props: { patientId: { type: String, required: true } },
   data() {
     return {
       patient: null,
@@ -366,123 +372,8 @@ export default {
       return this.$vuetify.breakpoint.smAndUp;
     },
   },
-  methods: {
-    onChange() {
-      let setTimer = () => {
-        if (this.ui.saveDelayTimerId) clearTimeout(this.ui.saveDelayTimerId);
-
-        this.ui.saveDelayTimerId = setTimeout(async () => {
-          if (this.ui.saving) {
-            setTimer();
-          } else {
-            await this.save();
-            this.ui.changed = false;
-          }
-        }, 2500);
-      };
-
-      this.ui.changed = true;
-      setTimer();
-    },
-    async save() {
-      let newCase = clone(this.case);
-      let prevCase = clone(this.patient.case);
-
-      newCase.investigations = clone(this.investigations);
-
-      delete newCase.followUps;
-      delete prevCase.followUps;
-
-      if (isEqual(newCase, prevCase)) return;
-
-      if (this.ui.saving) return;
-      this.ui.saving = true;
-      this.ui.saved = false;
-
-      let method, body;
-      if (newCase._id) {
-        body = { id: this.patientId };
-
-        for (const key in newCase) {
-          if (newCase.hasOwnProperty(key)) {
-            const element = newCase[key];
-            if (!isEqual(element, prevCase[key])) body[key] = element;
-          }
-        }
-        method = "put";
-      } else {
-        body = clone(newCase);
-        body.id = this.patientId;
-        method = "post";
-      }
-
-      try {
-        await makeRequest(method, "case", body);
-
-        this.$nextTick(() => {
-          this.ui.saving = false;
-          this.ui.saved = true;
-          if (this.ui.saveBadgeTimerId) clearTimeout(this.ui.saveBadgeTimerId);
-          this.ui.saveBadgeTimerId = setTimeout(
-            () => (this.ui.saved = false),
-            3200
-          );
-        });
-      } catch (err) {
-        this.ui.saving = false;
-        this.ui.saved = false;
-        this.errorHandler(err);
-      }
-    },
-    setHeight() {
-      this.$store.state.app.extensionHeight =
-        (this.isBiggerScreen ? 96 : 116) + (this.ui.tab == 2 ? 48 : 0) + 1;
-    },
-    patientUpdated(updates) {
-      updates.case = this.patient.case;
-      this.patient = updates;
-    },
-    getPatient() {
-      if (this.ui.loading) return;
-
-      this.ui.loading = true;
-      makeRequest("get", "case", { id: this.patientId })
-        .then(({ data }) => {
-          data.case = data.case || {};
-
-          data.case.investigations = data.case.investigations || [];
-
-          data.case.investigations = data.case.investigations.map((ev) => {
-            ev.format = investigationReports.find(
-              (e) => (e.name || e) == ev.name
-            );
-            ev.entries = ev.entries.map((ev) => {
-              ev.edit = false;
-              ev.changeDate = false;
-              ev.values = ev.values || (typeof format == "string" ? "" : {});
-
-              return ev;
-            });
-
-            return ev;
-          });
-          this.investigations = clone(data.case.investigations);
-
-          this.patient = data;
-          this.ui.loading = false;
-
-          this.$store.state.app.extentedAppBar = true;
-          this.setHeight();
-        })
-        .catch((err) => {
-          this.ui.loading = false;
-          this.ui.error = errorHandler(err);
-          this.errorHandler(this.ui.error);
-        });
-    },
-  },
   watch: {
-    "patient.case"(a) {
+    "patient.case": function (a) {
       if (!a) return;
 
       this.case = clone(a);
@@ -492,10 +383,10 @@ export default {
           sortBy("createdAt", true)
         );
 
-        let lastFollowUp = clone(this.case.followUps[0]);
+        const lastFollowUp = clone(this.case.followUps[0]);
 
-        let sameDay =
-          moment().format("YYYYMMDD") ==
+        const sameDay =
+          moment().format("YYYYMMDD") ===
           moment(lastFollowUp.createdAt).format("YYYYMMDD");
 
         if (sameDay) {
@@ -531,10 +422,10 @@ export default {
 
       this.getPatient();
     },
-    "$vuetify.breakpoint.xs"() {
+    "$vuetify.breakpoint.xs": function () {
       this.setHeight();
     },
-    "ui.tab"() {
+    "ui.tab": function () {
       this.setHeight();
     },
   },
@@ -545,6 +436,118 @@ export default {
   },
   mounted() {
     this.getPatient();
+  },
+  methods: {
+    onChange() {
+      const setTimer = () => {
+        if (this.ui.saveDelayTimerId) clearTimeout(this.ui.saveDelayTimerId);
+
+        this.ui.saveDelayTimerId = setTimeout(async () => {
+          if (this.ui.saving) {
+            setTimer();
+          } else {
+            await this.save();
+            this.ui.changed = false;
+          }
+        }, 2500);
+      };
+
+      this.ui.changed = true;
+      setTimer();
+    },
+    async save() {
+      const newCase = clone(this.case);
+      const prevCase = clone(this.patient.case);
+
+      newCase.investigations = clone(this.investigations);
+
+      delete newCase.followUps;
+      delete prevCase.followUps;
+
+      if (isEqual(newCase, prevCase)) return;
+
+      if (this.ui.saving) return;
+      this.ui.saving = true;
+      this.ui.saved = false;
+
+      let method;
+      let body;
+      if (newCase._id) {
+        body = { id: this.patientId };
+        Object.assign(body, changeFields(prevCase, newCase));
+
+        method = "put";
+      } else {
+        body = clone(newCase);
+        body.id = this.patientId;
+        method = "post";
+      }
+
+      try {
+        await this.makeRequest(method, "case", body);
+
+        this.$nextTick(() => {
+          this.ui.saving = false;
+          this.ui.saved = true;
+          if (this.ui.saveBadgeTimerId) clearTimeout(this.ui.saveBadgeTimerId);
+          this.ui.saveBadgeTimerId = setTimeout(
+            () => (this.ui.saved = false),
+            3200
+          );
+        });
+      } catch (err) {
+        this.ui.saving = false;
+        this.ui.saved = false;
+        this.errorHandler(err);
+      }
+    },
+    setHeight() {
+      this.$store.state.app.extensionHeight =
+        (this.isBiggerScreen ? 96 : 116) + (this.ui.tab === 2 ? 48 : 0) + 1;
+    },
+    patientUpdated(updates) {
+      updates.case = this.patient.case;
+      this.patient = updates;
+    },
+    getPatient() {
+      if (this.ui.loading) return;
+
+      this.ui.loading = true;
+      this.makeRequest("get", "case", { id: this.patientId })
+        .then(({ data }) => {
+          data.case = data.case || {};
+
+          data.case.investigations = data.case.investigations || [];
+
+          data.case.investigations = data.case.investigations.map((ev) => {
+            ev.format = investigationReports.find(
+              (e) => (e.name || e) === ev.name
+            );
+            ev.entries = ev.entries.map((entry) => {
+              entry.edit = false;
+              entry.changeDate = false;
+              entry.values =
+                entry.values || (typeof format === "string" ? "" : {});
+
+              return entry;
+            });
+
+            return ev;
+          });
+          this.investigations = clone(data.case.investigations);
+
+          this.patient = data;
+          this.ui.loading = false;
+
+          this.$store.state.app.extentedAppBar = true;
+          this.setHeight();
+        })
+        .catch((err) => {
+          this.ui.loading = false;
+          this.ui.error = errorHandler(err);
+          this.errorHandler(this.ui.error);
+        });
+    },
   },
 };
 </script>

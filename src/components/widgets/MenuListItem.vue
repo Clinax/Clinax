@@ -1,5 +1,5 @@
 <template>
-  <v-list-item v-on="$listeners" v-bind="link" :class="[bg]">
+  <v-list-item v-bind="link" :class="[bg]" v-on="$listeners">
     <v-list-item-action v-if="icon">
       <v-badge :value="Boolean(badge)">
         <template v-slot:badge>{{ badge }}</template>
@@ -29,5 +29,3 @@ export default {
   },
 };
 </script>
-
-<style></style>

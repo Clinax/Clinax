@@ -14,7 +14,7 @@
               <li class="grey rounded d-inline-block px-3 lighten-2">
                 {{ date1 }}
               </li>
-              <template v-if="date1 != date2">
+              <template v-if="date2 && date1 != date2">
                 <li><small>To</small></li>
                 <li class="grey rounded d-inline-block px-3 lighten-2">
                   {{ date2 }}
@@ -31,8 +31,8 @@
             <v-btn
               color="primary"
               title="Date Range Filter"
-              @click="(ev) => $emit('click:date-filter', ev)"
               icon
+              @click="(ev) => $emit('click:date-filter', ev)"
             >
               <v-icon>mdi-calendar-range</v-icon>
             </v-btn>
@@ -45,6 +45,9 @@
 
 <script>
 export default {
-  props: { date1: String, date2: String },
+  props: {
+    date1: { type: String, required: true },
+    date2: { type: String, default: null },
+  },
 };
 </script>

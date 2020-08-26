@@ -2,7 +2,7 @@
   <v-tooltip v-if="title" bottom>
     <template v-slot:activator="{ on }">
       <v-badge :color="dotColor" :value="badge" dot>
-        <span v-on="on" :class="classes" class="d-inline">
+        <span :class="classes" class="d-inline" v-on="on">
           <i v-if="fa" :class="classes" :style="fcolor"></i>
           <v-icon v-else v-bind="$props">
             <slot>{{ icon }}</slot>
@@ -28,19 +28,19 @@ export default {
     ...VIcon.props,
     badge: { type: Boolean, default: false },
     dotColor: { type: String, default: "primary" },
-    icon: { type: String },
-    title: { type: String, required: false, default: "" },
+    icon: { type: String, default: "" },
+    title: { type: String, default: "" },
     cls: { type: String, default: "" },
     fa: { type: Boolean, default: false },
     fas: { type: Boolean, default: false },
     outlined: { type: Boolean, default: false },
-    "two-tone": { type: Boolean, default: false },
+    twoTone: { type: Boolean, default: false },
     round: { type: Boolean, default: false },
     sharp: { type: Boolean, default: false },
   },
   data() {
     return {
-      faIcon: "fa-" + this.icon,
+      faIcon: `fa-${this.icon}`,
       classes: {
         fas: this.fas,
         "v-icon mx-2": true,
@@ -49,17 +49,17 @@ export default {
     };
   },
   created() {
-    var t;
+    let t;
     if (this.fa) {
       this.classes[this.faIcon] = true;
       if (this.class) this.classes[this.class] = true;
 
-      if (this.color[0] == "#") {
-        this.fcolor = "color: " + this.color;
+      if (this.color[0] === "#") {
+        this.fcolor = `color: ${this.color}`;
       } else {
         t = this.color.split(" ");
-        this.classes[t[0] + "--text"] = true;
-        if (t.length > 1) this.classes["text--" + t[1]] = true;
+        this.classes[`${t[0]}--text`] = true;
+        if (t.length > 1) this.classes[`text--${t[1]}`] = true;
       }
     } else {
       t = "";
@@ -70,7 +70,7 @@ export default {
       else if (this.sharp) t = "-sharp";
 
       this.classes = {};
-      this.classes["material-icons" + t] = true;
+      this.classes[`material-icons${t}`] = true;
       this.classes[this.cls] = true;
     }
   },

@@ -2,7 +2,7 @@ import mongoObjectId from "@/utils/mongoObjectId";
 import Address from "@/model/Address";
 
 import { getFromColorMap } from "@/utils";
-import { clone } from "@/modules/object";
+import { clone } from "@pranavraut033/js-utils/utils/object";
 
 export default class Contact {
   constructor(contact, userId) {

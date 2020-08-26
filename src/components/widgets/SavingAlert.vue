@@ -9,9 +9,9 @@
     <v-icon v-if="changed" small> mdi-alert-circle</v-icon>
     <v-spacer></v-spacer>
     <v-progress-circular
+      v-if="saving"
       indeterminate
       color="#ffffffaf"
-      v-if="saving"
       size="12"
       width="2"
     ></v-progress-circular>

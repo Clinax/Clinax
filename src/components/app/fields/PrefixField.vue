@@ -1,7 +1,6 @@
 <template>
   <input-field
     v-model="model"
-    v-on="$listeners"
     v-bind="$props"
     field="v-select"
     :label="inlineLabel ? null : 'Prefix'"
@@ -10,6 +9,7 @@
       items: prefixes,
       ...textfield,
     }"
+    v-on="$listeners"
     @input="
       (model === '- Less' &&
         ((prefixes = ['Mr', 'Mrs', 'Ms', '+ More']), (model = null))) ||

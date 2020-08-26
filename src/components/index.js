@@ -6,6 +6,7 @@ import draggable from "vuedraggable";
 import VueClipboard from "vue-clipboard2";
 import PerfectScrollbar from "vue2-perfect-scrollbar";
 
+import { RecycleScroller } from "vue-virtual-scroller";
 import WOI from "./widgets/WOI";
 import Icon from "./widgets/Icon";
 import List from "./widgets/List";
@@ -15,7 +16,6 @@ import IconButton from "./widgets/IconButton";
 import ResponsiveContainer from "./widgets/ResponsiveContainer";
 
 import PatientDialog from "./app/widgets/PatientDialog";
-import { RecycleScroller } from "vue-virtual-scroller";
 
 import "vue2-perfect-scrollbar/dist/vue2-perfect-scrollbar.css";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";

@@ -18,20 +18,20 @@
     </v-toolbar-title>
 
     <v-spacer v-if="!active"></v-spacer>
-    <search-bar class="mx-3 flex-grow-1" v-if="!isMobile"> </search-bar>
+    <search-bar v-if="!isMobile" class="mx-3 flex-grow-1"> </search-bar>
     <v-spacer v-if="!active"></v-spacer>
     <v-btn
       v-if="!active"
       color="error"
-      @click="$store.dispatch('logout')"
       v-bind="
         isMobile ? { fab: true, xSmall: true, depressed: true } : { text: true }
       "
+      @click="$store.dispatch('logout')"
     >
       <v-icon>mdi-logout</v-icon>
-      <span class="ml-2" v-if="!isMobile">logout</span>
+      <span v-if="!isMobile" class="ml-2">logout</span>
     </v-btn>
-    <template v-slot:extension v-if="$store.state.app.extentedAppBar">
+    <template v-if="$store.state.app.extentedAppBar" v-slot:extension>
       <portal-target name="app-bar-extension" class="w-100"> </portal-target>
     </template>
   </v-app-bar>
@@ -42,8 +42,8 @@ import Toggleable from "@/components/widgets/Toggleable";
 import SearchBar from "@/components/app/widgets/SearchBar";
 
 export default {
-  extends: Toggleable,
   components: { SearchBar },
+  extends: Toggleable,
   data() {
     return {
       active: false,

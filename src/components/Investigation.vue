@@ -45,8 +45,8 @@ span<template>
                       <span v-if="entry.edit">Report Date:</span>
                       <input
                         v-if="entry.edit && entry.changeDate"
-                        v-model="entry.reportDate"
                         :ref="'input-' + entry._id"
+                        v-model="entry.reportDate"
                         class="mx-3"
                         type="date"
                       />
@@ -57,16 +57,16 @@ span<template>
                       </b>
                       <v-btn
                         v-if="entry.edit"
+                        :color="entry.changeDate ? 'primary' : ''"
+                        outlined
+                        small
+                        icon
                         @click="
                           (entry.changeDate = !entry.changeDate) &&
                             $nextTick(() =>
                               $refs['input-' + entry._id][0].focus()
                             )
                         "
-                        :color="entry.changeDate ? 'primary' : ''"
-                        outlined
-                        small
-                        icon
                       >
                         <v-icon small>
                           {{
@@ -81,20 +81,20 @@ span<template>
                         v-if="entry.edit"
                         class="mx-3"
                         color="error"
+                        icon
                         @click="
                           report.entries = report.entries.filter(
                             (ev) => ev._id != entry._id
                           );
                           emitUpdate();
                         "
-                        icon
                       >
                         <v-icon> mdi-close-circle </v-icon>
                       </v-btn>
                       <v-btn
                         color="primary"
-                        @click="(entry.edit = !entry.edit) || emitUpdate()"
                         icon
+                        @click="(entry.edit = !entry.edit) || emitUpdate()"
                       >
                         <v-icon>
                           {{ entry.edit ? "mdi-check" : "mdi-pencil" }}
@@ -117,9 +117,9 @@ span<template>
                         ></input-field>
                         <span
                           v-else
-                          v-html="entry.value || 'Not provided'"
                           :class="{ 'text--secondary': !entry.value }"
                           class="border-left-bold border-primary text--primary px-3 body-1"
+                          v-html="entry.value || 'Not provided'"
                         >
                         </span>
                       </template>
@@ -132,9 +132,9 @@ span<template>
                           <tr>
                             <th
                               v-for="head in report.format.heads"
-                              v-html="head"
                               v-once
                               :key="head"
+                              v-html="head"
                             ></th>
                           </tr>
                           <template
@@ -200,11 +200,11 @@ span<template>
       <v-btn
         color="primary"
         class="ma-5"
-        @click="$refs.createDialog.open()"
         bottom
         fixed
         right
         fab
+        @click="$refs.createDialog.open()"
       >
         <v-icon>mdi-plus</v-icon>
       </v-btn>
@@ -229,7 +229,7 @@ import NoInvestigationIllustration from "@/components/NoInvestigationIllustratio
 
 export default {
   components: { InvestigationDialog, NoInvestigationIllustration },
-  props: { investigations: Array, default: () => [] },
+  props: { investigations: { type: Array, default: () => [] } },
   data() {
     return { investigationsModel: [...this.investigations] };
   },
@@ -244,7 +244,7 @@ export default {
         {
           _id: mongoObjectId(),
           reportDate: moment().format("YYYY-MM-DD"),
-          values: typeof report.format == "string" ? "" : {},
+          values: typeof report.format === "string" ? "" : {},
           edit: true,
           changeDate: false,
         },
@@ -256,7 +256,7 @@ export default {
     },
     removeReport(indexToRemove) {
       this.investigationsModel = this.investigationsModel.filter(
-        (_, i) => i != indexToRemove
+        (_, i) => i !== indexToRemove
       );
     },
   },

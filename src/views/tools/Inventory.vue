@@ -21,18 +21,18 @@
           <v-divider class="mb-5"></v-divider>
           <v-sheet height="450">
             <RecycleScroller
+              v-slot="{ item }"
               class="scroller"
               :items="availableDrugs"
               :item-size="48"
-              v-slot="{ item }"
             >
               <li
                 class="drug-item"
+                draggable="true"
+                :class="{ selected: item.selected }"
                 @drag="onDragEventSrc"
                 @dragend="onDragEventSrc"
                 @dragstart="onDragEventSrc"
-                draggable="true"
-                :class="{ selected: item.selected }"
                 @click="item.selected = !item.selected"
               >
                 {{ item.name }}
@@ -52,9 +52,9 @@
           >
             <v-list class="scroller">
               <RecycleScroller
+                v-slot="{ item }"
                 :items="inventoryDrugs"
                 :item-size="48"
-                v-slot="{ item }"
               >
                 <v-list-item>
                   <v-list-item-content>
@@ -96,7 +96,7 @@ export default {
   },
   methods: {
     onDragEventSrc(ev) {
-      const type = ev.type;
+      const { type } = ev;
 
       switch (type) {
         case "dragstart":
@@ -107,17 +107,20 @@ export default {
           break;
         case "dragend":
           ev.target.classList.remove("dragging");
+          break;
+        default:
+          break;
       }
     },
-    onDragEventDst(ev) {
-      const type = ev.type;
-      switch (type) {
-        case "dragstart":
-          break;
-        case "drag":
-          break;
-        case "dragend":
-      }
+    onDragEventDst() {
+      // const { type } = ev;
+      // switch (type) {
+      //   case "dragstart":
+      //     break;
+      //   case "drag":
+      //     break;
+      //   case "dragend":
+      // }
     },
   },
 };

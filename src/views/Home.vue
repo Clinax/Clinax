@@ -16,11 +16,11 @@
           <v-icon>mdi-chevron-right</v-icon>
         </v-btn>
       </v-layout>
-      <EventCalendar
+      <event-calendar
         ref="calendar"
-        tag="home"
         v-model="calender"
-      ></EventCalendar>
+        tag="home"
+      ></event-calendar>
     </v-card>
   </v-container>
 </template>

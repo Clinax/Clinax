@@ -66,20 +66,20 @@
                   flat: disabled,
                   disabled,
                 }"
-                @remove="criteria = criteria.filter((_, index) => i != index)"
                 editable-header
                 removable
+                @remove="criteria = criteria.filter((_, index) => i != index)"
               >
               </input-field>
-              <v-col cols="12" sm="6" md="4" key="add" v-if="!disabled">
+              <v-col v-if="!disabled" key="add" cols="12" sm="6" md="4">
                 <v-layout fill-height justify-center align-center>
                   <v-btn
                     color="primary"
+                    outlined
+                    small
                     @click.prevent="
                       criteria.push(['Click here to change title', ''])
                     "
-                    outlined
-                    small
                   >
                     Add Creatira
                   </v-btn>
@@ -92,8 +92,8 @@
               <input-field
                 v-for="(field, i) in extra"
                 :key="i"
-                field="v-textarea"
                 v-model="field[1]"
+                field="v-textarea"
                 :label.sync="field[0]"
                 :textfield="{
                   placeholder: disabled
@@ -105,9 +105,9 @@
                   rows: 3,
                   disabled,
                 }"
-                @remove="extra = extra.filter((_, index) => i != index)"
                 editable-header
                 removable
+                @remove="extra = extra.filter((_, index) => i != index)"
               >
               </input-field>
             </v-slide-y-transition>
@@ -145,19 +145,21 @@
                   disabled,
                 }"
                 :col="{ sm: 6, md: 4, cols: 12 }"
+                :removable="field[2]"
+                :editable-header="field[2]"
                 @remove="
                   physicalGeneral = physicalGeneral.filter(
                     (_, index) => i != index
                   )
                 "
-                :removable="field[2]"
-                :editable-header="field[2]"
               >
               </input-field>
-              <v-col cols="12" sm="6" md="4" key="add" v-if="!disabled">
+              <v-col v-if="!disabled" key="add" cols="12" sm="6" md="4">
                 <v-layout fill-height justify-center align-center>
                   <v-btn
                     color="primary"
+                    outlined
+                    small
                     @click.prevent="
                       physicalGeneral.push([
                         'Click here to change title',
@@ -165,8 +167,6 @@
                         true,
                       ])
                     "
-                    outlined
-                    small
                   >
                     Add Extra Field
                   </v-btn>
@@ -196,17 +196,19 @@
                   disabled,
                 }"
                 :col="{ sm: 6, md: 4, cols: 12 }"
+                :removable="field[2]"
+                :editable-header="field[2]"
                 @remove="
                   onExamination = onExamination.filter((_, index) => i != index)
                 "
-                :removable="field[2]"
-                :editable-header="field[2]"
               >
               </input-field>
-              <v-col cols="12" sm="6" md="4" key="add" v-if="!disabled">
+              <v-col v-if="!disabled" key="add" cols="12" sm="6" md="4">
                 <v-layout fill-height justify-center align-center>
                   <v-btn
                     color="primary"
+                    outlined
+                    small
                     @click.prevent="
                       onExamination.push([
                         'Click here to change title',
@@ -214,8 +216,6 @@
                         true,
                       ])
                     "
-                    outlined
-                    small
                   >
                     Add Extra Field
                   </v-btn>
@@ -237,7 +237,6 @@
               <template v-slot:activator="{ on }">
                 <input-field
                   v-model="followupDate"
-                  v-on="disabled ? null : on"
                   :value="
                     (followUpModel.nextFollowUpDate &&
                       moment(followUpModel.nextFollowUpDate).format(
@@ -255,12 +254,13 @@
                     clearable: true,
                     disabled,
                   }"
+                  v-on="disabled ? null : on"
                 ></input-field>
               </template>
               <v-card>
                 <v-date-picker
-                  class="elevation-0"
                   ref="datePicker"
+                  class="elevation-0"
                   color="primary"
                   :value="followUpModel.nextFollowUpDate"
                   :min="moment().format('YYYY-MM-DD')"
@@ -289,8 +289,8 @@
             <v-divider class="mt-5"></v-divider>
 
             <input-field
-              field="v-textarea"
               v-model="followUpModel.treatment.diagnosis"
+              field="v-textarea"
               label="Diagnosis"
               :textfield="{
                 placeholder: disabled ? 'Not Provided' : 'Start Typing...',
@@ -305,8 +305,8 @@
 
             <input-field
               v-if="ui.parallelTreatment"
-              field="v-textarea"
               v-model="followUpModel.treatment.parallelTreatment"
+              field="v-textarea"
               label="Parallel Treatment"
               :textfield="{
                 placeholder: disabled ? 'Not Provided' : 'Start Typing...',
@@ -435,9 +435,9 @@
               <v-spacer></v-spacer>
               <v-btn
                 color="primary"
-                @click="followUpModel.treatment.drugs.push({ id: drugId++ })"
                 small
                 outlined
+                @click="followUpModel.treatment.drugs.push({ id: drugId++ })"
               >
                 Add
               </v-btn>
@@ -459,19 +459,22 @@
 import moment from "moment";
 import drugs from "@/json/drugs.json";
 
-import { sortBy } from "@/modules/list";
-import { makeRequest } from "@/modules/request";
-import { clone, isEqual } from "@/modules/object";
+import { sortBy } from "@pranavraut033/js-utils/utils/list";
+import {
+  clone,
+  isEqual,
+  changedFields,
+} from "@pranavraut033/js-utils/utils/object";
 
 import SavingAlert from "@/components/widgets/SavingAlert";
 
 export default {
+  components: { SavingAlert },
   props: {
-    patient: Object,
-    followUp: Object,
+    patient: { type: Object, required: true },
+    followUp: { type: Object, default: null },
     disabled: { default: false, type: Boolean },
   },
-  components: { SavingAlert },
   data: () => ({
     drugs,
     drugId: 1,
@@ -559,22 +562,22 @@ export default {
     // },
     extra(a) {
       this.followUpModel.extra = {};
-      a.forEach((entry) => (this.followUpModel.extra[entry[0]] = entry[1]));
+      a.forEach(([key, value]) => (this.followUpModel.extra[key] = value));
     },
     criteria(a) {
       this.followUpModel.criteria = {};
-      a.forEach((entry) => (this.followUpModel.criteria[entry[0]] = entry[1]));
+      a.forEach(([key, value]) => (this.followUpModel.criteria[key] = value));
     },
     physicalGeneral(a) {
       this.followUpModel.physicalGeneral = {};
       a.forEach(
-        (entry) => (this.followUpModel.physicalGeneral[entry[0]] = entry[1])
+        ([key, value]) => (this.followUpModel.physicalGeneral[key] = value)
       );
     },
     onExamination(a) {
       this.followUpModel.onExamination = {};
       a.forEach(
-        (entry) => (this.followUpModel.onExamination[entry[0]] = entry[1])
+        ([key, value]) => (this.followUpModel.onExamination[key] = value)
       );
     },
     followUpModel: {
@@ -584,13 +587,56 @@ export default {
       deep: true,
     },
   },
+  destroyed() {
+    if (this.ui.saveBadgeTimerId) clearTimeout(this.ui.saveBadgeTimerId);
+    if (this.ui.saveDelayTimerId) clearTimeout(this.ui.saveDelayTimerId);
+  },
+  mounted() {
+    if (this.followUp) {
+      this.followUpModel = clone(this.followUp);
+
+      const reset =
+        moment().format("YYYYMMDD") !==
+          moment(this.followUp.createdAt).format("YYYYMMDD") && !this.disabled;
+
+      delete this.followUpModel.createdAt;
+      delete this.followUp.createdAt;
+
+      if (reset) this.followUpModel.treatment.drugs = [];
+
+      this.ui.parallelTreatment = !!this.followUp.treatment.parallelTreatment;
+
+      ["onExamination", "criteria", "extra", "physicalGeneral"].forEach(
+        (ev) => {
+          if (this.followUpModel[ev]) {
+            const indexNameMap = {};
+            for (let i = 0; i < this[ev].length; i++) {
+              const element = this[ev][i];
+              indexNameMap[element[0]] = i;
+            }
+            Object.keys(this.followUpModel[ev]).forEach((key) => {
+              const trueValue = this.followUpModel[ev][key];
+              const element = reset ? "" : trueValue;
+
+              if (typeof indexNameMap[key] === "number") {
+                this[ev][indexNameMap[key]][1] = element;
+                this[ev][indexNameMap[key]][3] = trueValue;
+              } else this[ev].push([key, element, true, trueValue]);
+            });
+          }
+
+          this[ev] = this[ev].sort(sortBy(0));
+        }
+      );
+    }
+  },
   methods: {
     onChange() {
       if (this.disabled) return;
 
       if (!this.$refs.form.validate()) return;
 
-      let setTimer = () => {
+      const setTimer = () => {
         if (this.ui.saveDelayTimerId) clearTimeout(this.ui.saveDelayTimerId);
 
         this.ui.saveDelayTimerId = setTimeout(async () => {
@@ -612,16 +658,11 @@ export default {
       this.ui.saving = true;
       this.ui.saved = false;
 
-      let method, body;
+      let method;
+      let body;
       if (this.followUpModel._id) {
         body = { id: this.followUpModel._id };
-
-        for (const key in this.followUpModel) {
-          if (this.followUpModel.hasOwnProperty(key)) {
-            const element = this.followUpModel[key];
-            if (!isEqual(element, this.followUp[key])) body[key] = element;
-          }
-        }
+        Object.assign(body, changedFields(this.followUp, this.followUpModel));
 
         method = "put";
         delete body.updatedAt;
@@ -634,12 +675,12 @@ export default {
       body.query = { patientId: this.patient._id };
 
       try {
-        let { data } = await makeRequest(method, "followUp", body);
+        const { data } = await this.makeRequest(method, "followUp", body);
 
         this.followUpModel._id = data._id;
 
         if (data.nextFollowUpDate)
-          this.$store.commit("addEvent", {
+          this.$store.commit("followUpsEvents/addEvent", {
             _id: this.patient._id,
             followUpId: data._id,
             name: this.patient.fullname,
@@ -665,52 +706,6 @@ export default {
         this.errorHandler(err);
       }
     },
-  },
-  destroyed() {
-    if (this.ui.saveBadgeTimerId) clearTimeout(this.ui.saveBadgeTimerId);
-    if (this.ui.saveDelayTimerId) clearTimeout(this.ui.saveDelayTimerId);
-  },
-  mounted() {
-    if (this.followUp) {
-      this.followUpModel = clone(this.followUp);
-
-      let reset =
-        moment().format("YYYYMMDD") !=
-          moment(this.followUp.createdAt).format("YYYYMMDD") && !this.disabled;
-
-      delete this.followUpModel.createdAt;
-      delete this.followUp.createdAt;
-
-      if (reset) this.followUpModel.treatment.drugs = [];
-
-      this.ui.parallelTreatment = !!this.followUp.treatment.parallelTreatment;
-
-      ["onExamination", "criteria", "extra", "physicalGeneral"].forEach(
-        (ev) => {
-          if (this.followUpModel[ev]) {
-            let indexNameMap = {};
-            for (let i = 0; i < this[ev].length; i++) {
-              const element = this[ev][i];
-              indexNameMap[element[0]] = i;
-            }
-
-            for (const key in this.followUpModel[ev]) {
-              if (this.followUpModel[ev].hasOwnProperty(key)) {
-                let trueValue = this.followUpModel[ev][key];
-                let element = reset ? "" : trueValue;
-
-                if (typeof indexNameMap[key] == "number") {
-                  this[ev][indexNameMap[key]][1] = element;
-                  this[ev][indexNameMap[key]][3] = trueValue;
-                } else this[ev].push([key, element, true, trueValue]);
-              }
-            }
-          }
-
-          this[ev] = this[ev].sort(sortBy(0));
-        }
-      );
-    }
   },
 };
 </script>

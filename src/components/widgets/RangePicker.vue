@@ -6,11 +6,11 @@
           <v-subheader>Presets</v-subheader>
           <v-list-item
             v-for="(preset, i) in internalPresets"
+            :key="i"
             @click="
               (preset.callback && preset.callback()) ||
                 computeDates(...preset.params)
             "
-            :key="i"
           >
             <v-list-item-content>
               <v-list-item-title>
@@ -70,7 +70,7 @@ import moment from "moment";
 
 export default {
   props: {
-    value: Array,
+    value: { type: Array, default: () => [] },
     presets: {
       type: Array,
       default: () => [
@@ -113,24 +113,24 @@ export default {
   computed: {
     internalPresets() {
       return this.presets.map((ev) =>
-        ev == "CUSTOM"
+        ev === "CUSTOM"
           ? {
               text: "Custom",
-              callback: function () {
+              callback: () => {
                 this.$refs.date1.focus();
-              }.bind(this),
+              },
             }
           : ev
       );
     },
     dates: {
       set(v) {
-        let date1 = v[0];
+        const date1 = v[0];
         let date2 = v[1];
 
         if (!date2) {
-          let d1 = Math.abs(moment(v[0]).diff(this.date1));
-          let d2 = Math.abs(moment(v[0]).diff(this.date2));
+          const d1 = Math.abs(moment(v[0]).diff(this.date1));
+          const d2 = Math.abs(moment(v[0]).diff(this.date2));
           date2 = v[1] || (d1 > d2 ? this.date1 : this.date2);
         }
         this.setDates(date1, date2);
@@ -150,15 +150,19 @@ export default {
       this.$emit("input", this.dates);
     },
     computeDates(...params) {
-      let method = params[2] || "add";
-      let date1 = moment()[method](params[0], params[1]).format("YYYY-MM-DD");
-      let date2 = moment().format("YYYY-MM-DD");
+      const method = params[2] || "add";
+      const date1 = moment()[method](params[0], params[1]).format("YYYY-MM-DD");
+      const date2 = moment().format("YYYY-MM-DD");
       this.setDates(date1, date2);
     },
     setDates(date1, date2) {
-      date2 > date1
-        ? ((this.date1 = date1), (this.date2 = date2))
-        : ((this.date1 = date2), (this.date2 = date1));
+      if (date2 > date1) {
+        this.date1 = date1;
+        this.date2 = date2;
+      } else {
+        this.date1 = date2;
+        this.date2 = date1;
+      }
     },
   },
 };

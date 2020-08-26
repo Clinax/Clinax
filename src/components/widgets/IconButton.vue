@@ -1,10 +1,10 @@
 <template>
   <v-btn
-    v-on="$listeners"
     :class="{ 'v-btn--active': active }"
     :color="active ? 'primary' : ''"
     :outlined="active"
     icon
+    v-on="$listeners"
   >
     <icon v-bind="$props"> </icon>
   </v-btn>

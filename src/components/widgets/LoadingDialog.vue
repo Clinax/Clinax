@@ -18,7 +18,7 @@ import Toggleable from "./Toggleable";
 
 export default {
   extends: Toggleable,
-  props: { text: String },
+  props: { text: { type: String, default: "Loading" } },
 };
 </script>
 

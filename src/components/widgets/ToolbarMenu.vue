@@ -2,7 +2,7 @@
   <v-menu v-model="model" v-bind="menuProps" min-width="190" bottom left>
     <template v-slot:activator="props">
       <slot name="activator" v-bind="props">
-        <v-btn v-on="props.on" icon>
+        <v-btn icon v-on="props.on">
           <v-icon>{{ activatorIcon }}</v-icon>
         </v-btn>
       </slot>
@@ -19,14 +19,14 @@
 import Toggleable from "./Toggleable";
 
 export default {
-  extends: Toggleable,
   components: { MenuList: () => import("./MenuList") },
+  extends: Toggleable,
   props: {
     options: { type: Array, default: () => [] },
     hideHeader: Boolean,
     headerText: { type: String, default: () => "Menu" },
+    menuProps: { type: Object, default: null },
     activatorIcon: { type: String, default: () => "mdi-dots-vertical" },
-    menuProps: Object,
   },
 };
 </script>

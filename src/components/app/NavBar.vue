@@ -9,7 +9,7 @@
         <v-card-actions>
           <patient-dialog block>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" color="primary" rounded large block depressed>
+              <v-btn color="primary" rounded large block depressed v-on="on">
                 <v-icon>mdi-plus</v-icon>Add Patient
               </v-btn>
             </template>
@@ -24,15 +24,15 @@
               <v-spacer></v-spacer>
               <div
                 v-ripple
-                @click="calendar = moment().format('YYYY-MM-DD')"
                 class="px-2"
                 style="cursor: pointer;"
+                @click="calendar = moment().format('YYYY-MM-DD')"
               >
                 <small>
                   <b>
                     <span> {{ moment().format("Do MMMM YYYY") }}&nbsp; </span>
                     <digital-clock
-                      :twelveHour="true"
+                      :twelve-hour="true"
                       :blink="true"
                     ></digital-clock>
                   </b>
@@ -43,11 +43,11 @@
                 color="primary"
                 :loading="loading"
                 :disabled="loading"
-                @click.stop="$refs.calendar.getEvents()"
                 absolute
                 right
                 small
                 icon
+                @click.stop="$refs.calendar.getEvents()"
               >
                 <v-icon small>mdi-refresh</v-icon>
               </v-btn>
@@ -62,8 +62,8 @@
           </div>
         </v-expand-transition>
         <v-list-item
-          @click.stop="calendarNav = !calendarNav"
           v-ripple="!calendarNav"
+          @click.stop="calendarNav = !calendarNav"
         >
           <v-list-item-content class="pa-0 flex-grow-1">
             <template v-if="calendarNav">
@@ -119,8 +119,8 @@ import Toggleable from "@/components/widgets/Toggleable";
 import EventCalendar from "@/components/app/widgets/EventCalendar";
 
 export default {
-  extends: Toggleable,
   components: { DigitalClock, EventCalendar },
+  extends: Toggleable,
 
   data: () => ({
     calendarNav: false,

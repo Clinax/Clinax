@@ -1,12 +1,10 @@
-export default function() {
-  var timestamp = ((new Date().getTime() / 1000) | 0).toString(16);
+export default () => {
+  const timestamp = ((new Date().getTime() / 1000) | 0).toString(16);
 
   return (
     timestamp +
     "xxxxxxxxxxxxxxxx"
-      .replace(/[x]/g, function() {
-        return ((Math.random() * 16) | 0).toString(16);
-      })
+      .replace(/[x]/g, () => ((Math.random() * 16) | 0).toString(16))
       .toLowerCase()
   );
-}
+};

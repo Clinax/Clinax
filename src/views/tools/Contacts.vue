@@ -22,19 +22,19 @@
       </v-toolbar>
       <v-list>
         <v-skeleton-loader
+          key="loader"
           :loading="ui.loading"
           type="list-item-avatar-two-line@5"
-          key="loader"
         >
           <v-slide-y-transition group>
             <template v-for="contact in contacts">
               <v-list-item
                 :key="contact._id"
-                @click="openProfile(contact)"
                 :class="{
                   'v-list-item--active':
                     contact._id == (ui.contactDetails && ui.contactDetails._id),
                 }"
+                @click="openProfile(contact)"
               >
                 <v-list-item-avatar :color="contact.color + '4f'">
                   <v-img
@@ -52,11 +52,7 @@
                   </v-list-item-subtitle>
                 </v-list-item-content>
                 <v-list-item-action v-if="!isSuperSmall">
-                  <v-chip
-                    :color="getFromColorMap(contact.type) + '4f'"
-                    x-small
-                    label
-                  >
+                  <v-chip :color="getColor(contact.type) + '4f'" x-small label>
                     <span class="text-capitalize">
                       {{ contact.type }}
                     </span>
@@ -77,11 +73,11 @@
     <v-btn
       color="primary"
       class="ma-5"
-      @click="openProfile()"
       bottom
       fixed
       right
       fab
+      @click="openProfile()"
     >
       <v-icon>mdi-plus</v-icon>
     </v-btn>
@@ -92,9 +88,8 @@
 import ContactDialog from "@/components/app/widgets/ContactDialog";
 import ToolbarMenu from "@/components/widgets/ToolbarMenu";
 
-import { sortBy } from "@/modules/list";
-import { makeRequest } from "@/modules/request";
-import { decrypt, getFromColorMap } from "@/utils";
+import { sortBy } from "@pranavraut033/js-utils/utils/list";
+import { decrypt, getColor } from "@/utils";
 
 export default {
   components: { ContactDialog, ToolbarMenu },
@@ -141,13 +136,16 @@ export default {
       },
     };
   },
+  mounted() {
+    this.init();
+  },
   methods: {
-    getFromColorMap,
+    getColor,
     init() {
       if (this.ui.loading) return;
 
       this.ui.loading = true;
-      makeRequest("get", "contacts")
+      this.makeRequest("get", "contacts")
         .then(({ data }) => {
           // eslint-disable-next-line no-console
           this.contacts = decrypt(data.contacts).sort(sortBy("displayName"));
@@ -159,7 +157,7 @@ export default {
         });
     },
     updated(contact) {
-      let index = this.contacts.findIndex((ev) => ev._id == contact._id);
+      const index = this.contacts.findIndex((ev) => ev._id === contact._id);
 
       if (~index) this.contacts[index] = contact;
       else this.contacts.push(contact);
@@ -173,10 +171,5 @@ export default {
       // this.$nextTick(() => (this.ui.contactDetailDialog = true));
     },
   },
-  mounted() {
-    this.init();
-  },
 };
 </script>
-
-<style></style>

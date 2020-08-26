@@ -1,9 +1,8 @@
 <template>
   <input-field
-    field="v-select"
     v-model="model"
+    field="v-select"
     v-bind="$props"
-    v-on="$listeners"
     :textfield="{
       label: 'Marital Status',
       prependInnerIcon: 'mdi-ring',
@@ -18,6 +17,7 @@
       ],
       ...textfield,
     }"
+    v-on="$listeners"
   ></input-field>
 </template>
 
