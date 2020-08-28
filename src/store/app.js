@@ -20,7 +20,7 @@ export const mutations = {
   title: (state, value) => (state.title = value),
   snackbar: (state, value) => (state.snackbar = value),
   appbarVisibility: (state, value) => (state.appbarVisibility = value),
-  extension: (state, value) => (state.extension = value),
+  extentedAppBar: (state, value) => (state.extentedAppBar = value),
   navbarVisibility: (state, value) => (state.navbarVisibility = value),
   hideSnackbar: (state) => (state.snackbar.value = false),
   setServiceWorkerState(state, serviceWorkerState) {
@@ -67,8 +67,8 @@ export const actions = {
     commit("appbarVisibility", true);
     commit("navbarVisibility", true);
   },
-  hideExtension: ({ commit }) => commit("extension", false),
-  showExtension: ({ commit }) => commit("extension", true),
+  hideExtension: ({ commit }) => commit("extentedAppBar", false),
+  showExtension: ({ commit }) => commit("extentedAppBar", true),
 
   errorHandler({ dispatch }, err) {
     // eslint-disable-next-line global-require

@@ -1,6 +1,6 @@
 <script>
 export default {
-  props: { value: Boolean },
+  props: { value: { type: [Boolean, String, Number], default: null } },
   data() {
     return {
       model: this.value,

@@ -263,7 +263,7 @@
 <script>
 /* eslint-disable no-console */
 
-import Toggleable from "@/components/widgets/Toggleable";
+import InputModel from "@/components/widgets/InputModel";
 import ConfirmationDialog from "@/components/widgets/ConfirmationDialog";
 import PrefixField from "@/components/app/fields/PrefixField";
 import GenderField from "@/components/app/fields/GenderField";
@@ -273,7 +273,7 @@ import AddressForm from "@/components/app/forms/AddressForm";
 
 import moment from "moment";
 import contactTypes from "@/json/contact-types.json";
-import Contact from "@/model/Contact";
+import Contact from "@/models/Contact";
 
 import {
   clone,
@@ -290,7 +290,7 @@ export default {
     BirthDateField,
     MaritalStatusField,
   },
-  extends: Toggleable,
+  extends: InputModel,
   props: { contact: { type: Object, default: null } },
   data() {
     return {

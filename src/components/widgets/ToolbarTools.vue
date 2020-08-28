@@ -15,6 +15,7 @@
             :badge="filtered"
             :title="'Filter by ' + filterBy || 'status'"
             class="flex-grow-0"
+            :active="!!filtered"
             icon="mdi-filter-variant"
             v-on="on"
           >

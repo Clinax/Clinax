@@ -15,14 +15,12 @@
         onSearch: (ev) => (search = ev),
       }"
     >
-      <v-sheet max-width="540" class="transparent mx-auto">
+      <v-sheet max-width="540" class="transparent mx-auto" dark>
         <v-autocomplete
           class="search-bar"
           label="Search by name, address, phone, etc..."
-          :class="{ focused, 'shadow-lg': focused }"
           :items="items"
-          :dense="isMobile"
-          :menu-props="{ maxWidth: !isMobile ? 540 : '100%' }"
+          :menu-props="{ maxWidth: 540 }"
           :search-input.sync="search"
           :rounded="!focused"
           :shaped="focused"
@@ -31,9 +29,12 @@
           :loading="loading"
           prepend-inner-icon="mdi-magnify"
           autocomplete="off"
-          append-icon
+          solo-inverted
           hide-details
+          append-icon
           clearable
+          light
+          dense
           solo
           @input="onInput"
           @focus="focused = true"
@@ -182,10 +183,9 @@ export default {
 <style lang="scss">
 .search-bar {
   transition: 350ms cubic-bezier(0.445, 0.05, 0.55, 0.95);
-  border: thin solid rgba(0, 0, 0, 0.12);
+  // border: thin solid rgba(0, 0, 0, 0.12);
   &.focused {
     border: none !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
   }
 }
 

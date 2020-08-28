@@ -34,10 +34,10 @@
 </template>
 
 <script>
-import Toggleable from "./Toggleable";
+import InputModel from "./InputModel";
 
 export default {
-  extends: Toggleable,
+  extends: InputModel,
 
   props: {
     message: { type: String, default: "" },

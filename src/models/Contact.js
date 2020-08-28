@@ -1,5 +1,5 @@
 import mongoObjectId from "@/utils/mongoObjectId";
-import Address from "@/model/Address";
+import Address from "@/models/Address";
 
 import { clone } from "@pranavraut033/js-utils/utils/object";
 import getColor from "@pranavraut033/js-utils/utils/getColor";

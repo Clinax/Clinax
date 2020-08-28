@@ -2,15 +2,10 @@
   <v-app-bar
     color="white"
     :extended="$store.state.app.extentedAppBar"
-    :extension-height="$store.state.app.extensionHeight"
     elevate-on-scroll
-    hide-on-scroll
-    clipped-right
+    dense
     app
   >
-    <v-divider
-      style="position: absolute; left: 0; right: 0; bottom: 0;"
-    ></v-divider>
     <v-app-bar-nav-icon v-if="!active" @click="model = !model">
     </v-app-bar-nav-icon>
     <v-toolbar-title v-if="!isMobile">
@@ -32,18 +27,18 @@
       <span v-if="!isMobile" class="ml-2">logout</span>
     </v-btn>
     <template v-if="$store.state.app.extentedAppBar" v-slot:extension>
-      <portal-target name="app-bar-extension" class="w-100"> </portal-target>
+      <portal-target name="appbar-extension" class="w-100"> </portal-target>
     </template>
   </v-app-bar>
 </template>
 
 <script>
-import Toggleable from "@/components/widgets/Toggleable";
+import InputModel from "@/components/widgets/InputModel";
 import SearchBar from "@/components/app/widgets/SearchBar";
 
 export default {
   components: { SearchBar },
-  extends: Toggleable,
+  extends: InputModel,
   data() {
     return {
       active: false,

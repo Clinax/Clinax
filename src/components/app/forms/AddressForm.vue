@@ -72,7 +72,7 @@
 
 <script>
 import InputField from "@/components/widgets/InputField";
-import Address from "@/model/Address";
+import Address from "@/models/Address";
 
 export default {
   components: { InputField },

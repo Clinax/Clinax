@@ -16,11 +16,11 @@
 </template>
 
 <script>
-import Toggleable from "./Toggleable";
+import InputModel from "./InputModel";
 
 export default {
   components: { MenuList: () => import("./MenuList") },
-  extends: Toggleable,
+  extends: InputModel,
   props: {
     options: { type: Array, default: () => [] },
     hideHeader: Boolean,
