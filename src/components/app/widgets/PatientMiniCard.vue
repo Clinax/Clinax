@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="patient" min-width="240" max-width="320">
+  <v-card min-width="240" max-width="320">
     <v-card-text class="text-center">
       <v-avatar color="primary" size="64">
         <v-img
@@ -17,15 +17,15 @@
           <template v-if="patient.phone || patient.phone">
             <v-list-item-subtitle :title="patient.phone || patient.phone">
               <a
-                class="dashed"
                 v-if="patient.phone"
+                class="dashed"
                 :href="'tel:' + patient.phone"
               >
                 {{ patient.phone }}
               </a>
               <a
-                class="dashed"
                 v-else-if="patient.email"
+                class="dashed"
                 :href="'mailto:' + patient.email"
               >
                 {{ patient.email }}
@@ -47,18 +47,18 @@
         <v-list-item dense class="py-0 text-left">
           <v-list-item-content>
             <v-list-item-title
+              v-if="patient.address.street"
               class="text-wrap"
               :title="patient.address.street"
-              v-if="patient.address.street"
             >
               {{ patient.address.street }}
             </v-list-item-title>
-            <v-list-item-subtitle class="text-wrap" v-if="patient.address.area">
+            <v-list-item-subtitle v-if="patient.address.area" class="text-wrap">
               {{ patient.address.area }}
             </v-list-item-subtitle>
             <v-list-item-subtitle
-              class="text-wrap"
               v-if="patient.address.pincode"
+              class="text-wrap"
             >
               <small>
                 {{ patient.address.pincode }}
@@ -73,7 +73,7 @@
 
 <script>
 export default {
-  props: { patient: Object },
+  props: { patient: { type: Object, required: true } },
 };
 </script>
 

@@ -29,6 +29,12 @@ export default new Router({
           props: true,
         },
         {
+          name: "Patient FollowUp",
+          path: "case/:patientId/:followUpId",
+          component: () => import("./views/core/Case"),
+          props: true,
+        },
+        {
           name: "Contacts",
           path: "contacts",
           component: () => import("./views/tools/Contacts"),

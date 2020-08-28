@@ -15,29 +15,30 @@
         onSearch: (ev) => (search = ev),
       }"
     >
-      <v-sheet max-width="540" class="transparent mx-auto">
+      <v-sheet max-width="540" class="transparent mx-auto" dark>
         <v-autocomplete
           class="search-bar"
           label="Search by name, address, phone, etc..."
-          :class="{ focused, 'shadow-lg': focused }"
           :items="items"
-          :dense="isMobile"
-          :menu-props="{ maxWidth: !isMobile ? 540 : '100%' }"
+          :menu-props="{ maxWidth: 540 }"
           :search-input.sync="search"
           :rounded="!focused"
           :shaped="focused"
           :flat="!focused"
           :filter="filter"
           :loading="loading"
+          prepend-inner-icon="mdi-magnify"
+          autocomplete="off"
+          solo-inverted
+          hide-details
+          append-icon
+          clearable
+          light
+          dense
+          solo
           @input="onInput"
           @focus="focused = true"
           @blur="focused = false"
-          prepend-inner-icon="mdi-magnify"
-          autocomplete="off"
-          append-icon
-          hide-details
-          clearable
-          solo
         >
           <template v-slot:selection="{ item }">
             {{ item.fullname }}
@@ -82,12 +83,12 @@
               type="list-item-avatar-two-line"
               :loading="loading"
             >
-              <v-list-item dense v-if="search">
+              <v-list-item v-if="search" dense>
                 <v-list-item-content>
                   <v-list-item-subtitle>No result found</v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
-              <v-list-item dense v-else>
+              <v-list-item v-else dense>
                 <v-list-item-content>
                   <v-list-item-subtitle>Start typing...</v-list-item-subtitle>
                 </v-list-item-content>
@@ -101,10 +102,9 @@
 </template>
 
 <script>
-import { decompressFromUTF16 } from "lz-string";
+import { decrypt } from "@/utils";
 
-import { stringToRegex } from "@/modules/regex";
-import { makeRequest } from "@/modules/request";
+import { stringToRegex } from "@pranavraut033/js-utils/utils/regex";
 
 export default {
   props: { minimal: Boolean },
@@ -131,11 +131,11 @@ export default {
 
       this.loading = true;
 
-      makeRequest("get", "search", {
+      this.makeRequest("get", "search", {
         query: { minimal: this.minimal, search: encodeURI(search) },
       })
-        .then(({ data }) => {
-          data = JSON.parse(decompressFromUTF16(data.compressedData));
+        .then((res) => {
+          const data = decrypt(res.data.compressedData);
           this.loading = false;
 
           // console.log(data);
@@ -143,12 +143,12 @@ export default {
             ev.casekeys =
               (ev.case &&
                 ev.case.followUps
-                  .map((ev) => [
-                    ev.treatment && ev.treatment.diagnosis,
-                    ev.chiefComplain,
+                  .map((followUp) => [
+                    followUp.treatment && followUp.treatment.diagnosis,
+                    followUp.chiefComplain,
                   ])
                   .flat()
-                  .filter((ev) => !!ev)) ||
+                  .filter((treatment) => !!treatment)) ||
               [];
 
             delete ev.case;
@@ -162,7 +162,8 @@ export default {
         });
     },
     filter(object, search) {
-      let regex = stringToRegex(search);
+      const regex = stringToRegex(search);
+
       if (regex)
         return (
           regex.test(object.fullname) ||
@@ -182,10 +183,9 @@ export default {
 <style lang="scss">
 .search-bar {
   transition: 350ms cubic-bezier(0.445, 0.05, 0.55, 0.95);
-  border: thin solid rgba(0, 0, 0, 0.12);
+  // border: thin solid rgba(0, 0, 0, 0.12);
   &.focused {
     border: none !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
   }
 }
 

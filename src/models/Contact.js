@@ -1,8 +1,8 @@
 import mongoObjectId from "@/utils/mongoObjectId";
-import Address from "@/model/Address";
+import Address from "@/models/Address";
 
-import { getFromColorMap } from "@/utils";
-import { clone } from "@/modules/object";
+import { clone } from "@pranavraut033/js-utils/utils/object";
+import getColor from "@pranavraut033/js-utils/utils/getColor";
 
 export default class Contact {
   constructor(contact, userId) {
@@ -11,7 +11,7 @@ export default class Contact {
     else {
       this.newObject = true;
       this._id = mongoObjectId();
-      this.color = getFromColorMap(this._id);
+      this.color = getColor(this._id);
       this.name = {};
       this.addedBy = userId;
     }

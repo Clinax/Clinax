@@ -4,27 +4,27 @@
       <v-subheader v-if="option.header" :key="option.header">
         {{ option.header }}
       </v-subheader>
-      <ToolbarMenu
+      <toolbar-menu
         v-else-if="option.items"
+        :key="option.text"
         :options="option.items"
         :header-text="option.text"
-        :key="option.text"
         :menu-props="{ top: true, closeOnContentClick: true }"
       >
         <template v-slot:activator="{ on }">
           <menu-list-item
-            v-on="on"
             v-bind="option"
             append="mdi-menu-right"
+            v-on="on"
           ></menu-list-item>
         </template>
-      </ToolbarMenu>
+      </toolbar-menu>
       <menu-list-item
         v-else
-        v-on="option.on"
+        :key="option.text"
         v-bind="option"
         :class="[option.bg]"
-        :key="option.text"
+        v-on="option.on"
       ></menu-list-item>
     </template>
   </v-list>

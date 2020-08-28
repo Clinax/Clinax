@@ -4,10 +4,11 @@
     :fullscreen="isSuperSmall"
     :persistent="!closeable || ui.loading"
     max-width="640"
+    scrollable
   >
     <template v-if="!noActivator" v-slot:activator="{ on }">
-      <slot name="activator" v-bind:on="on">
-        <v-btn v-on="on" color="primary" :block="block" depressed>
+      <slot name="activator" :on="on">
+        <v-btn color="primary" :block="block" depressed v-on="on">
           Add Patient
         </v-btn>
       </slot>
@@ -20,267 +21,279 @@
         <v-btn
           :disabled="ui.loading"
           color="error"
+          x-small
+          depressed
           @click="ui.deleteConfirmation = { model: true, name: '' }"
-          icon
         >
-          <v-icon>mdi-delete-circle</v-icon>
+          <v-icon x-small class="mr-1">mdi-delete</v-icon>
+          delete
         </v-btn>
         <v-btn
           class="mx-3"
           :to="'/app/case/' + patientModel._id"
           color="primary"
-          @click="closeDialog"
           :disabled="ui.loading"
           depressed
-          small
+          x-small
+          @click="closeDialog"
         >
           <span>View Case</span>
         </v-btn>
-        <v-btn @click="closeDialog" :disabled="ui.loading" small text>
-          <v-icon class="ml-2" small>mdi-close</v-icon>
+        <v-btn :disabled="ui.loading" x-small text @click="closeDialog">
+          <v-icon class="mr-1" x-small>mdi-close</v-icon>
           <span v-if="!isMobile">Close</span>
         </v-btn>
       </v-subheader>
+      <div>
+        <v-stepper v-model="ui.step" class="elevation-0">
+          <v-stepper-header>
+            <v-stepper-step
+              :complete="ui.step > 1 || !!patientModel._id"
+              :editable="!!patientModel._id"
+              step="1"
+            >
+              Basic
+            </v-stepper-step>
+            <v-divider></v-divider>
+            <v-stepper-step
+              :complete="ui.step > 2 || !!patientModel._id"
+              :editable="!!patientModel._id"
+              step="2"
+            >
+              Photo
+            </v-stepper-step>
+            <v-divider></v-divider>
+
+            <v-stepper-step
+              :complete="!!patientModel.address"
+              :editable="!!patientModel._id"
+              step="3"
+            >
+              Address
+            </v-stepper-step>
+          </v-stepper-header>
+        </v-stepper>
+      </div>
       <v-divider></v-divider>
-      <v-stepper v-model="ui.step">
-        <v-stepper-header>
-          <v-stepper-step
-            :complete="ui.step > 1 || !!patientModel._id"
-            :editable="!!patientModel._id"
-            step="1"
-          >
-            Basic
-          </v-stepper-step>
-          <v-divider></v-divider>
-          <v-stepper-step
-            :complete="ui.step > 2 || !!patientModel._id"
-            :editable="!!patientModel._id"
-            step="2"
-          >
-            Photo
-          </v-stepper-step>
-          <v-divider></v-divider>
-
-          <v-stepper-step
-            :complete="!!patientModel.address"
-            :editable="!!patientModel._id"
-            step="3"
-          >
-            Address
-          </v-stepper-step>
-        </v-stepper-header>
-
-        <v-stepper-items>
-          <v-stepper-content step="1" class="pa-0">
-            <v-form ref="patientForm" lazy-validation @submit.prevent="submit">
-              <v-card-text class="grey lighten-4">
-                <v-layout>
-                  <prefix-field
-                    v-model="patientModel.prefix"
-                    :textfield="{ autocomplete: 'off' }"
-                    :col="{ cols: 3 }"
-                    required
-                  >
-                  </prefix-field>
-
-                  <input-field
-                    v-model="patientModel.fullname"
-                    label="Full name"
-                    :col="{ cols: 9 }"
-                    :textfield="{
-                      placeholder: 'John Doe',
-                      prependInnerIcon: 'mdi-account',
-                      autocomplete: 'off',
-                    }"
-                    required
-                  ></input-field>
-                </v-layout>
-                <gender-field
-                  field="v-select"
-                  v-model="patientModel.gender"
+      <v-card-text class="pt-0 grey lighten-3">
+        <v-stepper v-model="ui.step" class="elevation-0 grey lighten-3">
+          <v-stepper-items class="pa-0">
+            <v-stepper-content step="1" class="pa-0">
+              <v-layout>
+                <prefix-field
+                  v-model="patientModel.prefix"
+                  :textfield="{ autocomplete: 'off' }"
+                  :col="{ cols: 3 }"
                   required
-                ></gender-field>
-                <birth-date-field
-                  v-model="patientModel.birthDate"
-                  required
-                ></birth-date-field>
-                <marital-status-field
-                  label="Marital Status"
-                  v-model="patientModel.maritalStatus"
                 >
-                </marital-status-field>
+                </prefix-field>
+
                 <input-field
-                  field="v-combobox"
-                  v-model="patientModel.occupation"
-                  label="Occupation"
+                  v-model="patientModel.fullname"
+                  label="Full name"
+                  :col="{ cols: 9 }"
                   :textfield="{
-                    prependInnerIcon: 'mdi-tie',
-                    items: ui.preLoaders.occupations,
-                    loading: ui.preLoaders.loading,
+                    placeholder: 'John Doe',
+                    prependInnerIcon: 'mdi-account',
+                    autocomplete: 'off',
                   }"
+                  required
                 ></input-field>
-                <v-divider class="mt-5"></v-divider>
+              </v-layout>
+              <gender-field
+                v-model="patientModel.gender"
+                field="v-select"
+                required
+              ></gender-field>
+              <birth-date-field
+                v-model="patientModel.birthDate"
+                required
+              ></birth-date-field>
+              <marital-status-field
+                v-model="patientModel.maritalStatus"
+                label="Marital Status"
+              >
+              </marital-status-field>
+              <input-field
+                v-model="patientModel.occupation"
+                field="v-combobox"
+                label="Occupation"
+                :textfield="{
+                  prependInnerIcon: 'mdi-tie',
+                  items: ui.preLoaders.occupations,
+                  loading: ui.preLoaders.loading,
+                }"
+              ></input-field>
+              <v-divider class="mt-5"></v-divider>
+              <template v-for="(field, model) in extraFileds">
+                <input-field
+                  v-if="field.visibility"
+                  :key="model"
+                  v-model="patientModel[model]"
+                  v-bind="field"
+                ></input-field>
+              </template>
+              <v-layout justify-end class="pb-1">
                 <template v-for="(field, model) in extraFileds">
-                  <input-field
-                    v-if="field.visibility"
-                    v-bind="field"
-                    v-model="patientModel[model]"
+                  <div
+                    v-if="!field.visibility"
                     :key="model"
-                  ></input-field>
-                </template>
-                <v-layout justify-end>
-                  <template v-for="(field, model) in extraFileds">
-                    <div
-                      v-if="!field.visibility"
-                      :key="model"
-                      class="my-3 mx-3 text-right"
-                    >
-                      <a @click="field.visibility = true">
-                        + {{ field.label }}
-                      </a>
-                    </div>
-                  </template>
-                </v-layout>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn text @click="closeDialog" :disabled="ui.loading">
-                  Cancel
-                </v-btn>
-                <v-btn
-                  color="primary"
-                  type="submit"
-                  :loading="ui.loading"
-                  :disabled="ui.loading"
-                  depressed
-                >
-                  {{ patientModel._id ? "save" : "Next" }}
-                </v-btn>
-              </v-card-actions>
-            </v-form>
-          </v-stepper-content>
-          <v-stepper-content step="2">
-            <template v-if="avatar.preview">
-              <v-card-text>
-                <p v-if="avatar.fd">
-                  Click <b>UPLOAD</b> to use this picture for
-                  {{ patientModel.fullname }}
-                </p>
-                <v-layout column justify-center align-center>
-                  <div class="text-right">
-                    <v-btn
-                      color="error"
-                      class="mb-2"
-                      @click="
-                        (avatar.fd && (avatar.fd = null)) ||
-                          (avatar.preview = '')
-                      "
-                      small
-                      text
-                    >
-                      <v-icon class="pr-1" small>mdi-close</v-icon> remove
-                    </v-btn>
-                    <v-img
-                      class="preview"
-                      :src="avatar.preview"
-                      height="248"
-                      width="168"
-                    >
-                    </v-img>
+                    class="my-3 mx-3 text-right"
+                  >
+                    <a @click="field.visibility = true">
+                      + {{ field.label }}
+                    </a>
                   </div>
-                </v-layout>
-              </v-card-text>
-              <v-card-actions>
-                <v-btn
-                  color="primary"
-                  @click="uploadPicture"
-                  :loading="ui.loading"
-                  :disabled="ui.loading || !avatar.fd"
-                  block
-                >
-                  Upload
-                </v-btn>
-              </v-card-actions>
-            </template>
-            <template v-else>
-              <v-card-text>
-                <p>Select or drag a picture of the patient</p>
-                <input
-                  ref="avatar"
-                  type="file"
-                  accept="images/*"
-                  @input="(ev) => (avatar.fd = ev.target.files[0])"
-                  hidden
-                />
-                <v-card-actions row wrap v-if="false">
-                  <v-spacer></v-spacer>
-                  <v-dialog>
-                    <template v-slot:activator="{ on }">
-                      <v-btn color="success" v-on="on">Open Camera</v-btn>
-                    </template>
-                    <v-card>
-                      <vue-camera></vue-camera>
-                    </v-card>
-                  </v-dialog>
+                </template>
+              </v-layout>
+            </v-stepper-content>
+            <v-stepper-content step="2" class="pa-0">
+              <template v-if="avatar.preview">
+                <v-card-text>
+                  <p v-if="avatar.fd">
+                    Click <b>UPLOAD</b> to use this picture for
+                    {{ patientModel.fullname }}
+                  </p>
+                  <v-layout column justify-center align-center>
+                    <div class="text-right">
+                      <v-btn
+                        color="error"
+                        class="mb-2"
+                        small
+                        text
+                        @click="
+                          (avatar.fd && (avatar.fd = null)) ||
+                            (avatar.preview = '')
+                        "
+                      >
+                        <v-icon class="pr-1" small>mdi-close</v-icon> remove
+                      </v-btn>
+                      <v-img
+                        class="preview"
+                        :src="avatar.preview"
+                        height="248"
+                        width="168"
+                      >
+                      </v-img>
+                    </div>
+                  </v-layout>
+                </v-card-text>
+                <v-card-actions>
+                  <v-btn
+                    color="primary"
+                    :loading="ui.loading"
+                    :disabled="ui.loading || !avatar.fd"
+                    block
+                    @click="uploadPicture"
+                  >
+                    Upload
+                  </v-btn>
                 </v-card-actions>
-                <div
-                  class="drag-region"
-                  :class="{ dragging: ui.dragEvent.dragging }"
-                  @click="$refs.avatar.click()"
-                  @drop.prevent="onFileDrag"
-                  @dragover.prevent="onFileDrag"
-                  @dragenter.prevent="onFileDrag"
-                  @dragleave.prevent="onFileDrag"
-                  v-ripple
-                >
-                  <v-layout fill-height align-center justify-center column>
-                    <v-icon
-                      class="mb-2"
-                      :x-large="ui.dragEvent.dragging"
-                      :large="!ui.dragEvent.dragging"
-                    >
-                      {{
-                        ui.dragEvent.dragging ? "mdi-package-down" : "mdi-image"
-                      }}
-                    </v-icon>
-                    <v-slide-y-transition mode="out-in">
-                      <span
-                        class="text--secondary"
-                        :key="ui.dragEvent.dragging"
+              </template>
+              <template v-else>
+                <v-card-text>
+                  <p>Select or drag a picture of the patient</p>
+                  <input
+                    ref="avatar"
+                    type="file"
+                    accept="images/*"
+                    hidden
+                    @input="(ev) => (avatar.fd = ev.target.files[0])"
+                  />
+                  <v-card-actions v-if="false" row wrap>
+                    <v-spacer></v-spacer>
+                    <v-dialog>
+                      <template v-slot:activator="{ on }">
+                        <v-btn color="success" v-on="on">Open Camera</v-btn>
+                      </template>
+                      <v-card>
+                        <vue-camera></vue-camera>
+                      </v-card>
+                    </v-dialog>
+                  </v-card-actions>
+                  <div
+                    v-ripple
+                    class="drag-region"
+                    :class="{ dragging: ui.dragEvent.dragging }"
+                    @click="$refs.avatar.click()"
+                    @drop.prevent="onFileDrag"
+                    @dragover.prevent="onFileDrag"
+                    @dragenter.prevent="onFileDrag"
+                    @dragleave.prevent="onFileDrag"
+                  >
+                    <v-layout fill-height align-center justify-center column>
+                      <v-icon
+                        class="mb-2"
+                        :x-large="ui.dragEvent.dragging"
+                        :large="!ui.dragEvent.dragging"
                       >
                         {{
                           ui.dragEvent.dragging
-                            ? "Drop your file here"
-                            : "Drag and drop photo file here"
+                            ? "mdi-package-down"
+                            : "mdi-image"
                         }}
-                      </span>
-                    </v-slide-y-transition>
-                  </v-layout>
-                </div>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="grey" text @click="ui.step = 3">
-                  skip
-                  <v-icon>mdi-skip-next</v-icon>
-                </v-btn>
-              </v-card-actions>
-            </template>
-          </v-stepper-content>
-          <v-stepper-content step="3" class="pa-0">
-            <address-form
-              ref="extraForm"
-              content-class="grey lighten-4 pt-3 pb-8"
-              v-model="patientModel.address"
-              :pins="ui.preLoaders.pins"
-              :areas="ui.preLoaders.areas"
-              :loading-prefetch="ui.preLoaders.loading"
-              @submit="submit"
-              add-address
-            ></address-form>
-          </v-stepper-content>
-        </v-stepper-items>
-      </v-stepper>
+                      </v-icon>
+                      <v-slide-y-transition mode="out-in">
+                        <span
+                          :key="ui.dragEvent.dragging"
+                          class="text--secondary"
+                        >
+                          {{
+                            ui.dragEvent.dragging
+                              ? "Drop your file here"
+                              : "Drag and drop photo file here"
+                          }}
+                        </span>
+                      </v-slide-y-transition>
+                    </v-layout>
+                  </div>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="grey" text @click="ui.step = 3">
+                    skip
+                    <v-icon>mdi-skip-next</v-icon>
+                  </v-btn>
+                </v-card-actions>
+              </template>
+            </v-stepper-content>
+            <v-stepper-content step="3" class="pa-0">
+              <address-form
+                ref="extraForm"
+                v-model="patientModel.address"
+                content-class="pa-0 mb-1"
+                :pins="ui.preLoaders.pins"
+                :areas="ui.preLoaders.areas"
+                :loading-prefetch="ui.preLoaders.loading"
+                hide-submit
+                add-address
+                @submit="submit"
+              ></address-form>
+            </v-stepper-content>
+          </v-stepper-items>
+        </v-stepper>
+      </v-card-text>
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          v-if="!closeable"
+          :disabled="ui.loading"
+          text
+          @click="closeDialog"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          color="primary"
+          :loading="ui.loading"
+          :disabled="ui.loading || closeable"
+          depressed
+          @click="submit"
+        >
+          {{ patientModel._id ? "save" : "Next" }}
+        </v-btn>
+      </v-card-actions>
     </v-card>
 
     <confirmation-dialog
@@ -309,8 +322,8 @@
           <v-spacer></v-spacer>
           <v-btn
             color="primary"
-            @click.native="ui.deleteConfirmation.model = false"
             depressed
+            @click.native="ui.deleteConfirmation.model = false"
           >
             cancel
           </v-btn>
@@ -318,8 +331,8 @@
             v-if="patientModel.fullname"
             color="error"
             :disabled="patientModel.fullname != ui.deleteConfirmation.name"
-            @click="deletePatient"
             outlined
+            @click="deletePatient"
           >
             Delete
           </v-btn>
@@ -330,7 +343,7 @@
 </template>
 
 <script>
-import Toggleable from "@/components/widgets/Toggleable";
+import InputModel from "@/components/widgets/InputModel";
 import ConfirmationDialog from "@/components/widgets/ConfirmationDialog";
 
 import PrefixField from "@/components/app/fields/PrefixField";
@@ -340,9 +353,12 @@ import MaritalStatusField from "@/components/app/fields/MaritalStatusField";
 import AddressForm from "@/components/app/forms/AddressForm";
 
 import moment from "moment";
-import Patient from "@/model/Patient";
-import { makeRequest } from "@/modules/request";
-import { isEmpty, clone, changedFields } from "@/modules/object";
+import Patient from "@/models/Patient";
+import {
+  isEmpty,
+  clone,
+  changedFields,
+} from "@pranavraut033/js-utils/utils/object";
 
 function ExtraField(label, textfield, extras) {
   this.visibility = false;
@@ -354,7 +370,6 @@ function ExtraField(label, textfield, extras) {
 }
 
 export default {
-  extends: Toggleable,
   components: {
     ConfirmationDialog,
     PrefixField,
@@ -363,9 +378,10 @@ export default {
     MaritalStatusField,
     AddressForm,
   },
+  extends: InputModel,
   props: {
     noActivator: { type: Boolean, default: false },
-    patient: Object,
+    patient: { type: Object, default: null },
     block: { type: Boolean, default: false },
   },
   data() {
@@ -425,29 +441,33 @@ export default {
   },
 
   computed: {
-    changedField() {
+    updates() {
       // this.log(changedFields(this.ui.initialState, this.patientModel));
       return changedFields(this.ui.initialState, this.patientModel);
     },
     closeable() {
-      return isEmpty(this.changedField);
+      return isEmpty(this.updates);
     },
   },
   watch: {
     model(a) {
-      !a || this.reset();
+      if (a) this.reset();
     },
-    "avatar.fd"(a) {
+    // eslint-disable-next-line func-names
+    "avatar.fd": function (a) {
       if (!a) {
         this.avatar.preview = "";
         return;
       }
 
-      let fr = new FileReader();
+      const fr = new FileReader();
       fr.onload = (ev) => (this.avatar.preview = ev.target.result);
 
       fr.readAsDataURL(a);
     },
+  },
+  mounted() {
+    this.setPatient(this.patient);
   },
   methods: {
     closeDialog() {
@@ -459,26 +479,28 @@ export default {
 
       if (this.$refs.patientForm.validate()) {
         this.ui.loading = true;
-        var data, method;
+        let requestData;
+        let method;
+
         if (this.patient) {
           method = "put";
-          data = {
+          requestData = {
             id: this.patientModel._id,
-            updates: this.changedField,
+            updates: this.updates,
           };
         } else {
           method = "post";
-          data = this.patientModel;
+          requestData = this.patientModel;
         }
 
-        makeRequest(method, "patient", data)
+        this.makeRequest(method, "patient", requestData)
           .then(({ data }) => {
             this.setPatient(data);
             this.$emit("update:patient", data);
 
             this.ui.loading = false;
 
-            if (method == "post") this.$nextTick(() => (this.ui.step = 2));
+            if (method === "post") this.$nextTick(() => (this.ui.step = 2));
           })
           .catch((err) => {
             this.ui.loading = false;
@@ -494,14 +516,14 @@ export default {
       if (this.ui.loading) return;
       this.ui.loading = true;
 
-      makeRequest("delete", "patient", { id: this.patientModel._id })
+      this.makeRequest("delete", "patient", { id: this.patientModel._id })
         .then(() => {
           this.$emit("patient:removed", this.patientModel._id);
 
           this.ui.deleteConfirmation = { model: false, name: "" };
           this.model = false;
 
-          if (window.location.pathname != "/app/patients/")
+          if (window.location.pathname !== "/app/patients/")
             this.$router.push("/app/patients/");
         })
         .catch((err) => {
@@ -518,13 +540,12 @@ export default {
       });
     },
     setPatient(patient) {
-      var patientModel;
-
-      patientModel = new Patient(patient);
+      const patientModel = new Patient(patient);
 
       if (patientModel)
-        for (const key in this.extraFileds)
+        Object.keys(this.extraFileds).forEach((key) => {
           this.extraFileds[key].visibility = Boolean(patientModel[key]);
+        });
 
       if (patientModel.birthDate)
         patientModel.birthDate = moment(patientModel.birthDate).format(
@@ -538,7 +559,7 @@ export default {
     fetchAutoCompleData() {
       this.ui.preLoaders.loading = true;
 
-      makeRequest("get", "patient/options")
+      this.makeRequest("get", "patient/options")
         .then(({ data }) => {
           this.ui.preLoaders.loading = false;
           this.ui.preLoaders = Object.assign(this.ui.preLoaders, data);
@@ -549,22 +570,19 @@ export default {
         });
     },
     onFileDrag(ev) {
-      let dragging = ev.type == "dragenter" || ev.type == "dragover";
+      const dragging = ev.type === "dragenter" || ev.type === "dragover";
 
       if (dragging) {
         this.ui.dragEvent.x = ev.x;
         this.ui.dragEvent.y = ev.y;
       }
 
-      if (ev.type == "drop")
+      if (ev.type === "drop")
         this.avatar.fd = ev.dataTransfer.files && ev.dataTransfer.files[0];
 
-      if (this.ui.dragEvent.dragging != dragging)
+      if (this.ui.dragEvent.dragging !== dragging)
         this.$nextTick(() => (this.ui.dragEvent.dragging = dragging));
     },
-  },
-  mounted() {
-    this.setPatient(this.patient);
   },
 };
 </script>

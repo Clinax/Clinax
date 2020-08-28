@@ -37,8 +37,8 @@
               <v-btn
                 color="error"
                 class="mx-3"
-                @click="$store.dispatch('logout')"
                 outlined
+                @click="$store.dispatch('logout')"
               >
                 Logout
               </v-btn>
@@ -104,12 +104,12 @@
         <v-btn
           v-if="offsetTop > $vuetify.breakpoint.height / 2"
           color="primary"
-          @click="$vuetify.goTo(0)"
           fab
           fixed
           bottom
           right
           class="ma-4"
+          @click="$vuetify.goTo(0)"
         >
           <v-icon>mdi-chevron-up</v-icon>
         </v-btn>

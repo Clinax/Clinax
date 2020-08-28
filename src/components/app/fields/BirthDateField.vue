@@ -26,7 +26,6 @@
     >
       <template v-slot:activator="{ on }">
         <input-field
-          v-on="on"
           v-bind="$props"
           :value="moment(model).format('ddd, Do MMM YYYY')"
           :textfield="{
@@ -37,27 +36,28 @@
             ...textfield,
           }"
           :col="{ col: true }"
+          v-on="on"
         ></input-field>
       </template>
       <v-date-picker
+        :value="model"
+        :max="moment().format('YYYY-MM-DD')"
+        no-title
         @input="
           (ev) => {
             model = ev;
             birthDateMenu = false;
           }
         "
-        :value="model"
-        :max="moment().format('YYYY-MM-DD')"
-        no-title
       ></v-date-picker>
     </v-menu>
     <icon-button
       class="mt-5 mr-3"
       :disabled="textfield && textfield.disabled"
       icon="mdi-counter"
-      @click="fieldToggle = !fieldToggle"
       title="Change between age input and birth date input"
       fab
+      @click="fieldToggle = !fieldToggle"
     >
     </icon-button>
   </v-row>
@@ -67,22 +67,23 @@
 import moment from "moment";
 import InputField from "@/components/widgets/InputField";
 import { getCookie, setCookie } from "@/modules/cookie";
+
 const FIELD_TOGGLE = "clinax.fields.birthDate.fieldToggle";
 
 export default {
   components: { InputField },
-  props: { ...InputField.props, value: [String, Date] },
+  props: { ...InputField.props, value: { type: [String, Date], default: "" } },
   data() {
     return {
-      model: this.value || "",
+      model: this.value,
       birthDateMenu: false,
       ageModel: Number(this.age),
-      fieldToggle: getCookie(FIELD_TOGGLE) == "true",
+      fieldToggle: getCookie(FIELD_TOGGLE) === "true",
     };
   },
   computed: {
     rtAge() {
-      let dateDif = new Date(Date.now() - new Date(this.model).getTime());
+      const dateDif = new Date(Date.now() - new Date(this.model).getTime());
       return dateDif.getFullYear() - 1970;
     },
     rtBirthDate() {
@@ -92,14 +93,14 @@ export default {
       //! FIX for infinite loop !!DO NOT REMOVE!!
       if (
         new Date(this.model).getMonth() > new Date().getMonth() ||
-        (new Date(this.model).getMonth() == new Date().getMonth() &&
+        (new Date(this.model).getMonth() === new Date().getMonth() &&
           new Date(this.model).getDay() > new Date().getDay())
       ) {
-        bYear--;
+        bYear -= 1;
       }
 
       if (this.model) {
-        var d = new Date(this.model);
+        const d = new Date(this.model);
         d.setFullYear(bYear);
         momentInstance = moment(d);
       } else momentInstance = moment(String(bYear));
@@ -110,7 +111,7 @@ export default {
   watch: {
     ageModel() {
       if (
-        new Date(this.rtBirthDate).getFullYear() !=
+        new Date(this.rtBirthDate).getFullYear() !==
         new Date(this.model).getFullYear()
       )
         this.$emit("input", this.rtBirthDate);

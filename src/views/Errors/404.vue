@@ -15,7 +15,7 @@
           >
             Take me to console
           </v-btn>
-          <v-btn to.replace="/" v-else>Take me home</v-btn>
+          <v-btn v-else to.replace="/">Take me home</v-btn>
         </v-layout>
       </v-container>
     </v-main>

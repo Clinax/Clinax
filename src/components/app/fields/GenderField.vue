@@ -1,8 +1,7 @@
 <template>
   <input-field
-    field="v-select"
     v-model="model"
-    v-on="$listeners"
+    field="v-select"
     :textfield="{
       label: 'Gender',
       items: [
@@ -13,6 +12,7 @@
       prependInnerIcon: (model && `mdi-gender-${model}`) || 'mdi-help',
       ...textfield,
     }"
+    v-on="$listeners"
   ></input-field>
 </template>
 

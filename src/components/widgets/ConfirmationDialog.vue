@@ -7,18 +7,18 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="primary" @click="close()" depressed>cancel</v-btn>
-        <v-btn @click="$emit('next'), close()" text>ok</v-btn>
+        <v-btn color="primary" depressed @click="close()">cancel</v-btn>
+        <v-btn text @click="$emit('next'), close()">ok</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
-import Toggleable from "./Toggleable";
+import InputModel from "./InputModel";
 
 export default {
-  extends: Toggleable,
+  extends: InputModel,
   methods: {
     open() {
       this.model = true;

@@ -65,7 +65,7 @@
                     :filled="signup"
                     :outlined="!signup"
                   ></v-text-field>
-                  <p class="text-right mt-1" v-if="!signup">
+                  <p v-if="!signup" class="text-right mt-1">
                     <a @click="forgetPassword = true">
                       Forget Password?
                     </a>
@@ -84,7 +84,7 @@
                       {{ signup ? "Create" : "login" }}
                     </v-btn>
                   </v-card-actions>
-                  <div class="text-center text--secondary" v-if="!signup">
+                  <div v-if="!signup" class="text-center text--secondary">
                     <small>- OR -</small>
                   </div>
                   <v-card-actions>
@@ -114,8 +114,10 @@
 </template>
 
 <script>
-import { makeRequest } from "@/modules/request";
-import { FIELD_EMAIL, getReqiredField } from "@/modules/regex";
+import {
+  FIELD_EMAIL,
+  getReqiredField,
+} from "@pranavraut033/js-utils/utils/regex";
 
 export default {
   data() {
@@ -131,9 +133,9 @@ export default {
         username: [
           (v) => !!v || "Username is required",
           (v) => {
-            let length = (v && v.length) || 0;
+            const length = (v && v.length) || 0;
             return (
-              (4 <= length && length <= 16) ||
+              (length >= 4 && length <= 16) ||
               "Username must be of 4 - 16 characters"
             );
           },
@@ -152,11 +154,14 @@ export default {
   },
   watch: {
     $route() {
-      this.signup = this.$route.query["new-account"] == "true";
+      this.signup = this.$route.query["new-account"] === "true";
     },
     signup() {
       this.$refs.authForm.reset();
     },
+  },
+  mounted() {
+    this.signup = this.$route.query["new-account"] === "true";
   },
   methods: {
     formSubmit() {
@@ -165,21 +170,22 @@ export default {
         this.$refs.authForm.validate()
       ) {
         this.loading = true;
-        let username = this.user.username;
+        const { username } = this.user;
 
-        var path, data;
+        let path;
+        let requestData;
         if (this.signup) {
-          data = this.user;
+          requestData = this.user;
           path = "user";
         } else {
           path = "login";
-          data = {
+          requestData = {
             username,
             password: this.user.password,
           };
         }
 
-        makeRequest("post", path, data)
+        this.makeRequest("post", path, requestData)
           .then(({ data }) => {
             this.loading = false;
 
@@ -201,9 +207,6 @@ export default {
           });
       }
     },
-  },
-  mounted() {
-    this.signup = this.$route.query["new-account"] == "true";
   },
 };
 </script>

@@ -19,9 +19,9 @@
         class="my-0"
       ></v-divider>
       <v-list-group
-        v-model="item.model"
         v-else-if="item.subLinks"
         :key="item.title"
+        v-model="item.model"
         :dense="!!item.dense"
         :nav="false"
       >
@@ -35,9 +35,9 @@
         </template>
         <v-list dense class="animate">
           <v-list-item
-            :dense="!!subItem.dense"
             v-for="subItem in item.subLinks"
             :key="subItem.title"
+            :dense="!!subItem.dense"
             class="animate"
             :class="{
               'v-list-item--active': $route.path == subItem.to,
@@ -58,8 +58,8 @@
         v-else
         :key="'item-' + index"
         :class="{ 'v-list-item--active': $route.path == item.to }"
-        @click="$route.path == item.to || $router.push(item.to)"
         :dense="!!item.dense"
+        @click="$route.path == item.to || $router.push(item.to)"
       >
         <v-list-item-action v-if="item.icon">
           <v-badge

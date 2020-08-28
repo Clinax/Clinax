@@ -24,25 +24,22 @@
           (!textfield || (!textfield.readonly && !textfield.disabled))
         "
         color="error"
-        @click="$emit('remove', label)"
         x-small
         text
+        @click="$emit('remove', label)"
       >
         remove
       </v-btn>
     </v-subheader>
 
     <component
+      :is="field"
+      v-if="mask"
       ref="field"
-      v-on="$listeners || {}"
-      v-bind:is="field || 'v-text-field'"
       v-model="model"
-      v-bind="textfield"
-      :rules="rules || [true]"
-      @blur="check"
-      @change="(ev) => $emit('change', ev)"
-      :solo="textfield && textfield.solo !== false"
-      :hide-details="textfield && textfield.hideDetails !== false"
+      v-mask="mask"
+      v-bind="props"
+      v-on="listeners"
     >
       <template
         v-if="
@@ -53,8 +50,35 @@
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-icon
-              v-on="on"
               :color="errors && errors[0] == true ? 'success' : 'error'"
+              v-on="on"
+            >
+              {{ errors[0] == true ? "mdi-check-circle" : "mdi-alert-circle" }}
+            </v-icon>
+          </template>
+          <span>{{ errors[0] == true ? "All Good" : errors[0] }}</span>
+        </v-tooltip>
+      </template>
+    </component>
+    <component
+      :is="field"
+      v-else
+      ref="field"
+      v-model="model"
+      v-bind="props"
+      v-on="listeners"
+    >
+      <template
+        v-if="
+          errors && (!textfield || (!textfield.readonly && !textfield.disabled))
+        "
+        v-slot:append
+      >
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              :color="errors && errors[0] == true ? 'success' : 'error'"
+              v-on="on"
             >
               {{ errors[0] == true ? "mdi-check-circle" : "mdi-alert-circle" }}
             </v-icon>
@@ -67,20 +91,20 @@
 </template>
 
 <script>
-import { getReqiredField } from "@/modules/regex";
+import { getReqiredField } from "@pranavraut033/js-utils/utils/regex";
 
 export default {
   props: {
     col: { type: Object, default: () => {} },
-    value: [String, Number],
-    label: String,
+    value: { type: [String, Number], default: null },
+    label: { type: String, default: "" },
     textfield: { type: Object, default: () => {} },
-    required: Boolean,
     inputRules: { type: Array, default: () => [] },
-    field: String,
-    mask: String,
+    field: { type: String, default: "v-text-field" },
+    mask: { type: String, default: null },
     editableHeader: { type: Boolean, default: false },
     removable: { type: Boolean, default: false },
+    required: Boolean,
   },
   data() {
     return {
@@ -90,8 +114,25 @@ export default {
     };
   },
   computed: {
+    props() {
+      const props = {
+        ...this.textfield,
+        rules: this.rules || [true],
+        solo: this.textfield && !this.textfield.solo,
+        hideDetails: this.textfield && !this.textfield.hideDetails,
+      };
+      return props;
+    },
+    listeners() {
+      const listeners = {
+        ...this.$listeners,
+        blur: this.check,
+        change: (ev) => this.$emit("change", ev),
+      };
+      return listeners;
+    },
     rules() {
-      let rules = [];
+      const rules = [];
       if (this.required)
         rules.push(
           ...getReqiredField(
@@ -115,6 +156,15 @@ export default {
       this.$emit("input", a);
     },
   },
+  mounted() {
+    // this.$refs.header.addEventListener(
+    //   "input",
+    //   (a) => {
+    //     this.$emit("update:label", a.target.innerText);
+    //   },
+    //   false
+    // );
+  },
   methods: {
     check() {
       if (
@@ -125,26 +175,20 @@ export default {
           this.rules &&
           this.rules
             .map((ev) => typeof ev === "function" && ev(this.model))
-            .filter((ev) => ev != true);
+            .filter((ev) => ev !== true);
       else this.errors = null;
 
       if (this.errors && !this.errors.length) this.errors[0] = true;
     },
     onHeaderBlur(a) {
       let text = a.target.innerText;
-      if (!text) text = a.target.innerText = "Click here to edit title";
+      if (!text) {
+        text = "Click here to edit title";
+        a.target.innerText = text;
+      }
 
       this.$emit("update:label", text);
     },
-  },
-  mounted() {
-    // this.$refs.header.addEventListener(
-    //   "input",
-    //   (a) => {
-    //     this.$emit("update:label", a.target.innerText);
-    //   },
-    //   false
-    // );
   },
 };
 </script>

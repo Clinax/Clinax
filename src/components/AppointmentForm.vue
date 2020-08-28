@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="model" c :persistent="loading" max-width="540" scrollable>
+  <v-dialog v-model="model" :persistent="loading" max-width="540" scrollable>
     <v-form ref="form" lazy-validation @submit.prevent="submit">
       <v-card>
         <v-card-title>
@@ -11,9 +11,9 @@
             v-if="entry._id"
             class="mx-3"
             color="error"
-            @click="deleteEntry"
             depressed
             small
+            @click="deleteEntry"
           >
             <v-icon small>mdi-delete-circle</v-icon> delete
           </v-btn>
@@ -25,20 +25,20 @@
           <v-row>
             <v-col cols="12" class="pb-0">
               <search-bar
-                class="w-100"
                 v-slot:default="{
                   search,
                   onInput,
                   onSearch,
                   items,
                   filter,
+                  // eslint-disable-next-line vue/no-template-shadow
                   loading,
                 }"
+                class="w-100"
                 minimal
               >
                 <v-combobox
                   v-model="patient"
-                  @update:search-input="onSearch"
                   label="Patient Name"
                   :items="items"
                   :menu-props="{
@@ -47,7 +47,6 @@
                   :filter="filter"
                   :loading="loading"
                   :disabled="!!entry._id"
-                  @input="onInput"
                   prepend-inner-icon="mdi-face"
                   autocomplete="off"
                   append-icon
@@ -55,6 +54,8 @@
                   item-text="fullname"
                   clearable
                   outlined
+                  @update:search-input="onSearch"
+                  @input="onInput"
                 >
                 </v-combobox>
               </search-bar>
@@ -69,9 +70,8 @@
             >
               <template v-slot:activator="{ on }">
                 <input-field
-                  :on="on"
                   v-model="entry.date"
-                  @click="dateMenu = true"
+                  :on="on"
                   :textfield="{
                     label: 'Date',
                     prependInnerIcon: 'mdi-calendar',
@@ -82,12 +82,13 @@
                   }"
                   :col="{ md: 6, cols: 12 }"
                   required
+                  @click="dateMenu = true"
                 ></input-field>
               </template>
               <v-card>
                 <v-date-picker
-                  class="elevation-0"
                   ref="datePicker"
+                  class="elevation-0"
                   color="primary"
                   :value="entry.date"
                   :min="moment().format('YYYY-MM-DD')"
@@ -122,9 +123,8 @@
             >
               <template v-slot:activator="{ on }">
                 <input-field
-                  :on="on"
                   v-model="entry.time"
-                  @click="timeMenu = true"
+                  :on="on"
                   :textfield="{
                     label: 'Time',
                     prependInnerIcon: 'mdi-clock',
@@ -135,12 +135,13 @@
                   }"
                   :col="{ md: 6, cols: 12 }"
                   required
+                  @click="timeMenu = true"
                 ></input-field>
               </template>
               <v-card>
                 <v-time-picker
-                  class="elevation-0"
                   ref="timePicker"
+                  class="elevation-0"
                   color="primary"
                   :value="entry.time"
                 ></v-time-picker>
@@ -193,9 +194,9 @@
           </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-btn @click="$refs.form.reset()" text>reset</v-btn>
+          <v-btn text @click="$refs.form.reset()">reset</v-btn>
           <v-spacer></v-spacer>
-          <v-btn @click.native="model = false" :disabled="loading" outlined>
+          <v-btn :disabled="loading" outlined @click.native="model = false">
             Cancel
           </v-btn>
           <v-btn
@@ -215,10 +216,9 @@
 
 <script>
 import moment from "moment";
-import { makeRequest } from "@/modules/request";
-
+import { changedFields } from "@pranavraut033/js-utils/utils/object";
 import SearchBar from "@/components/app/widgets/SearchBar";
-import Toggleable from "@/components/widgets/Toggleable";
+import InputModel from "@/components/widgets/InputModel";
 
 const defaultEntry = () => ({
   date: moment().add(1, "weeks").format("YYYY-MM-DD"),
@@ -226,9 +226,9 @@ const defaultEntry = () => ({
 });
 
 export default {
-  extends: Toggleable,
   components: { SearchBar },
-  props: { appointment: Object },
+  extends: InputModel,
+  props: { appointment: { type: Object, default: null } },
   data() {
     return {
       patient: "",
@@ -238,45 +238,47 @@ export default {
       entry: defaultEntry(),
     };
   },
+  watch: {
+    model() {
+      this.cloneAppointment();
+    },
+    appointment() {
+      this.cloneAppointment();
+    },
+  },
+  mounted() {
+    if (!this.appointment) this.cloneAppointment();
+  },
 
   methods: {
     submit() {
       if (this.loading) return;
       if (this.$refs.form.validate()) {
-        let data = {},
-          method = "post";
+        const requestData = {};
+        let method = "post";
 
-        this.entry.dateTime = new Date(this.entry.date + " " + this.entry.time);
+        this.entry.dateTime = new Date(`${this.entry.date} ${this.entry.time}`);
 
         if (this.entry._id) {
           method = "put";
-          data.updates = {};
-          data.id = this.entry._id;
-
-          for (const key in this.appointment)
-            if (
-              this.appointment.hasOwnProperty(key) &&
-              this.appointment[key] != this.entry[key]
-            )
-              data.updates[key] = this.entry[key];
-
-          // delete data.updates.date;
-          // delete data.updates.time;
+          requestData.updates = changedFields(this.appointment, this.entry);
+          requestData.id = this.entry._id;
         } else {
-          if (typeof this.patient == "string") this.entry.name = this.patient;
+          if (typeof this.patient === "string") this.entry.name = this.patient;
           else this.entry.patient = this.patient._id;
-          Object.assign(data, this.entry);
 
-          delete data.date;
-          delete data.time;
+          Object.assign(requestData, this.entry);
+
+          // delete requestData.date;
+          // delete requestData.time;
         }
 
         this.loading = true;
-        makeRequest(method, "appointment", data)
+        this.makeRequest(method, "appointment", requestData)
           .then(({ data }) => {
             this.loading = false;
 
-            if (method == "post") this.$emit("add", data);
+            if (method === "post") this.$emit("add", data);
             else this.$emit("update:appointment", data);
 
             this.reset();
@@ -290,42 +292,29 @@ export default {
     },
     cloneAppointment() {
       if (!this.appointment) return this.reset();
-      else {
-        Object.assign(this.entry, this.appointment);
-        this.entry.date = moment(this.entry.dateTime).format("YYYY-MM-DD");
-        this.entry.time = moment(this.entry.dateTime).format("HH:mm");
-        this.patient = this.appointment.patientName;
-      }
+
+      Object.assign(this.entry, this.appointment);
+      this.entry.date = moment(this.entry.dateTime).format("YYYY-MM-DD");
+      this.entry.time = moment(this.entry.dateTime).format("HH:mm");
+      this.patient = this.appointment.patientName;
     },
     deleteEntry() {
       const self = this;
       self.deleteLoading = true;
 
-      this.$store.dispatch("deleteAppointment", {
-        id: self.entry._id,
-        callback: (err) => {
-          self.deleteLoading = false;
-
-          if (err) self.errorHandler(err);
-          else self.model = false;
-        },
-      });
+      this.$store
+        .dispatch("deleteAppointment", {
+          id: self.entry._id,
+          makeRequest: self.makeRequest,
+        })
+        .then(() => (self.model = false))
+        .catch(self.errorHandler)
+        .finally(() => (self.deleteLoading = false));
     },
     reset() {
       this.patient = "";
       this.entry = defaultEntry();
     },
-  },
-  watch: {
-    model() {
-      this.cloneAppointment();
-    },
-    appointment() {
-      this.cloneAppointment();
-    },
-  },
-  mounted() {
-    if (!this.appointment) this.cloneAppointment();
   },
 };
 </script>

@@ -7,9 +7,9 @@
       bottom
     ></v-progress-linear>
     <v-calendar
-      :event-more="true"
-      v-model="model"
       ref="calendar"
+      v-model="model"
+      :event-more="true"
       :weekday-format="
         (ev) =>
           (small
@@ -34,13 +34,13 @@
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div
-              v-on="on"
               class="text--primary font-weight-bold px-3 text-truncate"
-              @click="openDialog(event)"
               :class="{
                 stripped: event.type == 'appointment',
                 '': event.type == 'follow-up',
               }"
+              v-on="on"
+              @click="openDialog(event)"
             >
               <span v-if="!small"> {{ event.name }}</span>
               <template v-else>&nbsp;</template>
@@ -92,8 +92,8 @@
             v-if="eventDialog.event._id"
             color="primary"
             :to="`/app/case/${eventDialog.event._id}`"
-            @click="eventDialog.model = false"
             depressed
+            @click="eventDialog.model = false"
           >
             View case File
           </v-btn>
@@ -137,13 +137,12 @@
 <script>
 import moment from "moment";
 import { tz } from "moment-timezone";
-import { makeRequest } from "@/modules/request";
-import { sortBy } from "@/modules/list";
+import { sortBy } from "@pranavraut033/js-utils/utils/list";
 
 export default {
   props: {
     small: Boolean,
-    value: String,
+    value: { type: String, required: true },
     tag: { type: String, required: true },
   },
   data() {
@@ -156,14 +155,43 @@ export default {
       allEventsDialog: { model: false },
     };
   },
+  watch: {
+    loading(a) {
+      this.$emit("update:loading", a);
+    },
+    model(a) {
+      this.$emit("input", a);
+    },
+    value(a) {
+      this.model = a;
+    },
+  },
+  mounted() {
+    this.$store.dispatch("addListener", {
+      event: "eventChange",
+      name: this.tag,
+      callback: () => {
+        this.dateEventMap = this.$store.getters.events;
+
+        this.events = [];
+        Object.values(this.dateEventMap).forEach((ev) =>
+          this.events.push(...ev)
+        );
+        this.$nextTick(
+          () => this.$refs.calendar && this.$refs.calendar.checkChange()
+        );
+      },
+    });
+    this.getEvents();
+  },
   methods: {
     openDialog(event) {
       this.eventDialog.model = false;
       this.$nextTick(() => {
-        let m = moment(event.start);
+        const m = moment(event.start);
         let time = m.format("LT");
-        time = time == "5:30 AM" ? null : time;
-        let date = m.format("Do MMM YYYY");
+        time = time === "5:30 AM" ? null : time;
+        const date = m.format("Do MMM YYYY");
 
         this.eventDialog = {
           event,
@@ -187,7 +215,7 @@ export default {
       if (this.loading) return;
 
       this.loading = true;
-      makeRequest("get", "followUp/events", {
+      this.makeRequest("get", "followUp/events", {
         header: { timezone: tz.guess() },
       })
         .then(({ data }) => {
@@ -205,34 +233,6 @@ export default {
     next() {
       this.$refs.calendar.next();
     },
-  },
-  watch: {
-    loading(a) {
-      this.$emit("update:loading", a);
-    },
-    model(a) {
-      this.$emit("input", a);
-    },
-    value(a) {
-      this.model = a;
-    },
-  },
-  mounted() {
-    this.$store.dispatch("addListener", {
-      event: "eventChange",
-      name: this.tag,
-      callback: () => {
-        this.dateEventMap = this.$store.getters.events;
-        this.events = [];
-        Object.values(this.$store.getters.events).forEach((ev) =>
-          this.events.push(...ev)
-        );
-        this.$nextTick(
-          () => this.$refs.calendar && this.$refs.calendar.checkChange()
-        );
-      },
-    });
-    this.getEvents();
   },
 };
 </script>

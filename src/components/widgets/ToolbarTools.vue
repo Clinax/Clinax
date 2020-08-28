@@ -12,11 +12,12 @@
       >
         <template v-slot:activator="{ on }">
           <icon-button
-            v-on="on"
             :badge="filtered"
             :title="'Filter by ' + filterBy || 'status'"
             class="flex-grow-0"
+            :active="!!filtered"
             icon="mdi-filter-variant"
+            v-on="on"
           >
           </icon-button>
         </template>
@@ -39,23 +40,23 @@
                 <v-btn-toggle
                   v-model="filterModel"
                   class="elevation-0 grey lighten-5 flex-column w-100"
-                  @change="emitFilterChange"
                   multiple
+                  @change="emitFilterChange"
                 >
                   <v-btn
-                    text
-                    class="border-0"
                     v-for="item in filterItems"
                     :key="item.text || item"
+                    text
+                    class="border-0"
                     :value="item.value || item.text || item"
                   >
                     <v-layout class="text-left">
                       <v-icon
                         v-if="item.icon"
-                        v-text="item.icon"
                         :color="item.color"
                         class="mx-2 flex-grow-0"
                         small
+                        v-text="item.icon"
                       ></v-icon>
                       <v-spacer></v-spacer>
                       <span v-text="item.text || item"></span>
@@ -69,14 +70,14 @@
             <v-btn
               color="primary"
               :disabled="!filtered"
+              block
+              small
+              text
               @click="
                 filterModel = [];
                 currencyFilterModel = '';
                 emitFilterChange(true);
               "
-              block
-              small
-              text
             >
               clear filters
             </v-btn>
@@ -89,13 +90,13 @@
         class="flex-grow-1 mx-3"
         label="Search"
         prepend-inner-icon="mdi-magnify"
-        @input="(ev) => $emit('search', ev)"
         solo-inverted
         hide-details
         clearable
         dense
         flat
         solo
+        @input="(ev) => $emit('search', ev)"
       ></v-text-field>
       <toolbar-menu :options="options" class="flex-grow-0"></toolbar-menu>
     </div>
@@ -105,12 +106,12 @@
         class="flex-grow-1 my-2"
         label="Search"
         prepend-inner-icon="mdi-magnify"
-        @input="(ev) => $emit('search', ev)"
         solo-inverted
         hide-details
         clearable
         flat
         solo
+        @input="(ev) => $emit('search', ev)"
       ></v-text-field>
     </div>
   </div>
@@ -124,10 +125,10 @@ import ToolbarMenu from "./ToolbarMenu";
 export default {
   components: { IconButton, ToolbarMenu },
   props: {
-    filterItems: Array,
+    filterItems: { type: Array, default: () => [] },
     filter: { type: Array, default: () => [] },
-    filterBy: String,
-    items: Function,
+    filterBy: { type: String, default: "" },
+    items: { type: Function, required: true },
     fileName: { type: String, default: () => "clinax-data" },
   },
   data() {
@@ -140,18 +141,18 @@ export default {
           text: "Refresh",
           icon: "mdi-refresh",
           on: {
-            click: function () {
+            click: () => {
               this.$emit("refresh");
-            }.bind(this),
+            },
           },
         },
         {
           text: "Download Excel",
           icon: "mdi-file-excel-outline",
           on: {
-            click: function () {
+            click: () => {
               this.downloadXLS();
-            }.bind(this),
+            },
           },
         },
       ],
@@ -159,14 +160,14 @@ export default {
       clear: false,
     };
   },
-  watch: {
-    filterModel(a) {
-      this.$emit("update:filter", a);
-    },
-  },
   computed: {
     filtered() {
       return !!this.filterModel.length || this.clear;
+    },
+  },
+  watch: {
+    filterModel(a) {
+      this.$emit("update:filter", a);
     },
   },
   methods: {
@@ -177,7 +178,7 @@ export default {
     },
     downloadXLS() {
       try {
-        let data = (this.items && this.items()) || [
+        const data = (this.items && this.items()) || [
           { text: "items not specified" },
         ];
         json2excel({
@@ -185,7 +186,7 @@ export default {
           name: this.fileName,
         });
       } catch (e) {
-        alert("export error: " + e.message);
+        alert(`export error: ${e.message}`);
       }
     },
   },

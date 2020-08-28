@@ -23,24 +23,24 @@
         >
         </icon-button>
         <icon-button
-          @click="ui.groupBy = !ui.groupBy"
           :active="ui.groupBy"
           title="Group By Gender"
           icon="mdi-gender-transgender"
+          @click="ui.groupBy = !ui.groupBy"
         >
         </icon-button>
         <v-divider v-if="!isMobile" class="mx-3" vertical inset></v-divider>
         <toolbar-tools
-          @search="(ev) => (ui.search = ev)"
           :filter-items="[
             { icon: 'mdi-gender-male', text: 'Male', value: 'male' },
             { icon: 'mdi-gender-female', text: 'Female', value: 'female' },
             { icon: 'mdi-gender-non-binary', text: 'Other', value: 'other' },
           ]"
-          @refresh="init"
           filter-by="Gender"
           :filter.sync="filter"
           :items="() => items"
+          @search="(ev) => (ui.search = ev)"
+          @refresh="init"
         >
         </toolbar-tools>
       </v-toolbar>
@@ -48,11 +48,11 @@
         v-if="isMobile"
         color="primary"
         class="ma-3"
-        @click="patientDialog = true"
         bottom
         fixed
         right
         fab
+        @click="patientDialog = true"
       >
         <v-icon>mdi-plus</v-icon>
       </v-btn>
@@ -79,7 +79,7 @@
               </span>
               <span>patients</span>
               <v-spacer></v-spacer>
-              <v-btn color="primary" @click="toggle" small text>
+              <v-btn color="primary" small text @click="toggle">
                 <span>{{ items.length }} item(s)</span>
                 <v-icon small>
                   mdi-chevron-down
@@ -127,16 +127,16 @@
         <template v-slot:item.prefixFullname="{ item, value }">
           <v-menu :close-on-content-click="false" open-on-hover top offset-y>
             <template v-slot:activator="{ on }">
-              <span v-on="on" class="dashed">{{ value }}</span>
+              <span class="dashed" v-on="on">{{ value }}</span>
             </template>
 
             <patient-mini-card :patient="item"> </patient-mini-card>
           </v-menu>
         </template>
         <template v-slot:item.age="{ item }">
-          <v-tooltip top v-if="item.birthDate">
+          <v-tooltip v-if="item.birthDate" top>
             <template v-slot:activator="{ on }">
-              <v-layout v-on="on" align-center>
+              <v-layout align-center v-on="on">
                 <v-icon
                   v-if="
                     moment(item.birthDate).format('L') == moment().format('L')
@@ -192,9 +192,9 @@
             <v-btn
               color="primary"
               title="Open patient case"
-              @click.stop="$router.push('/app/case/' + item._id)"
               depressed
               small
+              @click.stop="$router.push('/app/case/' + item._id)"
             >
               open Case
             </v-btn>
@@ -206,26 +206,23 @@
     <patient-dialog
       v-model="profile.model"
       :patient.sync="profile.patient"
+      no-activator
       @update:patient="listUpdated"
       @patient:removed="
         (id) => (patients = patients.filter((patient) => patient._id != id))
       "
-      no-activator
     ></patient-dialog>
   </responsive-container>
 </template>
 
 <script>
-import { makeRequest, baseUrl } from "@/modules/request";
-
+/* eslint-disable func-names */
 import ToolbarTools from "@/components/widgets/ToolbarTools";
 import PatientMiniCard from "@/components/app/widgets/PatientMiniCard";
 
 export default {
   components: { ToolbarTools, PatientMiniCard },
   data: () => ({
-    baseUrl,
-
     patientDialog: false,
     patients: [],
     profile: {
@@ -263,25 +260,25 @@ export default {
           sortable: false,
         },
       ],
-      groupBy: localStorage.getItem("clinax.patient.groupBy") == "true",
-      dense: localStorage.getItem("clinax.patient.dense") == "true",
-      sortDesc: localStorage.getItem("clinax.patient.sortDesc") == "true",
+      groupBy: localStorage.getItem("clinax.patient.groupBy") === "true",
+      dense: localStorage.getItem("clinax.patient.dense") === "true",
+      sortDesc: localStorage.getItem("clinax.patient.sortDesc") === "true",
       sortBy: localStorage.getItem("clinax.patient.sortBy") || "updatedAt",
       search: "",
       loading: false,
     },
   }),
   watch: {
-    "ui.groupBy"(a) {
+    "ui.groupBy": function (a) {
       localStorage.setItem("clinax.patient.groupBy", a);
     },
-    "ui.sortBy"(a) {
+    "ui.sortBy": function (a) {
       localStorage.setItem("clinax.patient.sortBy", a);
     },
-    "ui.dense"(a) {
+    "ui.dense": function (a) {
       localStorage.setItem("clinax.patient.dense", a);
     },
-    "ui.sortDesc"(a) {
+    "ui.sortDesc": function (a) {
       localStorage.setItem("clinax.patient.sortDesc", a);
     },
     patients: {
@@ -294,6 +291,9 @@ export default {
       this.makeitems();
     },
   },
+  mounted() {
+    this.init();
+  },
   methods: {
     makeitems() {
       this.items = this.patients.filter(
@@ -301,13 +301,13 @@ export default {
       );
     },
     listUpdated(patient) {
-      let index = this.patients.findIndex((ev) => ev._id == patient._id);
+      const index = this.patients.findIndex((ev) => ev._id === patient._id);
 
       if (~index) this.patients[index] = patient;
     },
     init() {
       this.ui.loading = true;
-      makeRequest("get", "patient")
+      this.makeRequest("get", "patient")
         .then(({ data }) => {
           this.ui.loading = false;
           this.patients = data;
@@ -317,9 +317,6 @@ export default {
           this.errorHandler(err);
         });
     },
-  },
-  mounted() {
-    this.init();
   },
 };
 </script>

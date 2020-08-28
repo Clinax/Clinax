@@ -1,22 +1,27 @@
 import "./registerServiceWorker";
 
 import Vue from "vue";
+import moment from "moment";
+import { AxiosHelper } from "@pranavraut033/js-utils";
+
 import App from "./App.vue";
 import router from "./router";
-import store from "./store";
-import moment from "moment";
+import store from "./store/index";
 import vuetify from "./plugins/vuetify";
 
-import { baseUrl } from "./modules/request";
-import { isProduction } from "./utils/";
+import { isProduction } from "./utils";
 import "./components";
+
+const baseUrl = isProduction()
+  ? process.env.VUE_APP_SERVER_URL
+  : process.env.VUE_APP_DEBUG_SERVER_URL;
 
 Vue.config.productionTip = false;
 
 router.afterEach((to) => {
   window.document.title = to.meta.title || to.name || to.path;
 
-  store.dispatch("setTitle", window.document.title);
+  store.dispatch("app/setTitle", window.document.title);
 
   window.document.title += " | ClinaX";
 });
@@ -28,6 +33,9 @@ Vue.mixin({
     };
   },
   computed: {
+    $axios() {
+      return new AxiosHelper(baseUrl, store.state.token);
+    },
     isMobile() {
       return this.$vuetify.breakpoint.smAndDown;
     },
@@ -37,6 +45,10 @@ Vue.mixin({
   },
   methods: {
     moment,
+    makeRequest() {
+      // eslint-disable-next-line prefer-rest-params
+      return this.$axios.makeRequest.call(this.$axios, ...arguments);
+    },
     log(ev) {
       if (!isProduction()) {
         // eslint-disable-next-line no-console
@@ -45,15 +57,19 @@ Vue.mixin({
     },
     errorHandler(err) {
       store.state.app.snackbar.value = false;
-      this.$nextTick(() => store.dispatch("errorHandler", err));
+      this.$nextTick(() => store.dispatch("app/errorHandler", err));
     },
-    showSnackbar(message) {
+    showSnackbar(message, ...args) {
       store.state.app.snackbar.value = false;
-      this.$nextTick(() => store.dispatch("showSnackbar", message));
+      this.$nextTick(() =>
+        store.dispatch("app/showSnackbar", { message, ...args })
+      );
     },
-    showError(message = "Something went wrong") {
+    showError(message = "Something went wrong", ...args) {
       store.state.app.snackbar.value = false;
-      this.$nextTick(() => store.dispatch("showError", message));
+      this.$nextTick(() =>
+        store.dispatch("app/showError", { message, ...args })
+      );
     },
   },
 });
@@ -62,12 +78,12 @@ new Vue({
   router,
   store,
   vuetify,
-  render: (h) => h(App),
   mounted() {
-    if (store.state.token) store.dispatch("getUser");
+    if (store.state.token) store.dispatch("getUser", this.makeRequest);
 
     // todo: temporary fixed for 404 page on shortcut creation
-    let location = window.location.pathname;
-    if (location == "/icons/www.clinax.in/app") this.$router.replace("/");
+    const location = window.location.pathname;
+    if (location === "/icons/www.clinax.in/app") this.$router.replace("/");
   },
+  render: (h) => h(App),
 }).$mount("#app");

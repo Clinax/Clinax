@@ -2,10 +2,10 @@
   <v-card-text v-if="!value && !addAddressModel" class="text-center">
     <v-btn
       v-if="field && field.textfield && !field.textfield.disabled"
-      @click="addAddressModel = true"
       color="primary"
       depressed
       small
+      @click="addAddressModel = true"
     >
       + Address
     </v-btn>
@@ -13,9 +13,9 @@
   <v-form v-else ref="addressForm" lazy-validation @submit.prevent="submit">
     <v-card-text :class="contentClass">
       <input-field
+        v-model="addressModel.street"
         v-bind="field"
         field="v-textarea"
-        v-model="addressModel.street"
         :label="inlineLabels ? 'Street' : ''"
         :textfield="{
           rows: 3,
@@ -28,8 +28,8 @@
       ></input-field>
       <v-row class="mx-0">
         <input-field
-          v-bind="field"
           v-model="addressModel.area"
+          v-bind="field"
           field="v-combobox"
           :label="inlineLabels ? 'Area' : ''"
           :col="{ md: 6, xs: 12 }"
@@ -40,13 +40,13 @@
             prependInnerIcon: 'mdi-image-filter-hdr',
             ...((field && field.textfield) || {}),
           }"
-          @input="emitInput"
           required
+          @input="emitInput"
         ></input-field>
         <input-field
+          v-model="addressModel.pincode"
           v-bind="field"
           field="v-combobox"
-          v-model="addressModel.pincode"
           :label="inlineLabels ? 'Pincode' : ''"
           :col="{ md: 6, xs: 12 }"
           :input-rules="[(v) => String(v).length == 6 || 'Invalid Pincode']"
@@ -58,8 +58,8 @@
             type: 'number',
             ...((field && field.textfield) || {}),
           }"
-          @input="emitInput"
           required
+          @input="emitInput"
         ></input-field>
       </v-row>
     </v-card-text>
@@ -72,35 +72,40 @@
 
 <script>
 import InputField from "@/components/widgets/InputField";
-import Address from "@/model/Address";
+import Address from "@/models/Address";
 
 export default {
   components: { InputField },
   props: {
-    field: { type: Object, required: false },
+    field: { type: Object, default: null },
 
     // model
-    value: { type: Object, default: () => null },
+    value: { type: Object, default: null },
 
     // UIs
-    contentClass: String,
-    inlineLabels: String,
+    contentClass: { type: String, default: null },
+    inlineLabels: { type: String, default: null },
     hideSubmit: Boolean,
     addAddress: Boolean,
     loadingPrefetch: Boolean,
     // prefills
-    areas: Array,
-    pins: Array,
+    areas: { type: Array, default: () => [] },
+    pins: { type: Array, default: () => [] },
   },
   data() {
     return {
       addressModel: new Address(this.value),
 
       addAddressModel: this.addAddress,
-      emitInput: function () {
+      emitInput: () => {
         this.$emit("input", new Address(this.addressModel));
-      }.bind(this),
+      },
     };
+  },
+  watch: {
+    value(a) {
+      this.addressModel = new Address(a);
+    },
   },
   methods: {
     Address,
@@ -114,11 +119,6 @@ export default {
       // eslint-disable-next-line no-console
       if (this.validate()) this.$emit("submit", new Address(this.addressModel));
       else this.showSnackbar("Please enter all the details");
-    },
-  },
-  watch: {
-    value(a) {
-      this.addressModel = new Address(a);
     },
   },
 };

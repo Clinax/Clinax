@@ -17,13 +17,13 @@
           <v-btn
             class="ml-3"
             :disabled="loading"
+            small
+            text
             @click="
               closeable
                 ? (model = false)
                 : ((confirmNext = 'close'), (closeConfirmation = true))
             "
-            small
-            text
           >
             <v-icon class="mr-1" small>mdi-close</v-icon>
             close
@@ -54,8 +54,8 @@
               </label>
               <input-field
                 ref="type"
-                field="v-select"
                 v-model="contactModel.type"
+                field="v-select"
                 style="padding: 0 !important;"
                 :textfield="{
                   ...inputFieldProps,
@@ -144,8 +144,8 @@
                 :col="{ cols: 12 }"
               ></input-field>
               <input-field
-                field="v-combobox"
                 v-model="contactModel.occupation"
+                field="v-combobox"
                 :textfield="{
                   ...inputFieldProps,
                   label: 'Occupation',
@@ -185,9 +185,9 @@
             </v-card-subtitle>
             <address-form
               ref="extraForm"
+              v-model="contactModel.address"
               content-class="px-0 pt-0 "
               style="margin: 0 -15px;"
-              v-model="contactModel.address"
               :field="{ textfield: { ...inputFieldProps } }"
               :pins="preLoaders.pins"
               :areas="preLoaders.areas"
@@ -201,11 +201,11 @@
           <v-btn
             v-if="!edit"
             :disabled="loading"
-            @click="edit = true"
             color="primary"
             depressed
             outlined
             small
+            @click="edit = true"
           >
             <v-icon class="mr-1" small> mdi-pencil </v-icon>
             <span>Edit</span>
@@ -213,11 +213,11 @@
           <v-btn
             v-if="contactModel.newObject"
             :disabled="loading"
-            @click="reset"
             type="reset"
             depressed
             outlined
             small
+            @click="reset"
           >
             <span>reset</span>
           </v-btn>
@@ -239,13 +239,13 @@
               v-if="!contactModel.newObject"
               class="ml-3"
               :disabled="loading"
+              outlined
+              small
               @click="
                 closeable
                   ? reset()
                   : ((confirmNext = 'reset'), (closeConfirmation = true))
               "
-              outlined
-              small
             >
               Cancel
             </v-btn>
@@ -263,7 +263,7 @@
 <script>
 /* eslint-disable no-console */
 
-import Toggleable from "@/components/widgets/Toggleable";
+import InputModel from "@/components/widgets/InputModel";
 import ConfirmationDialog from "@/components/widgets/ConfirmationDialog";
 import PrefixField from "@/components/app/fields/PrefixField";
 import GenderField from "@/components/app/fields/GenderField";
@@ -273,13 +273,15 @@ import AddressForm from "@/components/app/forms/AddressForm";
 
 import moment from "moment";
 import contactTypes from "@/json/contact-types.json";
-import Contact from "@/model/Contact";
+import Contact from "@/models/Contact";
 
-import { clone, changedFields, isEmpty } from "@/modules/object";
-import { makeRequest } from "@/modules/request";
+import {
+  clone,
+  changedFields,
+  isEmpty,
+} from "@pranavraut033/js-utils/utils/object";
 
 export default {
-  extends: Toggleable,
   components: {
     AddressForm,
     ConfirmationDialog,
@@ -288,7 +290,8 @@ export default {
     BirthDateField,
     MaritalStatusField,
   },
-  props: { contact: Object },
+  extends: InputModel,
+  props: { contact: { type: Object, default: null } },
   data() {
     return {
       contactTypes,
@@ -332,6 +335,26 @@ export default {
       return this.$store.state.user;
     },
   },
+  watch: {
+    model(a) {
+      if (a) {
+        this.reset();
+        this.preLoaders.loading = true;
+        this.makeRequest("get", "patient/options")
+          .then(({ data }) => {
+            this.preLoaders.loading = false;
+            Object.assign(this.preLoaders, data);
+          })
+          .catch((err) => {
+            this.preLoaders.loading = false;
+            this.errorHandler(err);
+          });
+      }
+    },
+  },
+  mounted() {
+    this.setContact(this.contact);
+  },
 
   methods: {
     save() {
@@ -340,21 +363,22 @@ export default {
 
       if (this.$refs.contactForm.validate()) {
         this.loading = true;
-        var method, data;
+        let method;
+        let requestData;
 
         if (this.contactModel.newObject) {
           method = "post";
-          data = this.contactModel;
+          requestData = this.contactModel;
         } else {
           method = "put";
-          data = {
+          requestData = {
             id: this.contactModel._id,
             ...this.changedField,
             query: { isPatient: !!this.contactModel.autoAdded },
           };
         }
 
-        makeRequest(method, "contact", data)
+        this.makeRequest(method, "contact", requestData)
           .then(({ data }) => {
             this.loading = false;
 
@@ -375,6 +399,9 @@ export default {
         case "reset":
           this.reset();
           break;
+        default:
+          console.log("Invalid Case", this.confirmNext);
+          break;
       }
     },
     reset() {
@@ -383,7 +410,7 @@ export default {
       this.$nextTick(() => this.setContact(this.contact));
     },
     setContact(contact) {
-      var contactModel = new Contact(contact, this.user._id);
+      const contactModel = new Contact(contact, this.user._id);
 
       if (contactModel.birthDate)
         contactModel.birthDate = moment(contactModel.birthDate).format(
@@ -394,27 +421,6 @@ export default {
       this.initialState = clone(contactModel);
       this.contactModel = contactModel;
     },
-  },
-  watch: {
-    model(a) {
-      !a || this.reset();
-
-      if (a) {
-        this.preLoaders.loading = true;
-        makeRequest("get", "patient/options")
-          .then(({ data }) => {
-            this.preLoaders.loading = false;
-            Object.assign(this.preLoaders, data);
-          })
-          .catch((err) => {
-            this.preLoaders.loading = false;
-            this.errorHandler(err);
-          });
-      }
-    },
-  },
-  mounted() {
-    this.setContact(this.contact);
   },
 };
 </script>

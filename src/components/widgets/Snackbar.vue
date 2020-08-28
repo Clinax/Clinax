@@ -19,8 +19,8 @@
         <v-spacer></v-spacer>
         <v-expand-x-transition>
           <v-btn
-            class="m-0"
             v-if="!loading"
+            class="m-0"
             text
             :color="mBtnColor"
             @click.native="(callback && callback()) || (model = false)"
@@ -34,10 +34,10 @@
 </template>
 
 <script>
-import Toggleable from "./Toggleable";
+import InputModel from "./InputModel";
 
 export default {
-  extends: Toggleable,
+  extends: InputModel,
 
   props: {
     message: { type: String, default: "" },
@@ -58,6 +58,17 @@ export default {
       mBtnColor: this.btnColor,
     };
   },
+  watch: {
+    error() {
+      this.init();
+    },
+    success() {
+      this.init();
+    },
+  },
+  mounted() {
+    this.init();
+  },
   methods: {
     init() {
       if (this.success) {
@@ -74,17 +85,6 @@ export default {
       this.mColor = "dark";
       this.mBtnColor = "primary";
     },
-  },
-  watch: {
-    error() {
-      this.init();
-    },
-    success() {
-      this.init();
-    },
-  },
-  mounted() {
-    this.init();
   },
 };
 </script>

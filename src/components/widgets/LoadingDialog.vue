@@ -14,11 +14,11 @@
 </template>
 
 <script>
-import Toggleable from "./Toggleable";
+import InputModel from "./InputModel";
 
 export default {
-  extends: Toggleable,
-  props: { text: String },
+  extends: InputModel,
+  props: { text: { type: String, default: "Loading" } },
 };
 </script>
 

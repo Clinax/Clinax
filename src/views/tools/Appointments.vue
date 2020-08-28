@@ -10,8 +10,8 @@
         <v-btn
           v-if="!isMobile"
           color="primary"
-          @click="ui.appoinmentDialog.model = { mdoel: true }"
           depressed
+          @click="ui.appoinmentDialog.model = { mdoel: true }"
         >
           <v-icon class="mr-2">mdi-calendar-plus</v-icon>
           Add appointment
@@ -25,11 +25,11 @@
         >
           <template v-slot:activator="{ on }">
             <v-btn
-              v-on="on"
               color="primary"
               title="Date Range Filter"
               dark
               icon
+              v-on="on"
             >
               <v-icon>mdi-calendar-range</v-icon>
             </v-btn>
@@ -45,10 +45,10 @@
         </v-menu>
 
         <toolbar-tools
+          :items="() => appointments"
+          :file-name="`Appointments-${moment().format('DD-MM-YYYY')}`"
           @search="(ev) => (ui.search = ev)"
           @refresh="init"
-          :items="() => appointments"
-          :fileName="`Appointments-${moment().format('DD-MM-YYYY')}`"
         >
         </toolbar-tools>
       </v-toolbar>
@@ -101,7 +101,7 @@
         <template v-slot:item.action="{ item }">
           <v-menu left bottom min-width="190">
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" :disabled="ui.loading" icon>
+              <v-btn :disabled="ui.loading" icon v-on="on">
                 <v-icon>mdi-dots-horizontal</v-icon>
               </v-btn>
             </template>
@@ -119,7 +119,7 @@
                   </v-list-item-content>
                 </v-list-item>
 
-                <v-list-item @click="deleteEntry(item)" class="error lighten-4">
+                <v-list-item class="error lighten-4" @click="deleteEntry(item)">
                   <v-list-item-action>
                     <v-icon color="error">mdi-delete</v-icon>
                   </v-list-item-action>
@@ -143,7 +143,7 @@
                 {{ moment(items[0].dateTime).format("Do MMMM YYYY") }}
               </span>
               <v-spacer></v-spacer>
-              <v-btn color="primary" @click="toggle" small text>
+              <v-btn color="primary" small text @click="toggle">
                 <span>{{ items.length }} item(s)</span>
                 <v-icon small>
                   mdi-chevron-down
@@ -166,11 +166,11 @@
       <v-btn
         v-if="isMobile"
         color="primary"
-        @click="ui.appoinmentDialog.model = true"
         bottom
         fixed
         right
         fab
+        @click="ui.appoinmentDialog.model = true"
       >
         <v-icon>mdi-calendar-plus</v-icon>
       </v-btn>
@@ -189,8 +189,7 @@
 <script>
 import moment from "moment";
 
-import { makeRequest } from "@/modules/request";
-import { sortBy } from "@/modules/list";
+import { sortBy } from "@pranavraut033/js-utils/utils/list";
 
 import AppointmentForm from "@/components/AppointmentForm";
 import NoAppointmentIllustration from "@/components/NoAppointmentIllustration";
@@ -275,22 +274,25 @@ export default {
     },
   },
   watch: {
-    "ui.appoinmentDialog.model"(a) {
+    "ui.appoinmentDialog.model": function (a) {
       if (!a) this.ui.appoinmentDialog.item = null;
     },
+  },
+  mounted() {
+    this.init();
   },
   methods: {
     init() {
       if (this.ui.loading) return;
       this.ui.loading = true;
-      makeRequest("get", "appointments", {
+      this.makeRequest("get", "appointments", {
         query: { from: this.dates[0], to: this.dates[1] },
       })
         .then(({ data }) => {
           this.ui.loading = false;
           this.appointments = data
             .map((ev) => {
-              let m = moment(ev.dateTime);
+              const m = moment(ev.dateTime);
               ev.groupKey = m.format("YYYYMMDD");
               ev.time = m.format("LT");
               return ev;
@@ -314,7 +316,7 @@ export default {
           if (err) self.errorHandler(err);
           else
             this.appointments = this.appointments.filter(
-              (ev) => ev._id != item._id
+              (ev) => ev._id !== item._id
             );
         },
       });
@@ -323,10 +325,5 @@ export default {
       this.ui.appoinmentDialog = { model: true, item };
     },
   },
-  mounted() {
-    this.init();
-  },
 };
 </script>
-
-<style></style>
