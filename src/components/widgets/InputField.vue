@@ -12,7 +12,7 @@
       <span
         ref="header"
         :contenteditable="editableHeader"
-        onClick="document.execCommand('selectall',null,false);"
+        style="user-select: all;"
         @blur="onHeaderBlur"
       >
         {{ label }}
