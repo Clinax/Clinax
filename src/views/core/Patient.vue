@@ -304,6 +304,7 @@ export default {
       const index = this.patients.findIndex((ev) => ev._id === patient._id);
 
       if (~index) this.patients[index] = patient;
+      else this.patients.push(patient);
     },
     init() {
       this.ui.loading = true;

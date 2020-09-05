@@ -1001,17 +1001,16 @@
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.3.tgz#2b5a3ab3f918cca48a8c754c08168e3f03eba61b"
   integrity sha512-shAmDyaQC4H92APFoIaVDHCx5bStIocgvbwQyxPRrbUY20V1EYTbSDchWbuwlMG3V17cprZhA6+78JfB+3DTPw==
 
-"@pranavraut033/js-utils@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@pranavraut033/js-utils/-/js-utils-1.2.1.tgz#1859458939f4d26e33744d08d6d2eb75347e6f63"
-  integrity sha512-YiAjMVQZf5MRVSKgn0SCDBRGyNd+P/6xZDd58hRI/3mn+DW3TmfCzMhy5d3WgSsutId6ohWpm7XfCiTT/djVKQ==
+"@pranavraut033/js-utils@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@pranavraut033/js-utils/-/js-utils-1.3.1.tgz#24c58bd304fc20aae828ed5e5107ebd845a480ca"
+  integrity sha512-CqEL8a/FcFIszr233bHEWpX4I8/VVMMZKiOiVuGqSKPKmvDgogFXm4Q0+CyrgQn4m6F3WkrXoPuGgBD55UlYFw==
   dependencies:
     axios "^0.19.2"
     browser-md5-file "^1.1.1"
     clone "^2.1.2"
     core-js "^3.6.5"
     deep-equal "^2.0.3"
-    is-plain-object "^4.1.1"
     is-string "^1.0.5"
     isobject "^4.0.0"
     regenerator-runtime "^0.13.7"
@@ -5850,11 +5849,6 @@ is-plain-object@^2.0.3, is-plain-object@^2.0.4:
   integrity sha512-h5PpgXkWitc38BBMYawTYMWJHFZJVnBquFE57xFpjB8pJFiF6gZ+bU+WyI/yqXiFR5mdLsgYNaPe8uao6Uv9Og==
   dependencies:
     isobject "^3.0.1"
-
-is-plain-object@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/is-plain-object/-/is-plain-object-4.1.1.tgz#1a14d6452cbd50790edc7fdaa0aed5a40a35ebb5"
-  integrity sha512-5Aw8LLVsDlZsETVMhoMXzqsXwQqr/0vlnBYzIXJbYo2F4yYlhLHs+Ez7Bod7IIQKWkJbJfxrWD7pA1Dw1TKrwA==
 
 is-regex@^1.0.4, is-regex@^1.1.0:
   version "1.1.0"

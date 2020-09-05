@@ -79,73 +79,75 @@
         <v-stepper v-model="ui.step" class="elevation-0 grey lighten-3">
           <v-stepper-items class="pa-0">
             <v-stepper-content step="1" class="pa-0">
-              <v-layout>
-                <prefix-field
-                  v-model="patientModel.prefix"
-                  :textfield="{ autocomplete: 'off' }"
-                  :col="{ cols: 3 }"
-                  required
-                >
-                </prefix-field>
-
-                <input-field
-                  v-model="patientModel.fullname"
-                  label="Full name"
-                  :col="{ cols: 9 }"
-                  :textfield="{
-                    placeholder: 'John Doe',
-                    prependInnerIcon: 'mdi-account',
-                    autocomplete: 'off',
-                  }"
-                  required
-                ></input-field>
-              </v-layout>
-              <gender-field
-                v-model="patientModel.gender"
-                field="v-select"
-                required
-              ></gender-field>
-              <birth-date-field
-                v-model="patientModel.birthDate"
-                required
-              ></birth-date-field>
-              <marital-status-field
-                v-model="patientModel.maritalStatus"
-                label="Marital Status"
-              >
-              </marital-status-field>
-              <input-field
-                v-model="patientModel.occupation"
-                field="v-combobox"
-                label="Occupation"
-                :textfield="{
-                  prependInnerIcon: 'mdi-tie',
-                  items: ui.preLoaders.occupations,
-                  loading: ui.preLoaders.loading,
-                }"
-              ></input-field>
-              <v-divider class="mt-5"></v-divider>
-              <template v-for="(field, model) in extraFileds">
-                <input-field
-                  v-if="field.visibility"
-                  :key="model"
-                  v-model="patientModel[model]"
-                  v-bind="field"
-                ></input-field>
-              </template>
-              <v-layout justify-end class="pb-1">
-                <template v-for="(field, model) in extraFileds">
-                  <div
-                    v-if="!field.visibility"
-                    :key="model"
-                    class="my-3 mx-3 text-right"
+              <v-form ref="patientForm" @submit.prevent="submit">
+                <v-layout>
+                  <prefix-field
+                    v-model="patientModel.prefix"
+                    :textfield="{ autocomplete: 'off' }"
+                    :col="{ cols: 3 }"
+                    required
                   >
-                    <a @click="field.visibility = true">
-                      + {{ field.label }}
-                    </a>
-                  </div>
+                  </prefix-field>
+
+                  <input-field
+                    v-model="patientModel.fullname"
+                    label="Full name"
+                    :col="{ cols: 9 }"
+                    :textfield="{
+                      placeholder: 'John Doe',
+                      prependInnerIcon: 'mdi-account',
+                      autocomplete: 'off',
+                    }"
+                    required
+                  ></input-field>
+                </v-layout>
+                <gender-field
+                  v-model="patientModel.gender"
+                  field="v-select"
+                  required
+                ></gender-field>
+                <birth-date-field
+                  v-model="patientModel.birthDate"
+                  required
+                ></birth-date-field>
+                <marital-status-field
+                  v-model="patientModel.maritalStatus"
+                  label="Marital Status"
+                >
+                </marital-status-field>
+                <input-field
+                  v-model="patientModel.occupation"
+                  field="v-combobox"
+                  label="Occupation"
+                  :textfield="{
+                    prependInnerIcon: 'mdi-tie',
+                    items: ui.preLoaders.occupations,
+                    loading: ui.preLoaders.loading,
+                  }"
+                ></input-field>
+                <v-divider class="mt-5"></v-divider>
+                <template v-for="(field, model) in extraFileds">
+                  <input-field
+                    v-if="field.visibility"
+                    :key="model"
+                    v-model="patientModel[model]"
+                    v-bind="field"
+                  ></input-field>
                 </template>
-              </v-layout>
+                <v-layout justify-end class="pb-1">
+                  <template v-for="(field, model) in extraFileds">
+                    <div
+                      v-if="!field.visibility"
+                      :key="model"
+                      class="my-3 mx-3 text-right"
+                    >
+                      <a @click="field.visibility = true">
+                        + {{ field.label }}
+                      </a>
+                    </div>
+                  </template>
+                </v-layout>
+              </v-form>
             </v-stepper-content>
             <v-stepper-content step="2" class="pa-0">
               <template v-if="avatar.preview">
@@ -477,7 +479,10 @@ export default {
     submit() {
       if (this.ui.loading) return;
 
-      if (this.$refs.patientForm.validate()) {
+      if (
+        (this.$refs.patientForm && this.$refs.patientForm.validate()) ||
+        (this.$refs.extraForm && this.$refs.extraForm.validate())
+      ) {
         this.ui.loading = true;
         let requestData;
         let method;
@@ -493,6 +498,7 @@ export default {
           requestData = this.patientModel;
         }
 
+        requestData = { ...requestData };
         this.makeRequest(method, "patient", requestData)
           .then(({ data }) => {
             this.setPatient(data);
