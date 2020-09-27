@@ -154,7 +154,7 @@ export default {
             to: "/app/contacts/",
           },
           {
-            title: "Invetory Manager",
+            title: "Inventory to-do",
             icon: "mdi-warehouse",
             to: "/app/inventory/",
           },

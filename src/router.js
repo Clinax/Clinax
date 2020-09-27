@@ -40,9 +40,9 @@ export default new Router({
           component: () => import("./views/tools/Contacts"),
         },
         {
-          name: "Inventory",
+          name: "Inventory to-do",
           path: "inventory",
-          component: () => import("./views/tools/Inventory"),
+          component: () => import("./views/tools/InventoryTodo"),
         },
         {
           name: "Appointments",

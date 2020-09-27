@@ -10,7 +10,7 @@
     "publish": "npm run build & npm run upload"
   },
   "dependencies": {
-    "@pranavraut033/js-utils": "^1.3.1",
+    "@pranavraut033/js-utils": "^1.3.2",
     "axios": "^0.20.0",
     "browser-md5-file": "^1.1.1",
     "clone": "^2.1.2",
@@ -56,7 +56,7 @@
     "sass-loader": "^9.0.3",
     "vue-cli-plugin-vuetify": "^2.0.7",
     "vue-template-compiler": "^2.6.12",
-    "vuetify-loader": "^1.3.0",
+    "vuetify-loader": "^1.6.0",
     "webpack": "^4.44.1"
   },
   "eslintConfig": {

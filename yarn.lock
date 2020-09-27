@@ -1001,10 +1001,10 @@
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.3.tgz#2b5a3ab3f918cca48a8c754c08168e3f03eba61b"
   integrity sha512-shAmDyaQC4H92APFoIaVDHCx5bStIocgvbwQyxPRrbUY20V1EYTbSDchWbuwlMG3V17cprZhA6+78JfB+3DTPw==
 
-"@pranavraut033/js-utils@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@pranavraut033/js-utils/-/js-utils-1.3.1.tgz#24c58bd304fc20aae828ed5e5107ebd845a480ca"
-  integrity sha512-CqEL8a/FcFIszr233bHEWpX4I8/VVMMZKiOiVuGqSKPKmvDgogFXm4Q0+CyrgQn4m6F3WkrXoPuGgBD55UlYFw==
+"@pranavraut033/js-utils@^1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@pranavraut033/js-utils/-/js-utils-1.3.2.tgz#78bb8e20c2d6dcbd3bddf8001009e1cd53ed6629"
+  integrity sha512-zpjuFCHOJ72fn0x2Msj1E2zjgcIRq7LxnKtnTcdUjbEr2LrJ1dkWfqbDEGxh6JFmXoEdmoX/KsqoXBr/VkOLMA==
   dependencies:
     axios "^0.19.2"
     browser-md5-file "^1.1.1"
@@ -10071,7 +10071,7 @@ vuedraggable@^2.24.1:
   dependencies:
     sortablejs "^1.10.1"
 
-vuetify-loader@^1.3.0:
+vuetify-loader@^1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/vuetify-loader/-/vuetify-loader-1.6.0.tgz#05df0805b3ab2ff0de198109d34f9da3f69da667"
   integrity sha512-1bx3YeZ712dT1+QMX+XSFlP0O5k5O5Ui9ysBBmUZ9bWkAEHWZJQI9soI+qG5qmeFxUC0L9QYMCIKP0hOL/pf3Q==
