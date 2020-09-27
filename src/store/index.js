@@ -11,7 +11,6 @@ const store = new Vuex.Store({
   state: {
     user: null,
     token: localStorage.getItem("clinax.token"),
-    followUpsEvents: {},
   },
   mutations: {
     // AUTH

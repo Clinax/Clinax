@@ -4,7 +4,7 @@
       <v-spacer></v-spacer>
       <slot></slot>
       <v-menu
-        v-if="filterItems"
+        v-if="filterItems && filterItems.length"
         v-model="menu"
         class="flex-grow-0"
         :close-on-content-click="false"
@@ -186,6 +186,7 @@ export default {
           name: this.fileName,
         });
       } catch (e) {
+        // eslint-disable-next-line no-alert
         alert(`export error: ${e.message}`);
       }
     },
